@@ -1,63 +1,148 @@
-__create__(VEF)
-__create__(VER)
-__create__(IKF)
-__create__(IKR)
-__create__(IKP)
-__create__(VO)
-__create__(HRCF)
-__create__(VTF)
-__create__(ITF)
-__create__(PE)
-__create__(ME)
-__create__(FC)
-__create__(AJE)
-__create__(PC)
-__create__(MC)
-__create__(AJC)
-__create__(PS)
-__create__(MS)
-__create__(AJS)
-__create__(IS)
-__create__(NF)
-__create__(Vtv)
-__create__(NR)
-__create__(ISP)
-__create__(WSP)
-__create__(NFP)
-__create__(RCX)
-__create__(RCI)
-__create__(GAMM)
-__create__(RBX)
-__create__(RBI)
-__create__(RE)
-__create__(RS)
-__create__(RBP)
-__create__(IBEI)
-__create__(NEI)
-__create__(NEN)
-__create__(IBEN)
-__create__(WBE)
-__create__(IBCI)
-__create__(NCI)
-__create__(IBCN)
-__create__(IBEIP)
-__create__(IBENP)
-__create__(NCN)
-__create__(NCIP)
-__create__(IBCIP)
-__create__(NCNP)
-__create__(IBCNP)
-__create__(AVC1)
-__create__(AVC2)
-__create__(TF)
-__create__(QTF)
-__create__(XTF)
-__create__(CJE)
-__create__(CJC)
-__create__(TR)
-__create__(QCO)
-__create__(CJEP)
-__create__(CJCP)
-__create__(CBEO)
+#ifdef SELF_HEATING
+__create__(TNOM) __COMMA__
+__create__(XRC) __COMMA__
+__create__(RCX_TNOM) __COMMA__
+__create__(RCI_TNOM) __COMMA__
+__create__(XRB) __COMMA__
+__create__(RBX_TNOM) __COMMA__
+__create__(RBI_TNOM) __COMMA__
+__create__(XRE) __COMMA__
+__create__(RE_TNOM) __COMMA__
+__create__(XRS) __COMMA__
+__create__(RS_TNOM) __COMMA__
+__create__(RBP_TNOM) __COMMA__
+__create__(IS_TNOM) __COMMA__
+__create__(XIS) __COMMA__
+__create__(EA) __COMMA__
+__create__(NF_TNOM) __COMMA__
+__create__(ISP_TNOM) __COMMA__
+__create__(NFP) __COMMA__
+__create__(EAIE) __COMMA__
+__create__(IBEI_TNOM) __COMMA__
+__create__(XII) __COMMA__
+__create__(NEI) __COMMA__
+__create__(EANE) __COMMA__
+__create__(IBEN_TNOM) __COMMA__
+__create__(XIN) __COMMA__
+__create__(NEN) __COMMA__
+__create__(EAIC) __COMMA__
+__create__(IBCI_TNOM) __COMMA__
+__create__(NCI) __COMMA__
+__create__(EANC) __COMMA__
+__create__(IBCN_TNOM) __COMMA__
+__create__(NCN) __COMMA__
+__create__(IBEIP_TNOM) __COMMA__
+__create__(IBENP_TNOM) __COMMA__
+__create__(EAIS) __COMMA__
+__create__(IBCIP_TNOM) __COMMA__
+__create__(NCIP) __COMMA__
+__create__(EANS) __COMMA__
+__create__(IBCNP_TNOM) __COMMA__
+__create__(NCNP) __COMMA__
+__create__(TNF) __COMMA__
+__create__(NR_TNOM) __COMMA__
+__create__(TAVC) __COMMA__
+__create__(AVC2_TNOM) __COMMA__
+__create__(PE_TNOM) __COMMA__
+__create__(AJC) __COMMA__
+__create__(AJE) __COMMA__
+__create__(AJS) __COMMA__
+__create__(CJCP_TNOM) __COMMA__
+__create__(CJC_TNOM) __COMMA__
+__create__(CJEP_TNOM) __COMMA__
+__create__(CJE_TNOM) __COMMA__
+__create__(FC) __COMMA__
+__create__(GAMM_TNOM) __COMMA__
+__create__(HRCF) __COMMA__
+__create__(IKF) __COMMA__
+__create__(IKP) __COMMA__
+__create__(IKR) __COMMA__
+__create__(ITF) __COMMA__
+__create__(MC) __COMMA__
+__create__(ME) __COMMA__
+__create__(MS) __COMMA__
+__create__(PC_TNOM) __COMMA__
+__create__(PS_TNOM) __COMMA__
+__create__(VEF) __COMMA__
+__create__(VER) __COMMA__
+__create__(VO_TNOM) __COMMA__
+__create__(VTF) __COMMA__
+__create__(XVO) __COMMA__
+__create__(WSP) __COMMA__
+__create__(WBE) __COMMA__
+__create__(AVC1) __COMMA__
+__create__(TF) __COMMA__
+__create__(QTF) __COMMA__
+__create__(XTF) __COMMA__
+__create__(TR) __COMMA__
+__create__(QCO) __COMMA__
+__create__(CBEO) __COMMA__
+__create__(CBCO) __COMMA__
+__create__(RTH) __COMMA__
+__create__(CTH)
+#else
+__create__(VEF) __COMMA__
+__create__(VER) __COMMA__
+__create__(IKF) __COMMA__
+__create__(IKR) __COMMA__
+__create__(IKP) __COMMA__
+__create__(VO) __COMMA__
+__create__(HRCF) __COMMA__
+__create__(VTF) __COMMA__
+__create__(ITF) __COMMA__
+__create__(PE) __COMMA__
+__create__(ME) __COMMA__
+__create__(FC) __COMMA__
+__create__(AJE) __COMMA__
+__create__(PC) __COMMA__
+__create__(MC) __COMMA__
+__create__(AJC) __COMMA__
+__create__(PS) __COMMA__
+__create__(MS) __COMMA__
+__create__(AJS) __COMMA__
+__create__(IS) __COMMA__
+__create__(NF) __COMMA__
+__create__(Vtv) __COMMA__
+__create__(NR) __COMMA__
+__create__(ISP) __COMMA__
+__create__(WSP) __COMMA__
+__create__(NFP) __COMMA__
+__create__(RCX) __COMMA__
+__create__(RCI) __COMMA__
+__create__(GAMM) __COMMA__
+__create__(RBX) __COMMA__
+__create__(RBI) __COMMA__
+__create__(RE) __COMMA__
+__create__(RS) __COMMA__
+__create__(RBP) __COMMA__
+__create__(IBEI) __COMMA__
+__create__(NEI) __COMMA__
+__create__(NEN) __COMMA__
+__create__(IBEN) __COMMA__
+__create__(WBE) __COMMA__
+__create__(IBCI) __COMMA__
+__create__(NCI) __COMMA__
+__create__(IBCN) __COMMA__
+__create__(IBEIP) __COMMA__
+__create__(IBENP) __COMMA__
+__create__(NCN) __COMMA__
+__create__(NCIP) __COMMA__
+__create__(IBCIP) __COMMA__
+__create__(NCNP) __COMMA__
+__create__(IBCNP) __COMMA__
+__create__(AVC1) __COMMA__
+__create__(AVC2) __COMMA__
+__create__(TF) __COMMA__
+__create__(QTF) __COMMA__
+__create__(XTF) __COMMA__
+__create__(CJE) __COMMA__
+__create__(CJC) __COMMA__
+__create__(TR) __COMMA__
+__create__(QCO) __COMMA__
+__create__(CJEP) __COMMA__
+__create__(CJCP) __COMMA__
+__create__(CBEO) __COMMA__
 __create__(CBCO)
+#endif
 #undef __create__
+#undef __COMMA__
