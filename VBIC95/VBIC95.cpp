@@ -103,27 +103,10 @@ static const char*const s_aNodeNames[] =
 #include "nodes.h"
 };
 enum class enumBranches:std::size_t
-{	Vbe,
-	Vbc,
-	Vbei,
-	Vbex,
-	Vbci,
-	Vrcx,
-	Vrci,
-	Vrbx,
-	Vrbi,
-	Vre,
-	Vrs,
-	Vbep,
-	Vbcp,
-	Vrbp,
-#ifdef SELF_HEATING
-	delT,
-#endif
-#ifdef EXCESS_PHASE
-	Vcxf,
-	Vrxf,
-#endif
+{
+#define __COMMA__ ,
+#define __create__(a, b, c) a
+#include "inputs.h"
 };
 static constexpr const std::pair<enumNodes, enumNodes> s_aInput2NodePair[] =
 {
@@ -148,16 +131,7 @@ struct vbic
 #define __create__(a) const double a;
 #define __COMMA__
 #include "members.h"
-#if 0
-	vbic(void)
-		:
-#define __create__(a) a(),
-#include "members.h"
-		COMMA()
-	{
-	}
-#endif
-	vbic(const string2double&_r = readParams())
+	vbic(const string2double &_r = readParams())
 		:
 #define __create__(a) a(_r.at(#a))
 #define __COMMA__ ,
@@ -180,88 +154,8 @@ struct vbic
 #define __COMMA__
 #include "inputs.h"
 #ifdef SELF_HEATING
-//	This section defines mappings of temperature dependent parameters.
-//	Note that with SELF-HEATING these mappings must be done at each
-//	bias calculation, and cannot be relegated to preprocessing, because
-//	the "voltage" for the local temperature rise delT must be taken
-//	into account.
-
-#ifdef SELF_HEATING
-	const auto Tdev  = TAMB + TABS + delT;	// device temperature (K), with delT
-#else
-	const auto Tdev  = TAMB + TABS;		// device temperature (K)
-#endif
-	const auto Tini  = TNOM + TABS;		// TNOM in K
-
-	const auto Vtv   = KB * Tdev / QQ;		// thermal voltage
-	const auto rT    = Tdev / Tini;		// ratio Tdev/TNOM in K
-
-	const auto RCX   = RCX_TNOM * pow(rT, XRC);	// temperature mapping
-	const auto RCI   = RCI_TNOM * pow(rT, XRC);	// of resistances is
-	const auto RBX   = RBX_TNOM * pow(rT, XRB);	// according to mobility
-	const auto RBI   = RBI_TNOM * pow(rT, XRB);	// variation, which
-	const auto RE    = RE_TNOM  * pow(rT, XRE);	// should be same in
-	const auto RS    = RS_TNOM  * pow(rT, XRS);	// emit/coll & base/subs
-	const auto RBP   = RBP_TNOM * pow(rT, XRC);	// Note: RBP is in coll
-
-//	Note: the following differs from the standard SPICE temperature
-//	mappings for IS/ISE/BF. This is for two reasons. First, 
-//	the base current is formulated directly in terms
-//	of ideal and non-ideal currents rather than in terms of current
-//	gain BF/transport current and non-ideal current. Second,
-//	particularly for HBTs, using the bandgap in the first-order
-//	theory expression for how IS should change with temperature often
-//	gives a poor model. To properly track IS and beta (both low and
-//	moderate bias) over temperature there is an activation energy
-//	in the first-order model that is (slightly) different from the bandgap,
-//	and is different for all of IS, IBEI and IBEN.
-//	01/26/94: the b-e and b-c components show slightly different behavior
-//	over temperature, so "activation energies" have been introduced for
-//	ideal and non-ideal components of b-e, b-c and s-c junctions. This
-//	allows separate fitting of forward and reverse beta curves over
-//	temperature.
-
-	const auto IS    = IS_TNOM    * pow( pow(rT, XIS) * exp ( - EA   * ( 1.0 - rT ) / Vtv ), 1.0 / NF_TNOM );
-	const auto ISP   = ISP_TNOM   * pow( pow(rT, XIS) * exp ( - EA   * ( 1.0 - rT ) / Vtv ), 1.0 / NFP  );
-	const auto IBEI  = IBEI_TNOM  * pow( pow(rT, XII) * exp ( - EAIE * ( 1.0 - rT ) / Vtv ), 1.0 / NEI  );
-	const auto IBEN  = IBEN_TNOM  * pow( pow(rT, XIN) * exp ( - EANE * ( 1.0 - rT ) / Vtv ), 1.0 / NEN  );
-	const auto IBCI  = IBCI_TNOM  * pow( pow(rT, XII) * exp ( - EAIC * ( 1.0 - rT ) / Vtv ), 1.0 / NCI  );
-	const auto IBCN  = IBCN_TNOM  * pow( pow(rT, XIN) * exp ( - EANC * ( 1.0 - rT ) / Vtv ), 1.0 / NCN  );
-	const auto IBEIP = IBEIP_TNOM * pow( pow(rT, XII) * exp ( - EAIC * ( 1.0 - rT ) / Vtv ), 1.0 / NCI  );
-	const auto IBENP = IBENP_TNOM * pow( pow(rT, XIN) * exp ( - EANC * ( 1.0 - rT ) / Vtv ), 1.0 / NCN  );
-	const auto IBCIP = IBCIP_TNOM * pow( pow(rT, XII) * exp ( - EAIS * ( 1.0 - rT ) / Vtv ), 1.0 / NCIP );
-	const auto IBCNP = IBCNP_TNOM * pow( pow(rT, XIN) * exp ( - EANS * ( 1.0 - rT ) / Vtv ), 1.0 / NCNP );
-
-//	Linear temperature mappings for NF/NR and AVC2
-//		Note: this is an undesirable type of temperature mapping,
-//		as it cannot be done "in-place" because it does not have the
-//		properties P(T1->T2->T3)=P(T1->T3) and P(T1->T2->T1)=P(T1).
-//		For this model it is best to always map from P_TNOM.
-
-	const auto NF    =   NF_TNOM   * ( 1.0 + TNF   * ( Tdev - Tini ) );
-	const auto NR    =   NR_TNOM   * ( 1.0 + TNF   * ( Tdev - Tini ) );
-	const auto AVC2  = AVC2_TNOM   * ( 1.0 + TAVC  * ( Tdev - Tini ) );
-
-//	Temperature mappings for built-in potentials
-
-	const auto PE    = psibi ( PE_TNOM, EAIE, Vtv, rT );
-	const auto PC    = psibi ( PC_TNOM, EAIC, Vtv, rT );
-	const auto PS    = psibi ( PS_TNOM, EAIS, Vtv, rT );
-
-//	zero-bias capacitance temperature mappings come directly from the
-//	first-order theory for p-n junction capacitance as:
-
-	const auto CJE   = CJE_TNOM  * pow( PE_TNOM / PE, ME);
-	const auto CJC   = CJC_TNOM  * pow( PC_TNOM / PC, MC);
-	const auto CJEP  = CJEP_TNOM * pow( PC_TNOM / PC, MC);
-	const auto CJCP  = CJCP_TNOM * pow( PS_TNOM / PS, MS);
-
-//	Temperature mappings for epi parameters
-
-	const auto GAMM  = GAMM_TNOM * ( pow(rT, XIS) * exp ( - EA   * ( 1.0 - rT ) / Vtv ) );
-	const auto VO    = VO_TNOM   * pow(rT, XVO);
-
-//	End of temperature mappings.
+#define __CONST_AUTO__ const auto
+#include "temperatureSetup.h"
 #endif
 
 //	This section defines branch currents, charges. and fluxes as functions
