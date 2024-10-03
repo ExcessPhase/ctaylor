@@ -135,6 +135,12 @@ enum class enumBranches:std::size_t
 	Vrxf,
 #endif
 };
+static constexpr const std::pair<enumNodes, enumNodes> s_aInput2NodePair[] =
+{
+#define __COMMA__ ,
+#define __create__(a, b, c) {enumNodes::b, enumNodes::c}
+#include "inputs.h"
+};
 enum class enumCurrentOutputs:std::size_t
 {
 #define __create__(a, b, c) a
@@ -168,32 +174,21 @@ struct vbic
 #include "members.h"
 	{
 	}
-	auto calculate(const std::array<double, std::size_t(enumNodes::NumberOfNodes)>& _rNodeVoltages) const
+	typedef std::map<enumNodes, double> index2Double;
+	typedef std::map<enumNodes, index2Double> index2Index2Double;
+	auto calculate(
+		const std::array<double, std::size_t(enumNodes::NumberOfNodes)>& _rNodeVoltages,
+		index2Index2Double&_rO
+	) const
 	{
-#define createVoltage(Vbe, b, e) const auto Vbe = createIndep<enumBranches::Vbe>(_rNodeVoltages[std::size_t(enumNodes::b)] - _rNodeVoltages[std::size_t(enumNodes::e)], false)
-		createVoltage(Vbe, b, e);
-		createVoltage(Vbc, b, c);
-		createVoltage(Vbei, bi, ei);	// intrinsic b-e voltage
-		createVoltage(Vbex, bx, ei);	// side      b-e voltage
-		createVoltage(Vbci, bi, ci);	// intrinsic b-c voltage
-		createVoltage(Vrcx, c, cx);	// voltage across RCX
-		createVoltage(Vrci, cx, ci);	// voltage across RCI
-		createVoltage(Vrbx, b, bx);	// voltage across RBX
-		createVoltage(Vrbi, bx, bi);	// voltage across RBI
-		createVoltage(Vre, e, ei);	// voltage across RE
-		createVoltage(Vrs, s, si);	// voltage across RS
-		createVoltage(Vbep, bx, bp);	// parasitic b-e voltage (pnp polarity)
-		createVoltage(Vbcp, si, bp);	// parasitic b-c voltage (pnp polarity)
-		createVoltage(Vrbp, cx, bp);	// voltage across RBP
-#ifdef SELF_HEATING
-		createVoltage(delT, dt, tl);// voltage across RTH, local temperature rise
-					// measured with respect to ground (ambient)
-#endif
-#ifdef EXCESS_PHASE
-#define createVoltage1(Vbe, b) const auto Vbe = createIndep<enumBranches::Vbe>(_rNodeVoltages[enumNodes::b], false)
-		createVoltage1(Vcxf, xf1);	// voltage across excess-phase capacitor
-		createVoltage1(Vrxf, xf2);	// voltage across excess-phase resistor Itxf
-#endif
+#define __create__(Vbe, b, e) const auto Vbe = createIndep<enumBranches::Vbe>(\
+	enumNodes::e != enumNodes::NumberOfNodes\
+		? _rNodeVoltages[std::size_t(enumNodes::b)] - _rNodeVoltages[std::size_t(enumNodes::e)]\
+		: _rNodeVoltages[std::size_t(enumNodes::b)],\
+		false\
+	);
+#define __COMMA__
+#include "inputs.h"
 #ifdef SELF_HEATING
 //	This section defines mappings of temperature dependent parameters.
 //	Note that with SELF-HEATING these mappings must be done at each
@@ -520,12 +515,48 @@ struct vbic
 	const auto &Qcth = std::get<2>(Ith_Irth_Qcth);
 #endif
 
-		return std::make_tuple(
-#define __create__(a, b, c) a
-#define __COMMA__ ,
+#define __create__(a, b, c)\
+{	if (enumNodes::b != enumNodes::NumberOfNodes)\
+		writeOutput(_rO[enumNodes::b], a);\
+	if (enumNodes::c != enumNodes::NumberOfNodes)\
+		writeOutput(_rO[enumNodes::c], -a);\
+}
+#define __COMMA__
 #include "outputs.h"
-		);
 //	End of equations.
+	}
+	template<typename T>
+	struct copyOutput
+	{	index2Double&m_rO;
+		const ctaylor<T, 2>&m_rV;
+		copyOutput(
+			index2Double&_rO,
+			const ctaylor<T, 2>&_rV
+		)
+			:m_rO(_rO),
+			m_rV(_rV)
+		{
+		}
+		template<typename ENUM>
+		void operator()(const mp_list<mp_list<ENUM, mp_size_t<1> > >&) const
+		{	const auto &rNodePair = s_aInput2NodePair[ENUM::value];
+			typedef mp_list<mp_list<ENUM, mp_size_t<1> > > LIST;
+			if (rNodePair.first != enumNodes::NumberOfNodes)
+				m_rO[rNodePair.first] += m_rV.m_s.at(mp_find<LIST, T>::value);
+			if (rNodePair.second != enumNodes::NumberOfNodes)
+				m_rO[rNodePair.second] -= m_rV.m_s.at(mp_find<LIST, T>::value);
+		}
+		void operator()(const mp_list<>&) const
+		{
+		}
+		template<typename LIST>
+		void operator()(const LIST&) const
+		{
+		}
+	};
+	template<typename T>
+	static void writeOutput(index2Double&_rO, const ctaylor<T, 2>&_rV)
+	{	mp_for_each<T>(copyOutput<T>(_rO, _rV));
 	}
 	static const char*const s_aNames[];
 };
@@ -547,10 +578,25 @@ template<typename ...REST>
 std::ostream &operator<<(std::ostream &_rS, const std::tuple<REST...>&_r)
 {	return print(_rS, _r, std::integral_constant<std::size_t, sizeof...(REST)>());
 }
+std::ostream &operator<<(std::ostream &_rS, const enumNodes _e)
+{	return _rS << std::size_t(_e);
+}
+template<typename T0, typename T1>
+std::ostream &operator<<(std::ostream &_rS, const std::pair<T0, T1>&_r)
+{	return _rS << "(" << _r.first << "," << _r.second << ")";
+}
+template<typename K, typename V>
+std::ostream &operator<<(std::ostream &_rS, const std::map<K, V>&_r)
+{	for (const auto &r : _r)
+		_rS << r << ",";
+	return _rS;
+}
 }
 int main(int, char**)
 {	using namespace vbic95;
 	vbic sI;
 	std::array<double, std::size_t(enumNodes::NumberOfNodes)> sV({});
-	std::cout << sI.calculate(sV) << "\n";
+	vbic::index2Index2Double s;
+	sI.calculate(sV, s);
+	std::cout << s << std::endl;
 }

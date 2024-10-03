@@ -142,6 +142,7 @@
     <ClCompile Include="VBIC95.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inputs.h" />
     <ClInclude Include="members.h" />
     <ClInclude Include="outputs.h" />
   </ItemGroup>
