@@ -148,7 +148,6 @@
     <ClInclude Include="outputs.h" />
     <ClInclude Include="parameters.h" />
     <ClInclude Include="temperatureSetup.h" />
-    <ClInclude Include="temperatureSetupTemporaries.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

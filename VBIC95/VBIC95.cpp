@@ -1,26 +1,38 @@
 #include "../ctaylor.h"
 #include <map>
 #include <string>
+#include <cstring>
 #include <fstream>
 //#include <initializer_list>
 #define SELF_HEATING
 namespace vbic95
 {
-typedef std::map<std::string, double> string2double;
-static string2double readParams(void)
-{	std::ifstream sFile("PARS");
-	double d;
-	std::string s;
-	string2double sRet;
-	while (true)
-	{	if (sFile >> d >> s)
-		{	sRet[s] = d;
-			sRet[s + "_TNOM"] = d;
-		}
-		else
-			break;
+enum class enumParameters
+{
+#define __create__(a, b) a
+#define __create2__(a, b) a##_TNOM
+#define __COMMA__ ,
+#include "parameters.h"
+};
+enum class enumMembers
+{
+#define __create__(a) a
+#define __COMMA__ ,
+#include "members.h"
+};
+struct compare
+{	bool operator()(const char *const _p0, const char *const _p1) const
+	{	return std::strcmp(_p0, _p1) < 0;
 	}
-	return sRet;
+};
+static enumParameters getParameterIdByName(const char *const _p)
+{	static const std::map<const char*, enumParameters, compare> s = {
+#define __create__(a, b) {#a, enumParameters::a}
+#define __create2__(a, b) {#a, enumParameters::a##_TNOM}
+#define __COMMA__ ,
+#include "parameters.h"
+	};
+	return s.at(_p);
 }
 using namespace taylor;
 template<typename P_T, typename EA_T, typename VTV_T, typename RT_T>
@@ -89,6 +101,47 @@ auto avalm(const V_T&V, const P_T&P, const M_T&M, const AV1_T&AV1, const AV2_T&A
 	const auto vl = 0.5 * ( sqrt ( sqr( P - V ) + 0.01 ) + ( P - V ) );
 	return AV1 * vl * exp ( - AV2 * pow(vl, M - 1.0 ) );
 }
+typedef std::map<enumMembers, double> enumMembers2double;
+static constexpr double KB = 1.380662E-23;	// Boltzmann's constant, J/K
+static constexpr double QQ = 1.602189E-19;	// magnitude of electronic charge, C
+static constexpr double TABS = 2.731500E+02;	// 0 degrees C in degrees K
+static constexpr double TAMB = 27.0;
+static enumMembers2double readParams(void)
+{	std::ifstream sFile("PARS");
+	double d;
+	std::string s;
+	enumMembers2double sRet;
+	std::map<enumParameters, double> sParameters;
+#define __create__(a, b) sParameters.insert(std::make_pair(enumParameters::a, b));
+#define __create2__(a, b) sParameters.insert(std::make_pair(enumParameters::a##_TNOM, b));
+#define __COMMA__
+#include "parameters.h"
+	while (true)
+	{	if (sFile >> d >> s)
+			sParameters[getParameterIdByName(s.c_str())] = d;
+		else
+			break;
+	}
+
+#ifndef SELF_HEATING
+#define __create__(a, b) const auto a = sParameters.at(enumParameters::a);
+#define __create2__(a, b) const auto a##_TNOM = sParameters.at(enumParameters::a##_TNOM);
+#define __COMMA__
+#include "parameters.h"
+#define __create__(a, b) const auto a = b;
+#define __create2__(a, b) const auto a = b;
+#define __COMMA__
+#include "temperatureSetup.h"
+#define __create__(a) sRet[enumMembers::a] = a;
+#define __COMMA__
+#include "members.h"
+#else
+#define __create__(a) sRet[enumMembers::a] = sParameters.at(enumParameters::a);
+#define __COMMA__
+#include "members.h"
+#endif
+	return sRet;
+}
 
 enum class enumNodes
 {
@@ -122,18 +175,14 @@ enum class enumCurrentOutputs:std::size_t
 };
 template<enumBranches E>
 using createIndep = ctaylor<makeIndependent<std::size_t(E)>, 2>;
-static constexpr double KB = 1.380662E-23;	// Boltzmann's constant, J/K
-static constexpr double QQ = 1.602189E-19;	// magnitude of electronic charge, C
-static constexpr double TABS = 2.731500E+02;	// 0 degrees C in degrees K
-static constexpr double TAMB = 27.0;
 struct vbic
 {
 #define __create__(a) const double a;
 #define __COMMA__
 #include "members.h"
-	vbic(const string2double &_r = readParams())
+	vbic(const enumMembers2double &_r = readParams())
 		:
-#define __create__(a) a(_r.at(#a))
+#define __create__(a) a(_r.at(enumMembers::a))
 #define __COMMA__ ,
 #include "members.h"
 	{
@@ -142,7 +191,8 @@ struct vbic
 	typedef std::map<enumNodes, index2Double> index2Index2Double;
 	auto calculate(
 		const std::array<double, std::size_t(enumNodes::NumberOfNodes)>& _rNodeVoltages,
-		index2Index2Double&_rO
+		index2Index2Double&_rO,
+		index2Double &_rV
 	) const
 	{
 #define __create__(Vbe, b, e) const auto Vbe = createIndep<enumBranches::Vbe>(\
@@ -154,7 +204,9 @@ struct vbic
 #define __COMMA__
 #include "inputs.h"
 #ifdef SELF_HEATING
-#define __CONST_AUTO__ const auto
+#define __create__(a, b) const auto a = b;
+#define __create2__(a, b) const auto a = b;
+#define __COMMA__
 #include "temperatureSetup.h"
 #endif
 
@@ -401,9 +453,9 @@ struct vbic
 
 #define __create__(a, b, c)\
 {	if (enumNodes::b != enumNodes::NumberOfNodes)\
-		writeOutput(_rO[enumNodes::b], a);\
+		writeOutput(_rV[enumNodes::b], _rO[enumNodes::b], a);\
 	if (enumNodes::c != enumNodes::NumberOfNodes)\
-		writeOutput(_rO[enumNodes::c], -a);\
+		writeOutput(_rV[enumNodes::c], _rO[enumNodes::c], -a);\
 }
 #define __COMMA__
 #include "outputs.h"
@@ -412,26 +464,31 @@ struct vbic
 	template<typename T>
 	struct copyOutput
 	{	index2Double&m_rO;
+		double&m_rValue;
 		const ctaylor<T, 2>&m_rV;
 		copyOutput(
+			double&_rValue,
 			index2Double&_rO,
 			const ctaylor<T, 2>&_rV
 		)
 			:m_rO(_rO),
-			m_rV(_rV)
+			m_rV(_rV),
+			m_rValue(_rValue)
 		{
 		}
 		template<typename ENUM>
 		void operator()(const mp_list<mp_list<ENUM, mp_size_t<1> > >&) const
 		{	const auto &rNodePair = s_aInput2NodePair[ENUM::value];
 			typedef mp_list<mp_list<ENUM, mp_size_t<1> > > LIST;
+			constexpr std::size_t POS = mp_find<T, LIST>::value;
 			if (rNodePair.first != enumNodes::NumberOfNodes)
-				m_rO[rNodePair.first] += m_rV.m_s.at(mp_find<LIST, T>::value);
+				m_rO[rNodePair.first] += m_rV.m_s.at(POS);
 			if (rNodePair.second != enumNodes::NumberOfNodes)
-				m_rO[rNodePair.second] -= m_rV.m_s.at(mp_find<LIST, T>::value);
+				m_rO[rNodePair.second] -= m_rV.m_s.at(POS);
 		}
 		void operator()(const mp_list<>&) const
-		{
+		{	constexpr std::size_t POS = mp_find<T, mp_list<> >::value;
+			m_rValue += m_rV.m_s.at(POS);
 		}
 		template<typename LIST>
 		void operator()(const LIST&) const
@@ -439,8 +496,8 @@ struct vbic
 		}
 	};
 	template<typename T>
-	static void writeOutput(index2Double&_rO, const ctaylor<T, 2>&_rV)
-	{	mp_for_each<T>(copyOutput<T>(_rO, _rV));
+	static void writeOutput(double &_rValue, index2Double&_rO, const ctaylor<T, 2>&_rV)
+	{	mp_for_each<T>(copyOutput<T>(_rValue, _rO, _rV));
 	}
 	static const char*const s_aNames[];
 };
@@ -489,6 +546,8 @@ int main(int, char**)
 	vbic sI;
 	std::array<double, std::size_t(enumNodes::NumberOfNodes)> sV({});
 	vbic::index2Index2Double s;
-	sI.calculate(sV, s);
+	vbic::index2Double sValues;
+	sI.calculate(sV, s, sValues);
 	std::cout << s << std::endl;
+	std::cout << sValues << std::endl;
 }
