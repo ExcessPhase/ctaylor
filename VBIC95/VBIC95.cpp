@@ -91,26 +91,16 @@ auto avalm(const V_T&V, const P_T&P, const M_T&M, const AV1_T&AV1, const AV2_T&A
 }
 
 enum class enumNodes
-{	c,
-	b,
-	e,
-	s,
-#ifdef SELF_HEATING
-	dt,
-	tl,
-#endif
-	cx,
-	ci,
-	bx,
-	bi,
-	ei,
-	si,
-	bp,
-#ifdef EXCESS_PHASE
-	xf1,
-	xf2,
-#endif
-	NumberOfNodes,
+{
+#define __create__(a) a
+#define __COMMA__ ,
+#include "nodes.h"
+};
+static const char*const s_aNodeNames[] =
+{
+#define __create__(a) #a
+#define __COMMA__ ,
+#include "nodes.h"
 };
 enum class enumBranches:std::size_t
 {	Vbe,
@@ -565,6 +555,12 @@ const char*const vbic::s_aNames[] = {
 #define __COMMA__ ,
 #include "outputs.h"
 };
+thread_local std::size_t s_iIndent = 0;
+std::ostream&printIdent(std::ostream&_rS)
+{	for (std::size_t i = 0; i < s_iIndent; ++i)
+		_rS << "        ";
+	return _rS;
+}
 template<typename ...REST>
 std::ostream &print(std::ostream &_rS, const std::tuple<REST...>&, const std::integral_constant<std::size_t, 0>&)
 {	return _rS;
@@ -579,16 +575,18 @@ std::ostream &operator<<(std::ostream &_rS, const std::tuple<REST...>&_r)
 {	return print(_rS, _r, std::integral_constant<std::size_t, sizeof...(REST)>());
 }
 std::ostream &operator<<(std::ostream &_rS, const enumNodes _e)
-{	return _rS << std::size_t(_e);
+{	return _rS << s_aNodeNames[std::size_t(_e)];
 }
 template<typename T0, typename T1>
 std::ostream &operator<<(std::ostream &_rS, const std::pair<T0, T1>&_r)
-{	return _rS << "(" << _r.first << "," << _r.second << ")";
+{	return printIdent(_rS) << _r.first << "," << _r.second << "\n";
 }
 template<typename K, typename V>
 std::ostream &operator<<(std::ostream &_rS, const std::map<K, V>&_r)
-{	for (const auto &r : _r)
-		_rS << r << ",";
+{	++s_iIndent;
+	for (const auto &r : _r)
+		_rS << r << "\n";
+	--s_iIndent;
 	return _rS;
 }
 }

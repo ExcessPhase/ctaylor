@@ -29,5 +29,8 @@
     <ClInclude Include="inputs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="nodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
