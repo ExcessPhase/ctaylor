@@ -18,6 +18,9 @@
     <ClCompile Include="VBIC95.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\LUFAC\lufac.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="members.h">
@@ -37,6 +40,9 @@
     </ClInclude>
     <ClInclude Include="parameters.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LUFAC\lufac.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

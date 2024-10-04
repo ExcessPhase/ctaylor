@@ -139,9 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\LUFAC\lufac.cpp" />
     <ClCompile Include="VBIC95.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\LUFAC\lufac.h" />
     <ClInclude Include="inputs.h" />
     <ClInclude Include="members.h" />
     <ClInclude Include="nodes.h" />

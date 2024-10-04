@@ -1,10 +1,11 @@
 #include "../ctaylor.h"
+#include "../LUFAC/lufac.h"
 #include <map>
 #include <string>
 #include <cstring>
 #include <fstream>
 //#include <initializer_list>
-#define SELF_HEATING
+//#define SELF_HEATING
 namespace vbic95
 {
 enum class enumParameters
@@ -143,6 +144,28 @@ static enumMembers2double readParams(void)
 	return sRet;
 }
 
+enum class eCircuitNodes
+{	IVB,
+	IVC,
+	c,
+	b,
+#ifdef SELF_HEATING
+	dt,
+	tl,
+#endif
+	cx,
+	ci,
+	bx,
+	bi,
+	ei,
+	si,
+	bp,
+#ifdef EXCESS_PHASE
+	xf1,
+	xf2,
+#endif
+	NumberOfNodes
+};
 enum class enumNodes
 {
 #define __create__(a) a
@@ -187,18 +210,23 @@ struct vbic
 #include "members.h"
 	{
 	}
-	typedef std::map<enumNodes, double> index2Double;
-	typedef std::map<enumNodes, index2Double> index2Index2Double;
 	auto calculate(
-		const std::array<double, std::size_t(enumNodes::NumberOfNodes)>& _rNodeVoltages,
-		index2Index2Double&_rO,
-		index2Double &_rV
+		const std::array<double, std::size_t(eCircuitNodes::NumberOfNodes)>& _rNodeVoltages,
+		lufac::index2Index2Double&_rO,
+		lufac::index2Double &_rV,
+		const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT
 	) const
 	{
 #define __create__(Vbe, b, e) const auto Vbe = createIndep<enumBranches::Vbe>(\
-	enumNodes::e != enumNodes::NumberOfNodes\
-		? _rNodeVoltages[std::size_t(enumNodes::b)] - _rNodeVoltages[std::size_t(enumNodes::e)]\
-		: _rNodeVoltages[std::size_t(enumNodes::b)],\
+	enumNodes::b != enumNodes::NumberOfNodes && _pT[std::size_t(enumNodes::b)] != std::size_t(eCircuitNodes::NumberOfNodes)\
+		? (enumNodes::e != enumNodes::NumberOfNodes && _pT[std::size_t(enumNodes::e)] != std::size_t(eCircuitNodes::NumberOfNodes)\
+			? _rNodeVoltages[std::size_t(enumNodes::b)] - _rNodeVoltages[std::size_t(enumNodes::e)]\
+			: _rNodeVoltages[std::size_t(enumNodes::b)]\
+		)\
+		: (enumNodes::e != enumNodes::NumberOfNodes && _pT[std::size_t(enumNodes::e)] != std::size_t(eCircuitNodes::NumberOfNodes)\
+			? - _rNodeVoltages[std::size_t(enumNodes::e)]\
+			: 0.0\
+		),\
 		false\
 	);
 #define __COMMA__
@@ -453,9 +481,15 @@ struct vbic
 
 #define __create__(a, b, c)\
 {	if (enumNodes::b != enumNodes::NumberOfNodes)\
-		writeOutput(_rV[enumNodes::b], _rO[enumNodes::b], a);\
+	{	const auto iBT = _pT[std::size_t(enumNodes::b)];\
+		if (iBT != std::size_t(eCircuitNodes::NumberOfNodes))\
+			writeOutput(_rV[iBT], _rO[iBT], -a, _pT);\
+	}\
 	if (enumNodes::c != enumNodes::NumberOfNodes)\
-		writeOutput(_rV[enumNodes::c], _rO[enumNodes::c], -a);\
+	{	const auto iCT = _pT[std::size_t(enumNodes::c)];\
+		if (iCT != std::size_t(eCircuitNodes::NumberOfNodes))\
+			writeOutput(_rV[iCT], _rO[iCT], a, _pT);\
+	}\
 }
 #define __COMMA__
 #include "outputs.h"
@@ -463,17 +497,20 @@ struct vbic
 	}
 	template<typename T>
 	struct copyOutput
-	{	index2Double&m_rO;
+	{	lufac::index2Double&m_rO;
 		double&m_rValue;
 		const ctaylor<T, 2>&m_rV;
+		const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &m_pT;
 		copyOutput(
 			double&_rValue,
-			index2Double&_rO,
-			const ctaylor<T, 2>&_rV
+			lufac::index2Double&_rO,
+			const ctaylor<T, 2>&_rV,
+			const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &_pT
 		)
 			:m_rO(_rO),
 			m_rV(_rV),
-			m_rValue(_rValue)
+			m_rValue(_rValue),
+			m_pT(_pT)
 		{
 		}
 		template<typename ENUM>
@@ -482,9 +519,15 @@ struct vbic
 			typedef mp_list<mp_list<ENUM, mp_size_t<1> > > LIST;
 			constexpr std::size_t POS = mp_find<T, LIST>::value;
 			if (rNodePair.first != enumNodes::NumberOfNodes)
-				m_rO[rNodePair.first] += m_rV.m_s.at(POS);
+			{	const auto iT = m_pT[std::size_t(rNodePair.first)];
+				if (iT != std::size_t(eCircuitNodes::NumberOfNodes))
+					m_rO[iT] -= m_rV.m_s.at(POS);
+			}
 			if (rNodePair.second != enumNodes::NumberOfNodes)
-				m_rO[rNodePair.second] -= m_rV.m_s.at(POS);
+			{	const auto iT = m_pT[std::size_t(rNodePair.second)];
+				if (iT != std::size_t(eCircuitNodes::NumberOfNodes))
+					m_rO[iT] += m_rV.m_s.at(POS);
+			}
 		}
 		void operator()(const mp_list<>&) const
 		{	constexpr std::size_t POS = mp_find<T, mp_list<> >::value;
@@ -496,8 +539,8 @@ struct vbic
 		}
 	};
 	template<typename T>
-	static void writeOutput(double &_rValue, index2Double&_rO, const ctaylor<T, 2>&_rV)
-	{	mp_for_each<T>(copyOutput<T>(_rValue, _rO, _rV));
+	static void writeOutput(double &_rValue, lufac::index2Double&_rO, const ctaylor<T, 2>&_rV, const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT)
+	{	mp_for_each<T>(copyOutput<T>(_rValue, _rO, _rV, _pT));
 	}
 	static const char*const s_aNames[];
 };
@@ -540,14 +583,103 @@ std::ostream &operator<<(std::ostream &_rS, const std::map<K, V>&_r)
 	--s_iIndent;
 	return _rS;
 }
+constexpr eCircuitNodes translateNodes(const enumNodes _e)
+{	switch (_e)
+	{	default:
+			throw std::logic_error("Invalid node ID!");
+		case enumNodes::NumberOfNodes:
+			return eCircuitNodes::NumberOfNodes;
+		case enumNodes::c:
+			return eCircuitNodes::c;
+		case enumNodes::b:
+			return eCircuitNodes::b;
+		case enumNodes::e:
+			return eCircuitNodes::NumberOfNodes;
+		case enumNodes::s:
+			return eCircuitNodes::NumberOfNodes;
+#ifdef SELF_HEATING
+		case enumNodes::dt:
+			return eCircuitNodes::dt;
+		case enumNodes::tl:
+			return eCircuitNodes::tl;
+#endif
+		case enumNodes::cx:
+			return eCircuitNodes::cx;
+		case enumNodes::ci:
+			return eCircuitNodes::ci;
+		case enumNodes::bx:
+			return eCircuitNodes::bx;
+		case enumNodes::bi:
+			return eCircuitNodes::bi;
+		case enumNodes::ei:
+			return eCircuitNodes::ei;
+		case enumNodes::si:
+			return eCircuitNodes::si;
+		case enumNodes::bp:
+			return eCircuitNodes::bp;
+#ifdef EXCESS_PHASE
+		case enumNodes::xf1:
+			return eCircuitNodes::xf1;
+		case enumNodes::xf2:
+			return eCircuitNodes::xf2;
+#endif
+	}
+}
 }
 int main(int, char**)
 {	using namespace vbic95;
+	using namespace lufac;
 	vbic sI;
-	std::array<double, std::size_t(enumNodes::NumberOfNodes)> sV({});
-	vbic::index2Index2Double s;
-	vbic::index2Double sValues;
-	sI.calculate(sV, s, sValues);
-	std::cout << s << std::endl;
-	std::cout << sValues << std::endl;
+	const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> sTrans{
+#define __create__(a) std::size_t(translateNodes(enumNodes::a))
+#define __COMMA__ ,
+#include "nodes.h"
+	};
+	for (double vb = 0.7; vb <= 1.00001; vb += 0.05)
+		for (double vc = 0.0; vc <= 5.00001; vc += 0.05)
+		{	std::array<double, std::size_t(eCircuitNodes::NumberOfNodes)> sV({});
+	//{ve=0;vs=0
+		 //for(vb=0.7;vb<=1.00001;vb+=0.05){
+		 //for(vc=0.0;vc<=5.00001;vc+=0.05){
+		//print vc,vb,ve,vs
+			while (true)
+			{	index2Index2Double s;
+				index2Double sValues;
+				sI.calculate(sV, s, sValues, sTrans);
+				sValues[std::size_t(eCircuitNodes::IVB)] += vb;
+				sValues[std::size_t(eCircuitNodes::IVC)] += vc;
+				s[std::size_t(eCircuitNodes::IVB)][std::size_t(eCircuitNodes::b)] += 1.0;
+				s[std::size_t(eCircuitNodes::b)][std::size_t(eCircuitNodes::IVB)] += 1.0;
+				s[std::size_t(eCircuitNodes::IVC)][std::size_t(eCircuitNodes::c)] += 1.0;
+				s[std::size_t(eCircuitNodes::c)][std::size_t(eCircuitNodes::IVC)] += 1.0;
+				for (const auto &rRow : s)
+				{	auto &rV = sValues[rRow.first];
+					for (const auto &rCol : rRow.second)
+						rV -= rCol.second*sV[rCol.first];
+				}
+				//std::cout << "vb=" << vb << ",vc=" << vc << "\n";
+				//std::cout << s << std::endl;
+				const auto sNew = factor(s);
+				const auto sDelta = solve(sNew.second, sValues, sNew.first);
+				//for (const auto &r : sDelta)
+				//	std::cerr << r << ",";
+				//std::cerr << "\n";
+				constexpr double dAbstol = 1e-6;
+				bool b = false;
+				for (const auto &r : sDelta)
+					if (std::abs(sV[r.first] - r.second) > dAbstol)
+					{	b = true;
+						break;
+					}
+				for (const auto &r : sDelta)
+					sV[r.first] = r.second;
+				if (!b)
+					break;
+			}
+			for (const auto d : sV)
+				std::cout << d << ",";
+			std::cout << "\n";
+			//std::cout << sNew << std::endl;
+			//std::cout << sValues << std::endl;
+		}
 }
