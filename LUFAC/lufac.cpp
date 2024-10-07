@@ -4,9 +4,29 @@
 #include <iostream>
 #include <stdexcept>
 #include <numeric>
+#include <algorithm>
 namespace lufac
 {
-std::pair<std::vector<std::size_t>, index2Index2Double> factor(const index2Index2Double&_r)
+double findMaxInColumn(const index2Index2Double::const_iterator &_pRow, const index2Index2Double&_rM)
+{	const auto iRow = _pRow->first;
+	return std::max_element(
+		_pRow,
+		_rM.end(),
+		[iRow](const index2Index2Double::value_type&_r0, const index2Index2Double::value_type&_r1)
+		{	const auto p1 = _r1.second.find(iRow);
+			if (p1 != _r1.second.end())
+			{	const auto p0 = _r0.second.find(iRow);
+				if (p0 != _r0.second.end())
+					return abs(p0->second) < abs(p1->second);
+				else
+					return true;
+			}
+			else
+				return false;
+		}
+	)->second.at(iRow);
+}
+index2Index2Double factor(const index2Index2Double&_r, index2Double&_rV)
 {	const auto iDim = _r.size();
 #if 0
 	const auto sCounts = [&](void)
@@ -65,15 +85,14 @@ std::pair<std::vector<std::size_t>, index2Index2Double> factor(const index2Index
 #else
 	auto sM = _r;
 #endif
-//	std::vector<std::size_t> sE2I(iDim);
-//	std::iota(sE2I.begin(), sE2I.end(), std::size_t());
-	std::vector<std::size_t> sI2E(iDim);
-	std::iota(sI2E.begin(), sI2E.end(), std::size_t());
+	//std::vector<std::size_t> sI2E(iDim);
+	//std::iota(sI2E.begin(), sI2E.end(), std::size_t());
 	for (auto pRow = sM.begin(); pRow != sM.end(); ++pRow)
 	{	auto pPivot = pRow->second.find(pRow->first);
+		const auto dMax = findMaxInColumn(pRow, sM);
 		while (true)
-			if (pPivot != pRow->second.end() && pPivot->second != 0.0)
-			{	const double dPivot = pPivot->second = 1.0/pPivot->second;
+			if(pPivot != pRow->second.end() && pPivot->second >= dMax)
+			{	const auto dPivot = pPivot->second = 1.0/pPivot->second;
 				for (auto pRowTarget = std::next(pRow); pRowTarget != sM.end(); ++pRowTarget)
 				{	const auto pFind = pRowTarget->second.find(pRow->first);
 					if (pFind != pRowTarget->second.end())
@@ -94,11 +113,12 @@ std::pair<std::vector<std::size_t>, index2Index2Double> factor(const index2Index
 					if (pPivot == p->second.end())
 						continue;
 					else
-					if (pPivot->second == 0.0)
+					if(pPivot->second < dMax)
 						continue;
 					else
 					{	std::swap(p->second, pRow->second);
-						std::swap(sI2E[pRow->first], sI2E[p->first]);
+						std::swap(_rV[pRow->first], _rV[p->first]);
+						//std::swap(sI2E[pRow->first], sI2E[p->first]);
 						b = true;
 						break;
 					}
@@ -107,25 +127,25 @@ std::pair<std::vector<std::size_t>, index2Index2Double> factor(const index2Index
 					throw std::logic_error("Did not find a pivot!");
 			}
 	}
-	return std::make_pair(sI2E, sM);
+	return sM;
 }
-index2Double solve(const index2Index2Double&_rM, const index2Double&_rY, const std::vector<std::size_t> &_rI2E)
+index2Double solve(const index2Index2Double&_rM, const index2Double&_rY)
 {	index2Double s(_rY);
 	const auto iDim = _rY.size();
 	for (std::size_t iRow = 0; iRow < iDim; ++iRow)
 	{	const auto dInvPivot = _rM.at(iRow).at(iRow);
-		auto &rRow = s[_rI2E[iRow]];
+		auto &rRow = s[iRow];
 		for (std::size_t iDestRow = iRow + 1; iDestRow < iDim; ++iDestRow)
 		{	const auto pFind = _rM.at(iDestRow).find(iRow);
 			if (pFind != _rM.at(iDestRow).end())
-				s[_rI2E[iDestRow]] -= dInvPivot*pFind->second*rRow;
+				s[iDestRow] -= dInvPivot*pFind->second*rRow;
 		}
 	}
 	for (std::ptrdiff_t iRow = iDim - 1; iRow >= 0; --iRow)
 	{	const auto &rRow = _rM.at(iRow);
-		auto &rY = s[_rI2E[iRow]];
+		auto &rY = s[iRow];
 		for (auto p = rRow.rbegin(); p != rRow.rend() && p->first > iRow; ++p)
-			rY -= p->second*s[_rI2E[p->first]];
+			rY -= p->second*s[p->first];
 		rY *= rRow.at(iRow);
 	}
 	return s;
