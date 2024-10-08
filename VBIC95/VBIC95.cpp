@@ -669,18 +669,26 @@ int main(int, char**)
 			{	index2Index2Double s;
 				index2Double sValues;
 				sI.calculate(sV, s, sValues, sTrans);
-				sValues[std::size_t(eCircuitNodes::IVB)] += vb - sV.at(std::size_t(eCircuitNodes::b));
+				
 				sValues[std::size_t(eCircuitNodes::IVC)] += vc - sV.at(std::size_t(eCircuitNodes::c));
-				sValues[std::size_t(eCircuitNodes::IVS)] += - sV.at(std::size_t(eCircuitNodes::s));
+				sValues[std::size_t(eCircuitNodes::IVB)] += vb - sV.at(std::size_t(eCircuitNodes::b));
 				sValues[std::size_t(eCircuitNodes::IVE)] += - sV.at(std::size_t(eCircuitNodes::e));
-				s[std::size_t(eCircuitNodes::IVE)][std::size_t(eCircuitNodes::e)] += 1.0;
-				s[std::size_t(eCircuitNodes::e)][std::size_t(eCircuitNodes::IVE)] += 1.0;
-				s[std::size_t(eCircuitNodes::IVS)][std::size_t(eCircuitNodes::s)] += 1.0;
-				s[std::size_t(eCircuitNodes::s)][std::size_t(eCircuitNodes::IVS)] += 1.0;
-				s[std::size_t(eCircuitNodes::IVB)][std::size_t(eCircuitNodes::b)] += 1.0;
-				s[std::size_t(eCircuitNodes::b)][std::size_t(eCircuitNodes::IVB)] += 1.0;
-				s[std::size_t(eCircuitNodes::IVC)][std::size_t(eCircuitNodes::c)] += 1.0;
+				sValues[std::size_t(eCircuitNodes::IVS)] += - sV.at(std::size_t(eCircuitNodes::s));
+				
+				sValues[std::size_t(eCircuitNodes::c)] += -sV.at(std::size_t(eCircuitNodes::IVC));
+				sValues[std::size_t(eCircuitNodes::b)] += -sV.at(std::size_t(eCircuitNodes::IVB));
+				sValues[std::size_t(eCircuitNodes::e)] += -sV.at(std::size_t(eCircuitNodes::IVE));
+				sValues[std::size_t(eCircuitNodes::s)] += -sV.at(std::size_t(eCircuitNodes::IVS));
+				
 				s[std::size_t(eCircuitNodes::c)][std::size_t(eCircuitNodes::IVC)] += 1.0;
+				s[std::size_t(eCircuitNodes::b)][std::size_t(eCircuitNodes::IVB)] += 1.0;
+				s[std::size_t(eCircuitNodes::e)][std::size_t(eCircuitNodes::IVE)] += 1.0;
+				s[std::size_t(eCircuitNodes::s)][std::size_t(eCircuitNodes::IVS)] += 1.0;
+				
+				s[std::size_t(eCircuitNodes::IVC)][std::size_t(eCircuitNodes::c)] += 1.0;
+				s[std::size_t(eCircuitNodes::IVB)][std::size_t(eCircuitNodes::b)] += 1.0;
+				s[std::size_t(eCircuitNodes::IVE)][std::size_t(eCircuitNodes::e)] += 1.0;
+				s[std::size_t(eCircuitNodes::IVS)][std::size_t(eCircuitNodes::s)] += 1.0;
 				const auto sFactored = factor(s, sValues);
 				const auto sDelta = solve(sFactored, sValues);
 				const auto dNormO = std::sqrt(
@@ -705,10 +713,10 @@ int main(int, char**)
 				);
 				for (const auto &r : sDelta)
 					sV[r.first] += r.second;
-				if (dNorm < 1e-4 && dNormO < 1e-4)
+				if (dNorm < 1e-9 && dNormO < 1e-9)
 					break;
 			}
-			for (const auto i : {eCircuitNodes::c, eCircuitNodes::b, eCircuitNodes::e, eCircuitNodes::s, eCircuitNodes::IVC, eCircuitNodes::IVB, eCircuitNodes::IVE, eCircuitNodes::IVS})
+			for (const auto i : {eCircuitNodes::c, eCircuitNodes::b, eCircuitNodes::IVC, eCircuitNodes::IVB, eCircuitNodes::IVS})
 				std::cout << sV[std::size_t(i)] << ",";
 			std::cout << "\n";
 		}
