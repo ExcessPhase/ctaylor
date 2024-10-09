@@ -486,6 +486,18 @@ struct ctaylor
 		:m_s(convert<T1, CHECK>(_r.m_s))
 	{	static_assert(!CHECK || ctaylor<T1, MAX>::SIZE < SIZE, "RHS size must be smaller!");
 	}
+	ctaylor operator+(const ctaylor&_r) const
+	{	ctaylor s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = m_s[i] + _r.m_s[i];
+		return s;
+	}
+	ctaylor operator-(const ctaylor&_r) const
+	{	ctaylor s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = m_s[i] - _r.m_s[i];
+		return s;
+	}
 	template<typename T1>
 	ctaylor<typename merge<T, T1>::type, MAX> operator+(const ctaylor<T1, MAX>&_r) const
 	{	typedef typename merge<T, T1>::type TT;
