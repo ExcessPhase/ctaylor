@@ -279,7 +279,7 @@ struct copy
 	{	m_rTarget[TPOS] = 0.0;
 	}
 };
-template<std::size_t TARGET, std::size_t SOURCE0, std::size_t SOURCE1, typename OP=std::plus<void> >
+template<std::size_t TARGET, std::size_t SOURCE0, std::size_t SOURCE1, typename PLUS=mp_true>
 struct addSub
 {	std::array<double, TARGET> &m_rTarget;
 	const std::array<double, SOURCE0> &m_rSource0;
@@ -302,7 +302,7 @@ struct addSub
 			std::integral_constant<std::size_t, S1>
 		>&
 	) const
-	{	m_rTarget[TPOS] = OP()(m_rSource0[S0], m_rSource1[S1]);
+	{	m_rTarget[TPOS] = PLUS::value ? m_rSource0[S0] + m_rSource1[S1] : m_rSource0[S0] - m_rSource1[S1];
 	}
 	template<std::size_t TPOS, std::size_t S0>
 	void operator()(
@@ -322,7 +322,7 @@ struct addSub
 			std::integral_constant<std::size_t, S1>
 		>&
 	) const
-	{	m_rTarget[TPOS] = m_rSource1[S1];
+	{	m_rTarget[TPOS] = PLUS::value ? m_rSource1[S1] : -m_rSource1[S1];
 	}
 };
 template<typename, typename, typename>
@@ -499,7 +499,7 @@ struct ctaylor
 	{	typedef typename merge<T, T1>::type TT;
 		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
 		ctaylor<TT, MAX> s;
-		mp_for_each<SOURCE_POSITIONS>(addSub<ctaylor<TT, MAX>::SIZE, ctaylor<T, MAX>::SIZE, ctaylor<T1, MAX>::SIZE, std::minus<void> >(s.m_s, m_s, _r.m_s));
+		mp_for_each<SOURCE_POSITIONS>(addSub<ctaylor<TT, MAX>::SIZE, ctaylor<T, MAX>::SIZE, ctaylor<T1, MAX>::SIZE, mp_false>(s.m_s, m_s, _r.m_s));
 		return s;
 	}
 	auto operator-(void) const
