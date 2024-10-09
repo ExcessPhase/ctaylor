@@ -1,3 +1,9 @@
+#ifdef __DIODE__
+	__create__(VD0, a0, NumberOfNodes) __COMMA__
+	__create__(VR0, a0, b0) __COMMA__
+	__create__(VD1, a1, NumberOfNodes) __COMMA__
+	__create__(VR1, a1, b1) __COMMA__
+#else
 #ifdef SELF_HEATING
 	__create__(delT, dt, tl) __COMMA__// voltage across RTH, local temperature rise
 					// measured with respect to ground (ambient)
@@ -20,5 +26,6 @@
 	__create__(Vbep, bx, bp) __COMMA__	// parasitic b-e voltage (pnp polarity)
 	__create__(Vbcp, si, bp) __COMMA__	// parasitic b-c voltage (pnp polarity)
 	__create__(Vrbp, cx, bp) // voltage across RBP
+#endif
 #undef __create__
 #undef __COMMA__
