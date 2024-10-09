@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <numeric>
 #include <algorithm>
+#include <cmath>
 namespace lufac
 {
 double findMaxInColumn(const index2Index2Double::const_iterator &_pRow, const index2Index2Double&_rM)
