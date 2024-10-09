@@ -9,7 +9,7 @@ namespace lufac
 {
 double findMaxInColumn(const index2Index2Double::const_iterator &_pRow, const index2Index2Double&_rM)
 {	const auto iRow = _pRow->first;
-	return std::max_element(
+	return std::abs(std::max_element(
 		_pRow,
 		_rM.end(),
 		[iRow](const index2Index2Double::value_type&_r0, const index2Index2Double::value_type&_r1)
@@ -24,7 +24,7 @@ double findMaxInColumn(const index2Index2Double::const_iterator &_pRow, const in
 			else
 				return false;
 		}
-	)->second.at(iRow);
+	)->second.at(iRow));
 }
 index2Index2Double factor(const index2Index2Double&_r, index2Double&_rV)
 {	const auto iDim = _r.size();
@@ -90,8 +90,10 @@ index2Index2Double factor(const index2Index2Double&_r, index2Double&_rV)
 	for (auto pRow = sM.begin(); pRow != sM.end(); ++pRow)
 	{	auto pPivot = pRow->second.find(pRow->first);
 		const auto dMax = findMaxInColumn(pRow, sM);
+		if (dMax == 0.0 || !std::isfinite(dMax) || std::isnan(dMax))
+			throw std::logic_error("matrix is singular");
 		while (true)
-			if(pPivot != pRow->second.end() && pPivot->second >= dMax)
+			if(pPivot != pRow->second.end() && std::abs(pPivot->second) >= dMax)
 			{	const auto dPivot = pPivot->second = 1.0/pPivot->second;
 				for (auto pRowTarget = std::next(pRow); pRowTarget != sM.end(); ++pRowTarget)
 				{	const auto pFind = pRowTarget->second.find(pRow->first);
@@ -113,7 +115,7 @@ index2Index2Double factor(const index2Index2Double&_r, index2Double&_rV)
 					if (pPivot == p->second.end())
 						continue;
 					else
-					if(pPivot->second < dMax)
+					if (std::abs(pPivot->second) < dMax)
 						continue;
 					else
 					{	std::swap(p->second, pRow->second);
