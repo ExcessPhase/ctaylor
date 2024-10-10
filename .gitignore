@@ -380,3 +380,6 @@ FodyWeavers.xsd
 /VBIC95/PARS.default
 /VBIC95/tmp
 /VBIC95/diode.txt
+/black_scholes.exe
+/ctaylor.exe
+/vbic95.exe

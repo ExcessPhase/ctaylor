@@ -15,6 +15,7 @@
 #include <functional>
 #include <boost/mp11.hpp>
 #include <cstdlib>
+#include <algorithm>
 #include "merge_sorted_sets.h"
 #include "taylor_series_expansions.h"
 
@@ -318,6 +319,33 @@ struct copy
 	{	m_rTarget[TPOS] = 0.0;
 	}
 };
+template<typename, typename>
+struct convertToStdArrayImpl;
+template<typename LIST, std::size_t ...INDICES>
+struct convertToStdArrayImpl<LIST, std::index_sequence<INDICES...> >
+{	static constexpr const std::array<
+		std::pair<std::size_t, std::size_t>,
+		mp_size<LIST>::value
+	> value = {std::make_pair(mp_second<mp_at_c<LIST, INDICES> >::value, mp_third<mp_at_c<LIST, INDICES> >::value)...};
+};
+template<typename LIST, std::size_t ...INDICES>
+const std::array<
+	std::pair<std::size_t, std::size_t>,
+	mp_size<LIST>::value
+> convertToStdArrayImpl<LIST, std::index_sequence<INDICES...> >::value;
+
+template<typename LIST>
+struct convertToStdArray
+{	static constexpr const std::array<
+		std::pair<std::size_t, std::size_t>,
+		mp_size<LIST>::value
+	> value = convertToStdArrayImpl<LIST, std::make_index_sequence<mp_size<LIST>::value> >::value;
+};
+template<typename LIST>
+const std::array<
+	std::pair<std::size_t, std::size_t>,
+	mp_size<LIST>::value
+> convertToStdArray<LIST>::value;
 template<std::size_t TARGET, std::size_t SOURCE0, std::size_t SOURCE1, typename PLUS=mp_true>
 struct addSub
 {	std::array<double, TARGET> &m_rTarget;
@@ -544,6 +572,56 @@ struct ctaylor
 			s.m_s[i] = m_s[i] - _r.m_s[i];
 		return s;
 	}
+#if 1
+	template<typename T1>
+	ctaylor<typename merge<T, T1>::type, MAX> operator+(const ctaylor<T1, MAX>&_r) const
+	{	typedef typename merge<T, T1>::type TT;
+		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
+		ctaylor<TT, MAX> s;
+		auto &rT = convertToStdArray<SOURCE_POSITIONS>::value;
+		std::transform(
+			rT.begin(),
+			rT.end(),
+			s.m_s.begin(),
+			[&](const std::pair<std::size_t, std::size_t>&_rI)
+			{	return _rI.first != std::numeric_limits<std::size_t>::max()
+				? (_rI.second != std::numeric_limits<std::size_t>::max()
+					? m_s[_rI.first] + _r.m_s[_rI.second]
+					: m_s[_rI.first]
+				)
+				: (_rI.second != std::numeric_limits<std::size_t>::max()
+					? _r.m_s[_rI.second]
+					: 0.0
+				);
+			}
+		);
+		return s;
+	}
+	template<typename T1>
+	ctaylor<typename merge<T, T1>::type, MAX> operator-(const ctaylor<T1, MAX>&_r) const
+	{	typedef typename merge<T, T1>::type TT;
+		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
+		ctaylor<TT, MAX> s;
+		auto &rT = convertToStdArray<SOURCE_POSITIONS>::value;
+		std::transform(
+			rT.begin(),
+			rT.end(),
+			s.m_s.begin(),
+			[&](const std::pair<std::size_t, std::size_t>&_rI)
+			{	return _rI.first != std::numeric_limits<std::size_t>::max()
+				? (_rI.second != std::numeric_limits<std::size_t>::max()
+					? m_s[_rI.first] - _r.m_s[_rI.second]
+					: m_s[_rI.first]
+				)
+				: (_rI.second != std::numeric_limits<std::size_t>::max()
+					? -_r.m_s[_rI.second]
+					: 0.0
+				);
+			}
+		);
+		return s;
+	}
+#else
 	template<typename T1>
 	ctaylor<typename merge<T, T1>::type, MAX> operator+(const ctaylor<T1, MAX>&_r) const
 	{	typedef typename merge<T, T1>::type TT;
@@ -560,6 +638,7 @@ struct ctaylor
 		mp_for_each<SOURCE_POSITIONS>(addSub<ctaylor<TT, MAX>::SIZE, ctaylor<T, MAX>::SIZE, ctaylor<T1, MAX>::SIZE, mp_false>(s.m_s, m_s, _r.m_s));
 		return s;
 	}
+#endif
 	auto operator-(void) const
 	{	ctaylor s;
 		for (std::size_t i = 0; i < SIZE; ++i)
