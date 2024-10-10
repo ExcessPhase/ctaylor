@@ -72,16 +72,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ExternalIncludePath>$(USERPROFILE)\Documents\boost_1_86_0;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ExternalIncludePath);$(BOOST_ROOT)\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ExternalIncludePath>$(USERPROFILE)\Documents\boost_1_86_0;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ExternalIncludePath);$(BOOST_ROOT)\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>$(USERPROFILE)\Documents\boost_1_86_0;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ExternalIncludePath);$(BOOST_ROOT)\include</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>$(USERPROFILE)\Documents\boost_1_86_0;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ExternalIncludePath);$(BOOST_ROOT)\include</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

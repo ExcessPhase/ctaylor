@@ -23,7 +23,7 @@ int main(int argc, char**argv)
 		/// some calculation
 	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
 		/// some calculation
-	const auto s5 = erfc(1.0/s4);
+	const auto s5 = erfc((1.0 + s4)/s4);
 		/// print the entire polynomial
 	std::cout << "s5=" << s5 << "\n";
 	typedef mp_list<

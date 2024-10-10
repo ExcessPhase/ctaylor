@@ -383,3 +383,6 @@ FodyWeavers.xsd
 /black_scholes.exe
 /ctaylor.exe
 /vbic95.exe
+/new
+/old
+/old.out
