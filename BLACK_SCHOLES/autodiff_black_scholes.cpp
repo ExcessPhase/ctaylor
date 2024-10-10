@@ -33,40 +33,47 @@ enum class CP { call, put };
 
 // Assume zero annual dividend yield (q=0).
 template <typename Price, typename Sigma, typename Tau, typename Rate>
-auto black_scholes_option_price(CP cp,
+auto black_scholes_option_price_call(
                                                             double K,
                                                             Price const& S,
                                                             Sigma const& sigma,
                                                             Tau const& tau,
                                                             Rate const& r) {
   using namespace std;
-  auto const d1 = (log(S / K) + (r + sigma * sigma / 2) * tau) / (sigma * sqrt(tau));
-  auto const d2 = (log(S / K) + (r - sigma * sigma / 2) * tau) / (sigma * sqrt(tau));
-  switch (cp) {
-    case CP::call:
+  auto const d1 = (log(S / K) + (r + sigma * sigma / 2.0) * tau) / (sigma * sqrt(tau));
+  auto const d2 = (log(S / K) + (r - sigma * sigma / 2.0) * tau) / (sigma * sqrt(tau));
       return S * Phi(d1) - exp(-r * tau) * K * Phi(d2);
-    case CP::put:
+}
+
+template <typename Price, typename Sigma, typename Tau, typename Rate>
+auto black_scholes_option_price_put(
+                                                            double K,
+                                                            Price const& S,
+                                                            Sigma const& sigma,
+                                                            Tau const& tau,
+                                                            Rate const& r) {
+  using namespace std;
+  auto const d1 = (log(S / K) + (r + sigma * sigma / 2.0) * tau) / (sigma * sqrt(tau));
+  auto const d2 = (log(S / K) + (r - sigma * sigma / 2.0) * tau) / (sigma * sqrt(tau));
       return exp(-r * tau) * K * Phi(-d2) - S * Phi(-d1);
-    default:
-      throw std::runtime_error("Invalid CP value.");
-  }
 }
 
 int main() {
   double const K = 100.0;  // Strike price.
   //auto const variables = make_ftuple<double, 3, 3, 1, 1>(105, 5, 30.0 / 365, 1.25 / 100);
+	constexpr std::size_t MAX = 3;
 	auto const variables = std::make_tuple(
-		ctaylor<makeIndependent<0>, 3>(105, true),
-		ctaylor<makeIndependent<1>, 3>(5, true),
-		ctaylor<makeIndependent<2>, 3>(30.0 / 365),
-		ctaylor<makeIndependent<3>, 3>(1.25 / 100)
+		ctaylor<makeIndependent<0>, MAX>(105, true),
+		ctaylor<makeIndependent<1>, MAX>(5, true),
+		ctaylor<makeIndependent<2>, MAX>(30.0 / 365, true),
+		ctaylor<makeIndependent<3>, MAX>(1.25 / 100, true)
 	);
   auto const& S = std::get<0>(variables);      // Stock price.
   auto const& sigma = std::get<1>(variables);  // Volatility.
   auto const& tau = std::get<2>(variables);    // Time to expiration in years. (30 days).
   auto const& r = std::get<3>(variables);      // Interest rate.
-  auto const call_price = black_scholes_option_price(CP::call, K, S, sigma, tau, r);
-  auto const put_price = black_scholes_option_price(CP::put, K, S, sigma, tau, r);
+  auto const call_price = black_scholes_option_price_call(K, S, sigma, tau, r);
+  auto const put_price = black_scholes_option_price_put(K, S, sigma, tau, r);
 
   double const d1 = value((log(S / K) + (r + sigma * sigma / 2) * tau) / (sigma * sqrt(tau)));
   double const d2 = value((log(S / K) + (r - sigma * sigma / 2) * tau) / (sigma * sqrt(tau)));

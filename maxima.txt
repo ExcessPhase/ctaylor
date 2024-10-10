@@ -1,9 +1,10 @@
 hypot(a, b):=sqrt(a*a + b*b)$
 pow(a, b):=a^b$
 display2d:false$
+ratprint:false$
 float(
 	taylor(
-		pow(1.0/(-x0 + x1 - x2 + x1*x2 - x0*x1 + x2*x3), 1.0/3.0),
+		erfc(1.0/(-x0 + x1 - x2 + x1*x2 - x0*x1 + x2*x3)),
 		[x0, x1, x2, x3],
 		[1.2, 1.3, 1.4, 1.5],
 		2

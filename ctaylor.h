@@ -21,7 +21,44 @@
 namespace taylor
 {
 using namespace boost::mp11;
-
+struct output
+{	std::ostream&m_r;
+	output(std::ostream&_r)
+		:m_r(_r)
+	{
+	}
+	template<std::size_t I>
+	void operator()(const mp_size_t<I>&) const
+	{	m_r << I << ",";
+	}
+	void operator()(const mp_list<>&) const
+	{	m_r << "(), ";
+	}
+	void operator()(const mp_list<>&, const mp_true&) const
+	{
+	}
+	template<typename FIRST, typename ...REST>
+	void operator()(const mp_list<FIRST, REST...>&, const mp_true&) const
+	{	(*this)(FIRST());
+		(*this)(mp_list<REST...>(), mp_true());
+	}
+	template<typename FIRST, typename ...REST>
+	void operator()(const mp_list<FIRST, REST...>&) const
+	{	m_r << "(";
+		(*this)(FIRST());
+		(*this)(mp_list<REST...>(), mp_true());
+		m_r << ")";
+	}
+};
+template<typename ...REST>
+std::ostream&operator<<(std::ostream&_r, const mp_list<REST...>&)
+{	_r << "(";
+	mp_for_each<
+		mp_list<REST...>
+	>(output(_r));
+	_r << ")";
+	return _r;
+}
 template<std::size_t I>
 struct factorial
 {	static constexpr double value = I*factorial<I - 1>::value;
