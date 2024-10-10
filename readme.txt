@@ -24,6 +24,9 @@ Reads arguments from the commandline as otherwise the g++ compiler simply incorp
 VBIC95.cpp -- simulates a single transistor using Halley's method (used to use Newton's method).
 Reads parameters from file named PARS.
 Still not fully tested.
+3)
+BLACK_SCHOLES
+Example code from the boost library. If it would be started in a loop without printouts, it would show a dramatic performance improvement compared to boost::autodiff.
 
 The type of the dual numbers object depends on how many independent variables are involved and their cross-products and order.
 So it is a good idea to avoid declaring variables in a different way than letting the compiler decide the type by using auto.
