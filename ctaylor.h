@@ -20,6 +20,8 @@
 
 namespace taylor
 {
+namespace implementation
+{
 using namespace boost::mp11;
 struct output
 {	std::ostream&m_r;
@@ -1253,7 +1255,7 @@ struct common_type<ctaylor<T, MAX>, double>
 };
 template<typename T, std::size_t MAX>
 struct common_type<double, ctaylor<T, MAX> >
-{	typedef taylor::ctaylor<T, MAX> type;
+{	typedef ctaylor<T, MAX> type;
 };
 template<typename T0, typename T1, std::size_t MAX>
 struct common_type<ctaylor<T0, MAX>, ctaylor<T1, MAX> >
@@ -1289,4 +1291,8 @@ typename common_type<
 	else
 		return std::forward<F>(_rF)();
 }
+}
+using implementation::ctaylor;
+using implementation::makeIndependent;
+using implementation::if_;
 }
