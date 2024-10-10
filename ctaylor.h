@@ -451,7 +451,8 @@ struct ctaylor
 	ctaylor(void) = default;
 	ctaylor(ctaylor&&) = default;
 	ctaylor(const ctaylor&) = default;
-
+	ctaylor&operator=(const ctaylor&) = default;
+	ctaylor&operator=(ctaylor&&) = default;
 	template<typename T1, bool CHECK = true>
 	static ARRAY convert(const typename ctaylor<T1, MAX>::ARRAY&_r, const mp_bool<CHECK>& = mp_bool<CHECK>())
 	{	typedef typename findPositions<T, T1, CHECK>::type SOURCE_POSITIONS;
@@ -460,6 +461,12 @@ struct ctaylor
 			SOURCE_POSITIONS
 		>(copy<SIZE, ctaylor<T1, MAX>::SIZE>(s, _r));
 		return s;
+	}
+	template<typename T1>
+	ctaylor &operator=(const ctaylor<T1, MAX>&_r)
+	{	static_assert(ctaylor<T1, MAX>::SIZE < SIZE, "RHS size must be smaller!");
+		m_s = convert<T1, true>(_r.m_s);
+		return *this;
 	}
 	template<
 		typename U=T,
