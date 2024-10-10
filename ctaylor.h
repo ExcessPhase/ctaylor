@@ -288,6 +288,7 @@ struct merge<mp_list<>, mp_list<> >
 };
 	/// copy from a source to a target
 	/// target must contain all the elements of source and more
+#if 0
 template<std::size_t TARGET, std::size_t SOURCE>
 struct copy
 {	std::array<double, TARGET> &m_rTarget;
@@ -319,6 +320,7 @@ struct copy
 	{	m_rTarget[TPOS] = 0.0;
 	}
 };
+#endif
 template<typename, typename>
 struct convertToStdArrayImpl;
 template<typename LIST, std::size_t ...INDICES>
@@ -336,16 +338,27 @@ const std::array<
 
 template<typename LIST>
 struct convertToStdArray
-{	static constexpr const std::array<
-		std::pair<std::size_t, std::size_t>,
-		mp_size<LIST>::value
-	> value = convertToStdArrayImpl<LIST, std::make_index_sequence<mp_size<LIST>::value> >::value;
+{	typedef convertToStdArrayImpl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
 };
-template<typename LIST>
-const std::array<
-	std::pair<std::size_t, std::size_t>,
+
+template<typename, typename>
+struct convertToStdArray2Impl;
+template<typename LIST, std::size_t ...INDICES>
+struct convertToStdArray2Impl<LIST, std::index_sequence<INDICES...> >
+{	static constexpr const std::array<
+		std::size_t,
+		mp_size<LIST>::value
+	> value = {mp_second<mp_at_c<LIST, INDICES> >::value...};
+};
+template<typename LIST, std::size_t ...INDICES>
+constexpr const std::array<
+	std::size_t,
 	mp_size<LIST>::value
-> convertToStdArray<LIST>::value;
+> convertToStdArray2Impl<LIST, std::index_sequence<INDICES...> >::value;
+template<typename LIST>
+struct convertToStdArray2
+{	typedef convertToStdArray2Impl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
+};
 template<std::size_t TARGET, std::size_t SOURCE0, std::size_t SOURCE1, typename PLUS=mp_true>
 struct addSub
 {	std::array<double, TARGET> &m_rTarget;
@@ -524,9 +537,24 @@ struct ctaylor
 	static ARRAY convert(const typename ctaylor<T1, MAX>::ARRAY&_r, const mp_bool<CHECK>& = mp_bool<CHECK>())
 	{	typedef typename findPositions<T, T1, CHECK>::type SOURCE_POSITIONS;
 		ARRAY s;
+#if 1
+		auto &rT = convertToStdArray2<SOURCE_POSITIONS>::type::value;
+		std::transform(
+			rT.begin(),
+			rT.end(),
+			s.begin(),
+			[&](const std::size_t _i)
+			{	if (_i == std::numeric_limits<std::size_t>::max())
+					return 0.0;
+				else
+					return _r[_i];
+			}
+		);
+#else
 		mp_for_each<
 			SOURCE_POSITIONS
 		>(copy<SIZE, ctaylor<T1, MAX>::SIZE>(s, _r));
+#endif
 		return s;
 	}
 	template<typename T1>
@@ -578,7 +606,7 @@ struct ctaylor
 	{	typedef typename merge<T, T1>::type TT;
 		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
 		ctaylor<TT, MAX> s;
-		auto &rT = convertToStdArray<SOURCE_POSITIONS>::value;
+		auto &rT = convertToStdArray<SOURCE_POSITIONS>::type::value;
 		std::transform(
 			rT.begin(),
 			rT.end(),
@@ -602,7 +630,7 @@ struct ctaylor
 	{	typedef typename merge<T, T1>::type TT;
 		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
 		ctaylor<TT, MAX> s;
-		auto &rT = convertToStdArray<SOURCE_POSITIONS>::value;
+		auto &rT = convertToStdArray<SOURCE_POSITIONS>::type::value;
 		std::transform(
 			rT.begin(),
 			rT.end(),
