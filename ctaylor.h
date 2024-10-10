@@ -984,6 +984,7 @@ struct ctaylor
 	__CREATE_NONLINEAR__(log)
 	__CREATE_NONLINEAR__(log10)
 	__CREATE_NONLINEAR__(sqrt)
+	__CREATE_NONLINEAR__(cbrt)
 	__CREATE_NONLINEAR__(sin)
 	__CREATE_NONLINEAR__(cos)
 	__CREATE_NONLINEAR__(sinh)

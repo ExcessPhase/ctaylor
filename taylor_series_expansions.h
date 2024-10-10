@@ -115,6 +115,23 @@ std::array<double, SIZE> sqrt(const double _d)
 	return s;
 }
 template<std::size_t SIZE>
+std::array<double, SIZE> cbrt(const double _d)
+{	std::array<double, SIZE> s;
+	const double d0 = std::cbrt(_d);
+	const double d1 = 1.0/_d;
+	double dPow = 1.0/3.0;
+	double d = d0;
+	//x^1.3
+	//pow*previous/x
+	//pow -= 1.0
+	for (std::size_t i = 0; i < SIZE; ++i)
+	{	s[i] = d;
+		d *= d1*dPow/(i + 1);
+		dPow -= 1.0;
+	}
+	return s;
+}
+template<std::size_t SIZE>
 std::array<double, SIZE> inverse(const double _d)
 {	std::array<double, SIZE> s;
 	const double ds = 1.0/_d;
