@@ -1,6 +1,6 @@
 all: ctaylor.exe vbic95.exe black_scholes.exe
 CC=g++
-CFLAGS=-std=c++14 -DNDEBUG -O3 -march=native -flto -I../boost_1_86_0/
+CFLAGS=-std=c++14 -DNDEBUG -O3 -march=native -flto -isystem ../boost_1_86_0/ -ffinite-math-only
 
 ctaylor.exe: ctaylor.cpp
 	$(CC) $(CFLAGS) -o ctaylor.exe ctaylor.cpp
