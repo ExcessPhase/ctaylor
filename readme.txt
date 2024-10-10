@@ -38,3 +38,34 @@ In fact, it is the reason why VBIC fails at higher currents.
 VBIC simulator can be changed to include self-heating by defining SELF_HEATING and excess-phase by defining EXCESS_PHASE
 Copy constructors and assignment operators between different types only compile, if the target type contains all the values of the source type.
 Means that it is impossible to forget by mistake derivatives.
+
+In order to access the value (0th derivative) use 
+friend double value(const ctaylor&).
+In order to access a particular derivative, use 
+
+template<typename LIST>
+double ctaylor::getDer(const LIST&) const;
+
+LIST being an argument containing the derivative to access, e.g.
+
+typedef mp_list<
+  mp_list<
+    mp_size_t<3>,
+    mp_size_t<2>
+  >
+> EXAMPLE;
+
+for 2nd derivative of independent variable with enum 3.
+
+typedef mp_list<
+  mp_list<
+    mp_size_t<0>,
+    mp_size_t<1>
+  >,
+  mp_list<
+    mp_size_t<1>,
+    mp_size_t<1>
+  >
+> EXAMPLE;
+
+for d2/dx0/dx1!
