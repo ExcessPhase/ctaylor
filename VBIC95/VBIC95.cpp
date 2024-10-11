@@ -112,7 +112,8 @@ static constexpr double TAMB = 27.0;
 static const double LOGSQRT2 = std::log(std::sqrt(2.0));
 static enumMembers2double readParams(const char *const _p)
 {	std::ifstream sFile(_p);
-	sFile.exceptions(std::ios_base::badbit);
+	sFile.exceptions(std::ios_base::badbit | std::ios_base::failbit);
+	sFile.exceptions(std::ios_base::goodbit);
 	double d;
 	std::string s;
 	enumMembers2double sRet;
@@ -934,6 +935,7 @@ lufac::index2Index2Double operator+(const lufac::index2Index2Double&_r0, const l
 }
 }
 int main(int argc, char**argv)
+try
 {	using namespace vbic95;
 	using namespace lufac;
 	if (argc < 2)
@@ -970,9 +972,9 @@ int main(int argc, char**argv)
 			sV[std::size_t(enumCircuitNodes::ci)] = vc;
 			sV[std::size_t(enumCircuitNodes::cx)] = vc;
 #endif
-	//{ve=0;vs=0
-			//for(vb=0.7;vb<=1.00001;vb+=0.05){
-			//for(vc=0.0;vc<=5.00001;vc+=0.05){
+	//ve=0;vs=0
+			//for(vb=0.7;vb<=1.00001;vb+=0.05)
+			//for(vc=0.0;vc<=5.00001;vc+=0.05)
 		//print vc,vb,ve,vs
 			for (std::size_t i = 0; true; ++i)
 			{	index2Index2Index2Double sH;
@@ -1059,4 +1061,7 @@ int main(int argc, char**argv)
 				std::cout << sV[std::size_t(i)] << ",";
 			std::cout << "\n";
 		}
+} catch (const std::exception&_r)
+{	std::cerr << argv[1] << ": Exception caught: " << _r.what() << std::endl;
+	return 1;
 }
