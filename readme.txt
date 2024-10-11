@@ -72,3 +72,10 @@ typedef mp_list<
 > EXAMPLE;
 
 for d2/dx0/dx1!
+
+10/10/2024
+avoided usage of template class for implementation of addition/subtraction/copy/assignment between different ctaylor types
+but usage of constexpr offset array instead.
+The motivation was to create less templete bloat but the compile time was not decreased.
+10/11/2024
+Made the VBIC testcase to complain about if there is no PARS file passed on the commandline or if it cannot be opened
