@@ -1196,6 +1196,33 @@ struct ctaylor
 	)
 	{	return sqrt(sqr(_r0) + sqr(_r1));
 	}
+	friend auto hypot(const ctaylor&_rX, const double _dY)
+	{	return sqrt(sqr(_rX), _dY*_dY);
+	}
+	friend auto hypot(const double _dX, const ctaylor&_rY)
+	{	return sqrt(sqr(_rY), _dX*_dX);
+	}
+	template<
+		typename T1,
+		typename U=T,
+		typename std::enable_if<
+			(mp_size<mp_first<U> >::value == 0)
+				&& (mp_size<mp_first<T1> >::value == 0),
+			int
+		>::type = 0
+	>
+	friend auto atan2(
+		const ctaylor&_rY,
+		const ctaylor<T1, MAX>&_rX
+	)
+	{	return atan(_rY/_rX);
+	}
+	friend auto atan2(const ctaylor&_rY, const double _dX)
+	{	return atan(_rY/_dX);
+	}
+	friend auto atan2(const double _dY, const ctaylor&_rX)
+	{	return atan(_dY/_rX);
+	}
 		/// if this does not compile, check the order of ENUM-order pairs
 	template<typename LIST_OF_PAIRS>
 	auto getDer(const LIST_OF_PAIRS&) const

@@ -21,9 +21,7 @@ int main(int argc, char**argv)
 	const auto s2 = ctaylor<makeIndependent<2>, MAX>(std::atof(argv[3]), false);
 	const auto s3 = ctaylor<makeIndependent<3>, MAX>(std::atof(argv[4]), false);
 		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
-		/// some calculation
-	const auto s5 = erfc((1.0 + s4)/s4);
+	const auto s5 = atan2(1.0 + -s0 + s1 + s2 - s1*s2 + s0*s1 - s2*s3, -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3);
 		/// print the entire polynomial
 	std::cout << "s5=" << s5 << "\n";
 	typedef mp_list<
