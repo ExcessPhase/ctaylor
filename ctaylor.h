@@ -1226,7 +1226,8 @@ struct ctaylor
 		/// if this does not compile, check the order of ENUM-order pairs
 	template<typename LIST_OF_PAIRS>
 	auto getDer(const LIST_OF_PAIRS&) const
-	{	return m_s.at(mp_find<T, LIST_OF_PAIRS>::value)*accumulatedFactorial<LIST_OF_PAIRS>::value;
+	{	static_assert(mp_find<T, LIST_OF_PAIRS>::value < SIZE, "derivative pattern not found! (wrong sorting?)");
+		return m_s.at(mp_find<T, LIST_OF_PAIRS>::value)*accumulatedFactorial<LIST_OF_PAIRS>::value;
 	}
 
 	template<typename T1>
