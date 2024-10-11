@@ -30,6 +30,9 @@ The major weak point is the quick&dirty matrix package.
 3)
 BLACK_SCHOLES
 Example code from the boost library. If it would be started in a loop without printouts, it would show a dramatic performance improvement compared to boost::autodiff.
+This example is extracting values from complicated expressions involving ctaylor variables.
+This constitutes unnecessary calculation of derivatives just to increase entropy of the universe.
+I don't know if the compiler is smart enough to avoid this.
 
 The type of the dual numbers object depends on how many independent variables are involved and their cross-products and order.
 So it is a good idea to avoid declaring variables in a different way than letting the compiler decide the type by using auto.
