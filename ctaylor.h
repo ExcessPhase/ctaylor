@@ -1197,10 +1197,10 @@ struct ctaylor
 	{	return sqrt(sqr(_r0) + sqr(_r1));
 	}
 	friend auto hypot(const ctaylor&_rX, const double _dY)
-	{	return sqrt(sqr(_rX), _dY*_dY);
+	{	return sqrt(sqr(_rX) + _dY*_dY);
 	}
 	friend auto hypot(const double _dX, const ctaylor&_rY)
-	{	return sqrt(sqr(_rY), _dX*_dX);
+	{	return sqrt(sqr(_rY) + _dX*_dX);
 	}
 	template<
 		typename T1,
