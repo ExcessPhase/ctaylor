@@ -110,8 +110,9 @@ static constexpr double QQ = 1.602189E-19;	// magnitude of electronic charge, C
 static constexpr double TABS = 2.731500E+02;	// 0 degrees C in degrees K
 static constexpr double TAMB = 27.0;
 static const double LOGSQRT2 = std::log(std::sqrt(2.0));
-static enumMembers2double readParams(void)
-{	std::ifstream sFile("PARS");
+static enumMembers2double readParams(const char *const _p)
+{	std::ifstream sFile(_p);
+	sFile.exceptions(std::ios_base::badbit);
 	double d;
 	std::string s;
 	enumMembers2double sRet;
@@ -220,7 +221,7 @@ struct vbic
 #define __create__(a) const double a;
 #define __COMMA__
 #include "members.h"
-	vbic(const enumMembers2double &_r = readParams())
+	vbic(const enumMembers2double &_r)
 		:
 #define __create__(a) a(_r.at(enumMembers::a))
 #define __COMMA__ ,
@@ -932,10 +933,14 @@ lufac::index2Index2Double operator+(const lufac::index2Index2Double&_r0, const l
 	return sRet;
 }
 }
-int main(int, char**)
+int main(int argc, char**argv)
 {	using namespace vbic95;
 	using namespace lufac;
-	vbic sI;
+	if (argc < 2)
+	{	std::cerr << argv[0] << ": usage: " << argv[0] << " PARS" << std::endl;
+		return 1;
+	}
+	vbic sI(readParams(argv[1]));
 	const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> sTrans{
 #define __create__(a) std::size_t(translateNodes(enumNodes::a))
 #define __COMMA__ ,
