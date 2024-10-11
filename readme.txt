@@ -14,8 +14,9 @@ Refer to ctaylor.cpp for a example usage.
 Compile time under Visual C++ 2022 tends to be much longer than using g++.
 Requires C++14.
 Requires boost::mp11 (boost_1_86_0).
+There is intentionally no double-cast operator in order to facilitate a compiler error if an unimplemented function is being used.
 
-There are two examples:
+There are three examples:
 
 1) 
 ctaylor.cpp
