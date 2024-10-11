@@ -24,6 +24,8 @@ Reads arguments from the commandline as otherwise the g++ compiler simply incorp
 VBIC95.cpp -- simulates a single transistor using Halley's method (used to use Newton's method).
 Reads parameters from file named PARS.
 Still not fully tested.
+Yields the same results as the standard.
+The major weak point is the quick&dirty matrix package.
 3)
 BLACK_SCHOLES
 Example code from the boost library. If it would be started in a loop without printouts, it would show a dramatic performance improvement compared to boost::autodiff.
