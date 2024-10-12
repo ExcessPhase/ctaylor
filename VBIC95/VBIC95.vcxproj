@@ -145,6 +145,7 @@
     <ClCompile Include="VBIC95.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ctaylor.h" />
     <ClInclude Include="..\LUFAC\lufac.h" />
     <ClInclude Include="inputs.h" />
     <ClInclude Include="members.h" />
