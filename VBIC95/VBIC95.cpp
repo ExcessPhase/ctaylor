@@ -584,12 +584,10 @@ struct vbic
 #endif
 #endif
 #define __create__(a, b, c)\
-{	if (enumNodes::b != enumNodes::NumberOfNodes)\
-	{	const auto iBT = _pT[std::size_t(enumNodes::b)];\
+{	{	const auto iBT = _pT[std::size_t(enumNodes::b)];\
 		if (iBT != std::size_t(enumCircuitNodes::NumberOfNodes))\
 			writeOutput(_rV[iBT], _rO[iBT], _r2[iBT], -a, _pT);\
 	}\
-	if (enumNodes::c != enumNodes::NumberOfNodes)\
 	{	const auto iCT = _pT[std::size_t(enumNodes::c)];\
 		if (iCT != std::size_t(enumCircuitNodes::NumberOfNodes))\
 			writeOutput(_rV[iCT], _rO[iCT], _r2[iCT], a, _pT);\
