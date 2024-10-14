@@ -1295,6 +1295,20 @@ struct ctaylor
 	friend bool operator>=(const double _d, const ctaylor&_r)
 	{	return _d >= value(_r);
 	}
+	friend bool isnan(const ctaylor&_r)
+	{	return std::any_of(
+			_r.m_s.begin(),
+			_r.m_s.end(),
+			static_cast<bool(*)(double)>(&std::isnan)
+		);
+	}
+	friend bool isfinite(const ctaylor&_r)
+	{	return std::all_of(
+			_r.m_s.begin(),
+			_r.m_s.end(),
+			static_cast<bool(*)(double)>(&std::isfinite)
+		);
+	}
 };
 #if !defined(__GNUC__) || defined(__clang__)
 template<typename T, std::size_t MAX>
