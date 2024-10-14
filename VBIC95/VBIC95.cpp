@@ -167,6 +167,12 @@ static const char*const s_aNodeNames[] =
 #define __COMMA__ ,
 #include "nodes.h"
 };
+static const char*const s_aCircuitNodeNames[] =
+{
+#define __create__(a) #a
+#define __COMMA__ ,
+#include "circuitNodes.h"
+};
 enum class enumBranches:std::size_t
 {
 #define __COMMA__ ,
@@ -185,8 +191,9 @@ enum class enumCurrentOutputs:std::size_t
 #define __COMMA__ ,
 #include "currentSources.h"
 };
+constexpr std::size_t MAX = 2;
 template<enumBranches E>
-using createIndep = ctaylor<makeIndependent<std::size_t(E)>, 2>;
+using createIndep = ctaylor<makeIndependent<std::size_t(E)>, MAX>;
 struct vbic
 {
 #define __create__(a) const double a;
@@ -201,7 +208,7 @@ struct vbic
 	}
 #if 0
 	template<typename T>
-	static auto EXP(const ctaylor<T, 1>&vnew, const double vold, bool *const _pbLimit) -> decltype(exp(vnew))
+	static auto EXP(const ctaylor<T, MAX>&vnew, const double vold, bool *const _pbLimit) -> decltype(exp(vnew))
 	{	if (!_pbLimit)
 			return exp(vnew);
 		else
@@ -572,13 +579,13 @@ struct vbic
 	{	lufac::index2Double&m_rO;
 		lufac::index2Index2Double&m_r1;
 		double&m_rValue;
-		const ctaylor<T, 2>&m_rV;
+		const ctaylor<T, MAX>&m_rV;
 		const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &m_pT;
 		copyOutput(
 			double&_rValue,
 			lufac::index2Double&_rO,
 			lufac::index2Index2Double&_r1,
-			const ctaylor<T, 2>&_rV,
+			const ctaylor<T, MAX>&_rV,
 			const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &_pT
 		)
 			:m_rO(_rO),
@@ -658,7 +665,7 @@ struct vbic
 		}
 	};
 	template<typename T>
-	static void writeOutput(double&_rValue, lufac::index2Double&_rO, lufac::index2Index2Double&_r1, const ctaylor<T, 2>&_rV, const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT)
+	static void writeOutput(double&_rValue, lufac::index2Double&_rO, lufac::index2Index2Double&_r1, const ctaylor<T, MAX>&_rV, const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT)
 	{	mp_for_each<T>(copyOutput<T>(_rValue, _rO, _r1, _rV, _pT));
 	}
 	static const char*const s_aNames[];
