@@ -151,39 +151,9 @@ static enumMembers2double readParams(const char *const _p)
 
 enum class enumCircuitNodes
 {
-#ifdef __DIODE__
-	a0,
-	b0,
-	IVB0,
-	a1,
-	b1,
-	IVB1,
-#else
-	c,
-	b,
-	e,
-	s,
-#ifdef SELF_HEATING
-	dt,
-//	tl,
-#endif
-	cx,
-	ci,
-	bx,
-	bi,
-	ei,
-	si,
-	bp,
-#ifdef EXCESS_PHASE
-	xf1,
-	xf2,
-#endif
-	IVC,
-	IVB,
-	IVE,
-	IVS,
-#endif
-	NumberOfNodes
+#define __create__(a) a
+#define __COMMA__ ,
+#include "circuitNodes.h"
 };
 enum class enumNodes
 {
@@ -213,7 +183,7 @@ enum class enumCurrentOutputs:std::size_t
 {
 #define __create__(a, b, c) a
 #define __COMMA__ ,
-#include "outputs.h"
+#include "currentSources.h"
 };
 template<enumBranches E>
 using createIndep = ctaylor<makeIndependent<std::size_t(E)>, 2>;
@@ -594,7 +564,7 @@ struct vbic
 	}\
 }
 #define __COMMA__
-#include "outputs.h"
+#include "currentSources.h"
 //	End of equations.
 	}
 	template<typename T>
@@ -696,7 +666,7 @@ struct vbic
 const char*const vbic::s_aNames[] = {
 #define __create__(a, b, c) #a
 #define __COMMA__ ,
-#include "outputs.h"
+#include "currentSources.h"
 };
 thread_local std::size_t s_iIndent = 0;
 std::ostream&printIdent(std::ostream&_rS)
