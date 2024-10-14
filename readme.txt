@@ -85,3 +85,6 @@ but usage of constexpr offset array instead.
 The motivation was to create less templete bloat but the compile time was not decreased.
 10/11/2024
 Made the VBIC testcase to complain about if there is no PARS file passed on the commandline or if it cannot be opened
+
+10/14/2024
+It seems that clang++-15 is showing the best compile-time performance -- even better than g++-11.
