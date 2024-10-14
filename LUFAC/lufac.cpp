@@ -10,22 +10,24 @@ namespace lufac
 {
 double findMaxInColumn(const index2Index2Double::const_iterator &_pRow, const index2Index2Double&_rM)
 {	const auto iRow = _pRow->first;
-	return std::abs(std::max_element(
-		_pRow,
-		_rM.end(),
-		[iRow](const index2Index2Double::value_type&_r0, const index2Index2Double::value_type&_r1)
-		{	const auto p1 = _r1.second.find(iRow);
-			if (p1 != _r1.second.end())
-			{	const auto p0 = _r0.second.find(iRow);
-				if (p0 != _r0.second.end())
-					return abs(p0->second) < abs(p1->second);
+	return std::abs(
+		std::max_element(
+			_pRow,
+			_rM.end(),
+			[iRow](const index2Index2Double::value_type&_r0, const index2Index2Double::value_type&_r1)
+			{	const auto p1 = _r1.second.find(iRow);
+				if (p1 != _r1.second.end())
+				{	const auto p0 = _r0.second.find(iRow);
+					if (p0 != _r0.second.end())
+						return std::abs(p0->second) < std::abs(p1->second);
+					else
+						return true;
+				}
 				else
-					return true;
+					return false;
 			}
-			else
-				return false;
-		}
-	)->second.at(iRow));
+		)->second.at(iRow)
+	);
 }
 index2Index2Double factor(const index2Index2Double&_r, index2Double&_rV)
 {	const auto iDim = _r.size();
