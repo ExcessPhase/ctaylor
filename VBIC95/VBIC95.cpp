@@ -630,18 +630,19 @@ struct vbic
 		template<std::size_t POS>
 		void operator()(const enumCircuitNodes _e0, const enumCircuitNodes _e1, const mp_size_t<POS>&, const bool _bMinus, const bool _bDouble = false) const
 		{	if (_e0 != enumCircuitNodes::NumberOfNodes && _e1 != enumCircuitNodes::NumberOfNodes)
-			{	auto &r = m_r1[std::size_t(_e0)][std::size_t(_e1)];
-				if (_bDouble)
-					if (_bMinus)
-						r -= 2.0*m_rV.m_s.at(POS);
+				if (const double d = m_rV.m_s.at(POS))
+				{	auto &r = m_r1[std::size_t(_e0)][std::size_t(_e1)];
+					if (_bDouble)
+						if (_bMinus)
+							r -= 2.0*d;
+						else
+							r += 2.0*d;
 					else
-						r += 2.0*m_rV.m_s.at(POS);
-				else
-					if (_bMinus)
-						r -= m_rV.m_s.at(POS);
-					else
-						r += m_rV.m_s.at(POS);
-			}
+						if (_bMinus)
+							r -= d;
+						else
+							r += d;
+				}
 		}
 		template<typename ENUM>
 		void operator()(const mp_list<mp_list<ENUM, mp_size_t<2> > >&) const
@@ -675,10 +676,12 @@ struct vbic
 		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM::value]);
 			typedef mp_list<mp_list<ENUM, mp_size_t<1> > > LIST;
 			constexpr std::size_t POS = mp_find<T, LIST>::value;
-			if (sNodePair.first != enumCircuitNodes::NumberOfNodes)
-				m_rO[std::size_t(sNodePair.first)] -= m_rV.m_s.at(POS);
-			if (sNodePair.second != enumCircuitNodes::NumberOfNodes)
-				m_rO[std::size_t(sNodePair.second)] += m_rV.m_s.at(POS);
+			if (const double d = m_rV.m_s.at(POS))
+			{	if (sNodePair.first != enumCircuitNodes::NumberOfNodes)
+					m_rO[std::size_t(sNodePair.first)] -= d;
+				if (sNodePair.second != enumCircuitNodes::NumberOfNodes)
+					m_rO[std::size_t(sNodePair.second)] += d;
+			}
 		}
 		void operator()(const mp_list<>&) const
 		{	m_rValue += m_rV.m_s.at(mp_find<T, mp_list<> >::value);
