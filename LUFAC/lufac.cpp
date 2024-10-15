@@ -6,6 +6,7 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
+#include <boost/format.hpp>
 namespace lufac
 {
 double findMaxInColumn(const index2Index2Double::const_iterator &_pRow, const index2Index2Double&_rM)
@@ -94,7 +95,7 @@ index2Index2Double factor(const index2Index2Double&_r, index2Double&_rV)
 	{	auto pPivot = pRow->second.find(pRow->first);
 		const auto dMax = findMaxInColumn(pRow, sM);
 		if (dMax == 0.0 || !std::isfinite(dMax) || std::isnan(dMax))
-			throw std::logic_error("matrix is singular");
+			throw std::logic_error((boost::format("matrix is singular for row=%1%") % pRow->first).str());
 		while (true)
 			if(pPivot != pRow->second.end() && std::abs(pPivot->second) >= dMax)
 			{	const auto dPivot = pPivot->second = 1.0/pPivot->second;
