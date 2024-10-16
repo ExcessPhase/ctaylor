@@ -22,11 +22,9 @@ int main(int argc, char**argv)
 	const auto s3 = ctaylor<makeIndependent<3>, MAX>(std::atof(argv[4]), false);
 		/// some calculation
 	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
-	const auto s5 = max(s4, cos(1.0/s4));
-	const auto s6 = min(s4, cos(1.0/s4));
+	const auto s5 = fmod(s4*s4, 1.0 - s4*s4);
 		/// print the entire polynomial
 	std::cout << "s5=" << s5 << "\n";
-	std::cout << "s6=" << s6 << "\n";
 	typedef mp_list<
 		mp_list<
 			mp_size_t<0>,	// wrt x0

@@ -1308,6 +1308,16 @@ struct ctaylor
 			}
 		);
 	}
+	friend auto fmod(const ctaylor&_r0, const double _r1)
+	{	return _r0 - static_cast<int>(value(_r0)/_r1)*_r1;
+	}
+	friend auto fmod(const double _r0, const ctaylor&_r1)
+	{	return _r0 - static_cast<int>(_r0/value(_r1))*_r1;
+	}
+	template<typename T1>
+	friend auto fmod(const ctaylor&_r0, const ctaylor<T1, MAX>&_r1)
+	{	return _r0 - static_cast<int>(value(_r0)/value(_r1))*_r1;
+	}
 		/// if this does not compile, check the order of ENUM-order pairs
 	template<typename LIST_OF_PAIRS>
 	auto getDer(const LIST_OF_PAIRS&) const
