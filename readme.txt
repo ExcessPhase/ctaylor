@@ -88,3 +88,7 @@ Made the VBIC testcase to complain about if there is no PARS file passed on the 
 
 10/14/2024
 It seems that clang++-15 is showing the best compile-time performance -- even better than g++-11.
+
+10/16/2024
+Adapted strategy of calculating norm and reducing delta-x from VBIC solver*.f.
+This makes everything converge fine but only with Newton's method, whereas before it converged faster with Halley's method
