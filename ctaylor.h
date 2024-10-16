@@ -23,6 +23,17 @@ namespace taylor
 {
 namespace implementation
 {
+template<typename, typename>
+struct common_type;
+template<typename T, typename F>
+typename common_type<
+	typename std::decay<decltype(std::declval<T>()())>::type,
+	typename std::decay<decltype(std::declval<F>()())>::type
+>::type if_(
+	const bool _b,
+	T &&_rT,
+	F&&_rF
+);
 using namespace boost::mp11;
 struct output
 {	std::ostream&m_r;
@@ -1222,6 +1233,80 @@ struct ctaylor
 	}
 	friend auto atan2(const double _dY, const ctaylor&_rX)
 	{	return atan(_dY/_rX);
+	}
+	template<typename T1>
+	friend auto max(const ctaylor&_r0, const double _r1)
+	{	return if_(
+			_r0 > _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+	template<typename T1>
+	friend auto max(const double _r0, const ctaylor&_r1)
+	{	return if_(
+			_r0 > _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+		/// if this does not compile, check the order of ENUM-order pairs
+	template<typename T1>
+	friend auto max(const ctaylor&_r0, const ctaylor<T1, MAX>&_r1)
+	{	return if_(
+			_r0 > _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+	template<typename T1>
+	friend auto min(const ctaylor&_r0, const double _r1)
+	{	return if_(
+			_r0 < _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+	template<typename T1>
+	friend auto min(const double _r0, const ctaylor&_r1)
+	{	return if_(
+			_r0 < _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+		/// if this does not compile, check the order of ENUM-order pairs
+	template<typename T1>
+	friend auto min(const ctaylor&_r0, const ctaylor<T1, MAX>&_r1)
+	{	return if_(
+			_r0 < _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
 	}
 		/// if this does not compile, check the order of ENUM-order pairs
 	template<typename LIST_OF_PAIRS>
