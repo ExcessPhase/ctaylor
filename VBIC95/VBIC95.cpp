@@ -6,7 +6,8 @@
 #include <fstream>
 #include <numeric>
 #include <algorithm>
-//#define SELF_HEATING
+#include <cassert>
+#define SELF_HEATING
 //#define __DIODE__
 namespace vbic95
 {
@@ -149,12 +150,14 @@ static enumMembers2double readParams(const char *const _p)
 	return sRet;
 }
 
-enum class enumCircuitNodes
+enum class enumCircuitNodes:std::ptrdiff_t
 {
 #define __create__(a) a
+#define __create2__(a, b) a = b
 #define __COMMA__ ,
 #include "circuitNodes.h"
 };
+static_assert(std::size_t(enumCircuitNodes::cx) == 0, "cx must be zero!");
 enum class enumNodes
 {
 #define __create__(a) a
@@ -169,8 +172,9 @@ static const char*const s_aNodeNames[] =
 };
 static const char*const s_aCircuitNodeNames[] =
 {
-#define __create__(a) #a
-#define __COMMA__ ,
+#define __create__(a) #a,
+#define __create2__(a, b)
+#define __COMMA__
 #include "circuitNodes.h"
 };
 enum class enumBranches:std::size_t
@@ -191,7 +195,7 @@ enum class enumCurrentOutputs:std::size_t
 #define __COMMA__ ,
 #include "currentSources.h"
 };
-constexpr std::size_t MAX = 2;
+constexpr std::size_t MAX = 1;
 template<enumBranches E>
 using createIndep = ctaylor<makeIndependent<std::size_t(E)>, MAX>;
 struct vbic
@@ -259,24 +263,45 @@ struct vbic
 #endif
 	}
 #endif
+	template<enumNodes _e>
+	static double getInputVoltage(
+		const std::array<double, 2>&_rN,
+		const std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)>& _rP,
+		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT
+	)
+	{	if (_e == enumNodes::NumberOfNodes)
+			return 0.0;
+		else
+		{	const auto i = _pT.at(std::size_t(_e));
+			if (i < 0)
+				return _rN.at(-1 - i);
+			else
+			if (i == std::ptrdiff_t(enumCircuitNodes::NumberOfNodes))
+				return 0.0;
+			else
+				return _rP.at(i);
+		}
+	}
+	template<enumNodes _e0, enumNodes _e1>
+	static double getInputVoltage(
+		const std::array<double, 2>&_rN,
+		const std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)>& _rP,
+		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT
+	)
+	{	return getInputVoltage<_e0>(_rN, _rP, _pT) - getInputVoltage<_e1>(_rN, _rP, _pT);
+	}
 	auto calculate(
-		const std::array<double, std::size_t(enumCircuitNodes::NumberOfNodes)>& _rNodeVoltages,
+		const std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)>& _rNodeVoltages,
+		const std::array<double, std::size_t(2)>& _rNodeVoltages2,
 		lufac::index2Index2Index2Double&_r2,
 		lufac::index2Index2Double&_rO,
 		lufac::index2Double &_rV,
-		const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT
+		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT,
+		std::array<double, 4>&_rTC
 	) const
 	{
 #define __create__(Vbe, b, e) const auto Vbe = createIndep<enumBranches::Vbe>(\
-	enumNodes::b != enumNodes::NumberOfNodes && _pT[std::size_t(enumNodes::b)] != std::size_t(enumCircuitNodes::NumberOfNodes)\
-		? (enumNodes::e != enumNodes::NumberOfNodes && _pT[std::size_t(enumNodes::e)] != std::size_t(enumCircuitNodes::NumberOfNodes)\
-			? _rNodeVoltages[_pT[std::size_t(enumNodes::b)]] - _rNodeVoltages[_pT[std::size_t(enumNodes::e)]]\
-			: _rNodeVoltages[_pT[std::size_t(enumNodes::b)]]\
-		)\
-		: (enumNodes::e != enumNodes::NumberOfNodes && _pT[std::size_t(enumNodes::e)] != std::size_t(enumCircuitNodes::NumberOfNodes)\
-			? - _rNodeVoltages[_pT[std::size_t(enumNodes::e)]]\
-			: 0.0\
-		),\
+		getInputVoltage<enumNodes::b, enumNodes::e>(_rNodeVoltages2, _rNodeVoltages, _pT),\
 		false\
 	);
 #define __COMMA__
@@ -562,17 +587,21 @@ struct vbic
 #endif
 #define __create__(a, b, c)\
 {	{	const auto iBT = _pT[std::size_t(enumNodes::b)];\
-		if (iBT != std::size_t(enumCircuitNodes::NumberOfNodes))\
+		if (iBT >= 0 && iBT != std::ptrdiff_t(enumCircuitNodes::NumberOfNodes))\
 			writeOutput(_rV[iBT], _rO[iBT], _r2[iBT], -a, _pT);\
 	}\
 	{	const auto iCT = _pT[std::size_t(enumNodes::c)];\
-		if (iCT != std::size_t(enumCircuitNodes::NumberOfNodes))\
+		if (iCT >= 0 && iCT != std::ptrdiff_t(enumCircuitNodes::NumberOfNodes))\
 			writeOutput(_rV[iCT], _rO[iCT], _r2[iCT], a, _pT);\
 	}\
 }
 #define __COMMA__
 #include "currentSources.h"
 //	End of equations.
+		_rTC[0]=value(Itzf-Itzr-Ibc+Igc+Irbp);
+		_rTC[1]=value(Ibe+Ibex+Ibc-Igc+Ibep+Iccp);
+		_rTC[2]=value(-Itzf+Itzr-Ibe-Ibex);
+		_rTC[3]=-_rTC[0]-_rTC[1]-_rTC[2];
 	}
 	template<typename T>
 	struct copyOutput
@@ -580,13 +609,13 @@ struct vbic
 		lufac::index2Index2Double&m_r1;
 		double&m_rValue;
 		const ctaylor<T, MAX>&m_rV;
-		const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &m_pT;
+		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &m_pT;
 		copyOutput(
 			double&_rValue,
 			lufac::index2Double&_rO,
 			lufac::index2Index2Double&_r1,
 			const ctaylor<T, MAX>&_rV,
-			const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &_pT
+			const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &_pT
 		)
 			:m_rO(_rO),
 			m_r1(_r1),
@@ -596,17 +625,23 @@ struct vbic
 		{
 		}
 		constexpr enumCircuitNodes translate(const enumNodes _e) const
-		{	if (_e == enumNodes::NumberOfNodes)
+		{	const auto i = m_pT[std::size_t(_e)];
+			if (i < 0)
 				return enumCircuitNodes::NumberOfNodes;
 			else
-				return enumCircuitNodes(m_pT[std::size_t(_e)]);
+			{	assert(i <= std::ptrdiff_t(enumCircuitNodes::NumberOfNodes));
+				assert(i != std::ptrdiff_t(18446744073709551614ul));
+				return enumCircuitNodes(i);
+			}
 		}
 		constexpr std::pair<enumCircuitNodes, enumCircuitNodes> translate(const std::pair<enumNodes, enumNodes>&_r) const
 		{	return std::make_pair(translate(_r.first), translate(_r.second));
 		}
 		template<std::size_t POS>
 		void operator()(const enumCircuitNodes _e0, const enumCircuitNodes _e1, const mp_size_t<POS>&, const bool _bMinus, const bool _bDouble = false) const
-		{	if (_e0 != enumCircuitNodes::NumberOfNodes && _e1 != enumCircuitNodes::NumberOfNodes)
+		{	assert(std::ptrdiff_t(_e0) >= std::ptrdiff_t());
+			assert(std::ptrdiff_t(_e1) >= std::ptrdiff_t());
+			if (_e0 != enumCircuitNodes::NumberOfNodes && _e1 != enumCircuitNodes::NumberOfNodes)
 				if (const double d = m_rV.m_s.at(POS))
 				{	auto &r = m_r1[std::size_t(_e0)][std::size_t(_e1)];
 					if (_bDouble)
@@ -665,8 +700,10 @@ struct vbic
 		}
 	};
 	template<typename T>
-	static void writeOutput(double&_rValue, lufac::index2Double&_rO, lufac::index2Index2Double&_r1, const ctaylor<T, MAX>&_rV, const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT)
-	{	mp_for_each<T>(copyOutput<T>(_rValue, _rO, _r1, _rV, _pT));
+	static void writeOutput(double&_rValue, lufac::index2Double&_rO, lufac::index2Index2Double&_r1, const ctaylor<T, MAX>&_rV, const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT)
+	{	assert(isfinite(_rV) && !isnan(_rV));
+		assert(std::isfinite(_rValue) && !std::isnan(_rValue));
+		mp_for_each<T>(copyOutput<T>(_rValue, _rO, _r1, _rV, _pT));
 	}
 	static const char*const s_aNames[];
 };
@@ -734,9 +771,9 @@ constexpr enumCircuitNodes translateNodes(const enumNodes _e)
 		case enumNodes::b:
 			return enumCircuitNodes::b;
 		case enumNodes::e:
-			return enumCircuitNodes::e;
+			return enumCircuitNodes::NumberOfNodes;
 		case enumNodes::s:
-			return enumCircuitNodes::s;
+			return enumCircuitNodes::NumberOfNodes;
 #ifdef SELF_HEATING
 		case enumNodes::dt:
 			return enumCircuitNodes::dt;
@@ -927,8 +964,8 @@ try
 		return 1;
 	}
 	vbic sI(readParams(argv[1]));
-	const std::array<std::size_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> sTrans{
-#define __create__(a) std::size_t(translateNodes(enumNodes::a))
+	const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> sTrans{
+#define __create__(a) std::ptrdiff_t(translateNodes(enumNodes::a))
 #define __COMMA__ ,
 #include "nodes.h"
 	};
@@ -938,70 +975,89 @@ try
 #else
 		for (double VD = 0.0; VD <= 5.00001; VD += 0.05)
 #endif
-		{	std::array<double, std::size_t(enumCircuitNodes::NumberOfNodes)> sV({});
-			std::array<double, std::size_t(enumCircuitNodes::NumberOfNodes)> sV1({});
+		{	std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)> sV({});
+			std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)> sV1({});
 #ifdef __DIODE__
-			sV[std::size_t(enumCircuitNodes::b0)] = VD;
-			sV[std::size_t(enumCircuitNodes::b1)] = VD;
+			sV[std::ptrdiff_t(enumCircuitNodes::b0)] = VD;
+			sV[std::ptrdiff_t(enumCircuitNodes::b1)] = VD;
 #else
-			sV[std::size_t(enumCircuitNodes::b)] = vb;
-			sV[std::size_t(enumCircuitNodes::bx)] = vb;
-			sV[std::size_t(enumCircuitNodes::bi)] = vb;
-			sV[std::size_t(enumCircuitNodes::bp)] = vc;
-			sV[std::size_t(enumCircuitNodes::e)] = 0.0;
-			sV[std::size_t(enumCircuitNodes::ei)] = 0.0;
-			sV[std::size_t(enumCircuitNodes::s)] = 0.0;
-			sV[std::size_t(enumCircuitNodes::si)] = 0.0;
-			sV[std::size_t(enumCircuitNodes::c)] = vc;
-			sV[std::size_t(enumCircuitNodes::ci)] = vc;
-			sV[std::size_t(enumCircuitNodes::cx)] = vc;
+			sV[std::ptrdiff_t(enumCircuitNodes::bx)] = vb;
+			sV[std::ptrdiff_t(enumCircuitNodes::bi)] = vb;
+			sV[std::ptrdiff_t(enumCircuitNodes::bp)] = vc;
+			sV[std::ptrdiff_t(enumCircuitNodes::ei)] = 0.0;
+			sV[std::ptrdiff_t(enumCircuitNodes::si)] = 0.0;
+			sV[std::ptrdiff_t(enumCircuitNodes::ci)] = vc;
+			sV[std::ptrdiff_t(enumCircuitNodes::cx)] = vc;
 #endif
 	//ve=0;vs=0
 			//for(vb=0.7;vb<=1.00001;vb+=0.05)
 			//for(vc=0.0;vc<=5.00001;vc+=0.05)
 		//print vc,vb,ve,vs
-			for (std::size_t i = 0; true; ++i)
+			std::array<double, 4> sTC;
+			for (std::size_t i = 0; i < 200; ++i)
 			{	index2Index2Index2Double sH;
 				index2Index2Double sJ;
 				index2Double sValues;
-				sI.calculate(sV, sH, sJ, sValues, sTrans);
-				for (const auto &rS : sJ)
-					for (const auto &r : rS.second)
-						if (!std::isfinite(r.second) || std::isnan(r.second))
+				//sV[std::ptrdiff_t(enumCircuitNodes::e)] = 0.0;
+				//sV[std::ptrdiff_t(enumCircuitNodes::s)] = 0.0;
+#if 0
+				for (const auto &r : sV)
+					std::cerr << "input[" << s_aCircuitNodeNames[&r - sV.data()] << "]=" << r << "\n";
+#endif
+				static_assert(std::ptrdiff_t(enumCircuitNodes::b) == -1);
+				static_assert(std::ptrdiff_t(enumCircuitNodes::c) == -2);
+				sI.calculate(sV, {vb, vc}, sH, sJ, sValues, sTrans, sTC);
+#if 0
+				for (const auto &r : sValues)
+					std::cerr << "rhs[" << s_aCircuitNodeNames[r.first] << "]=" << r.second << "\n";
+				for (const auto &r0 : sJ)
+					for (const auto &r1 : r0.second)
+						std::cerr << "J[" << s_aCircuitNodeNames[r0.first] << "][" << s_aCircuitNodeNames[r1.first] << "]=" << r1.second << "\n";
+				for (const auto &r0 : sH)
+				{	assert(r0.first < std::size(s_aCircuitNodeNames));
+					for (const auto &r1 : r0.second)
+					{	assert(r1.first < std::size(s_aCircuitNodeNames));
+						for (const auto &r2 : r1.second)
+						{	assert(r2.first < std::size(s_aCircuitNodeNames));
+							std::cerr << "H[" << s_aCircuitNodeNames[r0.first] << "][" << s_aCircuitNodeNames[r1.first] << "][" << s_aCircuitNodeNames[r2.first] << "]=" << r2.second << "\n";
+						}
+					}
+				}
+#endif
+				for (const auto &r0 : sH)
+					for (const auto &r1 : r0.second)
+						for (const auto &r2 : r1.second)
+							if (!std::isfinite(r2.second) || std::isnan(r2.second))
+								throw std::logic_error("Calculate produces NAN!");
+				for (const auto &r0 : sJ)
+					for (const auto &r1 : r0.second)
+						if (!std::isfinite(r1.second) || std::isnan(r1.second))
 							throw std::logic_error("Calculate produces NAN!");
 				for (const auto &r : sValues)
 					if (!std::isfinite(r.second) || std::isnan(r.second))
 						throw std::logic_error("Calculate produces NAN!");
 #ifdef __DIODE__
-				sValues[std::size_t(enumCircuitNodes::IVB0)] += VD - sV.at(std::size_t(enumCircuitNodes::b0));
-				sValues[std::size_t(enumCircuitNodes::b0)] += - sV.at(std::size_t(enumCircuitNodes::IVB0));
-				sJ[std::size_t(enumCircuitNodes::b0)][std::size_t(enumCircuitNodes::IVB0)] += 1.0;
-				sJ[std::size_t(enumCircuitNodes::IVB0)][std::size_t(enumCircuitNodes::b0)] += 1.0;
+				sValues[std::ptrdiff_t(enumCircuitNodes::IVB0)] += VD - sV.at(std::ptrdiff_t(enumCircuitNodes::b0));
+				sValues[std::ptrdiff_t(enumCircuitNodes::b0)] += - sV.at(std::ptrdiff_t(enumCircuitNodes::IVB0));
+				sJ[std::ptrdiff_t(enumCircuitNodes::b0)][std::ptrdiff_t(enumCircuitNodes::IVB0)] += 1.0;
+				sJ[std::ptrdiff_t(enumCircuitNodes::IVB0)][std::ptrdiff_t(enumCircuitNodes::b0)] += 1.0;
 				
-				sValues[std::size_t(enumCircuitNodes::IVB1)] += VD - sV.at(std::size_t(enumCircuitNodes::b1));
-				sValues[std::size_t(enumCircuitNodes::b1)] += - sV.at(std::size_t(enumCircuitNodes::IVB1));
-				sJ[std::size_t(enumCircuitNodes::b1)][std::size_t(enumCircuitNodes::IVB1)] += 1.0;
-				sJ[std::size_t(enumCircuitNodes::IVB1)][std::size_t(enumCircuitNodes::b1)] += 1.0;
+				sValues[std::ptrdiff_t(enumCircuitNodes::IVB1)] += VD - sV.at(std::ptrdiff_t(enumCircuitNodes::b1));
+				sValues[std::ptrdiff_t(enumCircuitNodes::b1)] += - sV.at(std::ptrdiff_t(enumCircuitNodes::IVB1));
+				sJ[std::ptrdiff_t(enumCircuitNodes::b1)][std::ptrdiff_t(enumCircuitNodes::IVB1)] += 1.0;
+				sJ[std::ptrdiff_t(enumCircuitNodes::IVB1)][std::ptrdiff_t(enumCircuitNodes::b1)] += 1.0;
 #else
-				sValues[std::size_t(enumCircuitNodes::IVC)] += vc - sV.at(std::size_t(enumCircuitNodes::c));
-				sValues[std::size_t(enumCircuitNodes::IVB)] += vb - sV.at(std::size_t(enumCircuitNodes::b));
-				sValues[std::size_t(enumCircuitNodes::IVE)] += - sV.at(std::size_t(enumCircuitNodes::e));
-				sValues[std::size_t(enumCircuitNodes::IVS)] += - sV.at(std::size_t(enumCircuitNodes::s));
+				//sValues[std::ptrdiff_t(enumCircuitNodes::IVE)] += - sV.at(std::ptrdiff_t(enumCircuitNodes::e));
+				//sValues[std::ptrdiff_t(enumCircuitNodes::IVS)] += - sV.at(std::ptrdiff_t(enumCircuitNodes::s));
 				
-				sValues[std::size_t(enumCircuitNodes::c)] += -sV.at(std::size_t(enumCircuitNodes::IVC));
-				sValues[std::size_t(enumCircuitNodes::b)] += -sV.at(std::size_t(enumCircuitNodes::IVB));
-				sValues[std::size_t(enumCircuitNodes::e)] += -sV.at(std::size_t(enumCircuitNodes::IVE));
-				sValues[std::size_t(enumCircuitNodes::s)] += -sV.at(std::size_t(enumCircuitNodes::IVS));
+				//sValues[std::ptrdiff_t(enumCircuitNodes::e)] += -sV.at(std::ptrdiff_t(enumCircuitNodes::IVE));
+				//sValues[std::ptrdiff_t(enumCircuitNodes::s)] += -sV.at(std::ptrdiff_t(enumCircuitNodes::IVS));
 				
-				sJ[std::size_t(enumCircuitNodes::c)][std::size_t(enumCircuitNodes::IVC)] += 1.0;
-				sJ[std::size_t(enumCircuitNodes::b)][std::size_t(enumCircuitNodes::IVB)] += 1.0;
-				sJ[std::size_t(enumCircuitNodes::e)][std::size_t(enumCircuitNodes::IVE)] += 1.0;
-				sJ[std::size_t(enumCircuitNodes::s)][std::size_t(enumCircuitNodes::IVS)] += 1.0;
+				//sJ[std::ptrdiff_t(enumCircuitNodes::e)][std::ptrdiff_t(enumCircuitNodes::IVE)] += 1.0;
+				//sJ[std::ptrdiff_t(enumCircuitNodes::s)][std::ptrdiff_t(enumCircuitNodes::IVS)] += 1.0;
 				
-				sJ[std::size_t(enumCircuitNodes::IVC)][std::size_t(enumCircuitNodes::c)] += 1.0;
-				sJ[std::size_t(enumCircuitNodes::IVB)][std::size_t(enumCircuitNodes::b)] += 1.0;
-				sJ[std::size_t(enumCircuitNodes::IVE)][std::size_t(enumCircuitNodes::e)] += 1.0;
-				sJ[std::size_t(enumCircuitNodes::IVS)][std::size_t(enumCircuitNodes::s)] += 1.0;
+				//sJ[std::ptrdiff_t(enumCircuitNodes::IVE)][std::ptrdiff_t(enumCircuitNodes::e)] += 1.0;
+				//sJ[std::ptrdiff_t(enumCircuitNodes::IVS)][std::ptrdiff_t(enumCircuitNodes::s)] += 1.0;
 #endif
 				const auto sM = sqrT2(sJ) + FtF2(sValues, sH);
 				auto sValues1 = twoFtF1(sValues, sJ);
@@ -1018,32 +1074,60 @@ try
 						[](const double _dSum, const index2Double::value_type&_r)
 						{	return _dSum + _r.second*_r.second;
 						}
-					)/sValues1.size()
+					)
 				);
+				double vscale = 1.0;
+#if 1
+				const auto dvmax = 0.2;
+				for (const auto &r : sDelta)
+#ifdef SELF_HEATING
+					if (r.first != std::size_t(enumCircuitNodes::dt))
+#endif
+					if (std::abs(r.second)/dvmax*vscale > 1.0)
+						vscale = std::abs(dvmax/r.second);
+#endif
 				const auto dNorm = std::sqrt(
 					std::accumulate(
 						sDelta.begin(),
 						sDelta.end(),
 						0.0,
-						[](const double _dSum, const index2Double::value_type&_r)
-						{	return _dSum + _r.second*_r.second;
+						[vscale](const double _dSum, const index2Double::value_type&_r)
+						{
+#ifdef SELF_HEATING
+							if (_r.first == std::size_t(enumCircuitNodes::dt))
+								return _dSum;
+#endif
+							const double d = _r.second*vscale;
+							return _dSum + d*d;
 						}
-					)/sDelta.size()
+					)
 				);
 				for (const auto &r : sDelta)
-					sV[r.first] += r.second;
-				if (dNorm < 1e-9 && dNormO < 1e-9)
-				{	std::cout << "iter=" << i + 1 << ',';
-					break;
-				}
-			}
-#ifdef __DIODE__
-			for (const auto i : {enumCircuitNodes::b0, enumCircuitNodes::IVB0, enumCircuitNodes::IVB1})
-#else
-			for (const auto i : {enumCircuitNodes::c, enumCircuitNodes::b, enumCircuitNodes::IVC, enumCircuitNodes::IVB, enumCircuitNodes::IVS})
+				{	double &rD = sV[r.first] += vscale*r.second;
+#ifdef SELF_HEATING
+					if (r.first == std::size_t(enumCircuitNodes::dt))
+						if (rD < 0.0)
+							rD = 0.0;
 #endif
-				std::cout << sV[std::size_t(i)] << ",";
-			std::cout << "\n";
+				}
+				if (dNorm < 1e-6 && dNormO < 1e-6)
+					break;
+			}
+#ifdef SELF_HEATING
+			std::cout << vc << "\t" << vb << "\t" << sTC[0] << "\t" << sTC[1] << "\t" << -sV[std::size_t(enumCircuitNodes::dt)];
+#else
+			std::cout << vc << "\t" << vb << "\t" << sTC[0] << "\t" << sTC[1] << "\t" << sTC[3];
+#endif
+			std::cout << std::endl;
+#ifdef SELF_HEATING
+	//write(6,*) 'Inputs  are: v(c) v(b) v(e) v(s)'
+	//write(6,*) 'Outputs are: i(c) i(b) i(e) dt'
+//Vce Vbe Ic Ib Is
+#else
+	//write(6,*) 'Inputs  are: v(c) v(b) v(e) v(s)'
+	//write(6,*) 'Outputs are: i(c) i(b) i(e) i(s)'
+//Vce Vbe Ic Ib Is
+#endif
 		}
 } catch (const std::exception&_r)
 {	std::cerr << argv[1] << ": Exception caught: " << _r.what() << std::endl;
