@@ -6,7 +6,7 @@ ctaylor.exe: ctaylor.cpp
 	$(CC) $(CFLAGS) -o ctaylor.exe ctaylor.cpp
 
 vbic95.exe: VBIC95/VBIC95.cpp LUFAC/lufac.cpp
-	$(CC) $(CFLAGS) -o vbic95.exe VBIC95/VBIC95.cpp LUFAC/lufac.cpp
+	$(CC) $(CFLAGS) -o vbic95.exe VBIC95/VBIC95.cpp LUFAC/lufac.cpp -D__JACOBIAN__
 
 black_scholes.exe: BLACK_SCHOLES/autodiff_black_scholes.cpp
 	$(CC) $(CFLAGS) -o black_scholes.exe BLACK_SCHOLES/autodiff_black_scholes.cpp

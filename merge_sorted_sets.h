@@ -4,6 +4,8 @@
 
 namespace taylor
 {
+namespace implementation
+{
 //namespace mp = boost::mp11;
 using namespace boost::mp11;
 
@@ -96,4 +98,6 @@ struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...> >
 	>::type type;
 #endif
 };
+}
+using implementation::merge_sorted_sets;
 }

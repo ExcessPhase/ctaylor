@@ -1,4 +1,8 @@
+#ifdef __JACOBIAN__
+#include "../cjacobian.h"
+#else
 #include "../ctaylor.h"
+#endif
 #include "../LUFAC/lufac.h"
 #include <map>
 #include <string>
@@ -11,6 +15,7 @@
 //#define __DIODE__
 namespace vbic95
 {
+using namespace boost::mp11;
 enum class enumParameters
 {
 #define __create__(a, b) a
@@ -38,7 +43,11 @@ static enumParameters getParameterIdByName(const char *const _p)
 	};
 	return s.at(_p);
 }
+#ifdef __JACOBIAN__
+using namespace jacobian;
+#else
 using namespace taylor;
+#endif
 template<typename P_T, typename EA_T, typename VTV_T, typename RT_T>
 auto psibi (const P_T& P, const EA_T&EA, const VTV_T&Vtv, const RT_T&rT) 
 {
@@ -49,7 +58,7 @@ auto psibi (const P_T& P, const EA_T&EA, const VTV_T&Vtv, const RT_T&rT)
 template<typename V_T, typename P_T, typename M_T, typename FC_T, typename A_T>
 auto qj(const V_T&V, const P_T&P, const M_T&M, const FC_T&FC, const A_T&A )
 {
-	return taylor::if_(
+	return if_(
 		A <= 0.0,
 		[&](void)
 		{
@@ -57,7 +66,7 @@ auto qj(const V_T&V, const P_T&P, const M_T&M, const FC_T&FC, const A_T&A )
 			//		SPICE regional depletion capacitance model
 			//
 			const auto dvh = V - FC * P;
-			return taylor::if_(
+			return if_(
 				dvh > 0.0,
 				[&](void)
 				{	const auto qlo = P * ( 1.0 - pow( 1.0 - FC, 1.0 - M ) ) / ( 1.0 - M );
@@ -195,9 +204,18 @@ enum class enumCurrentOutputs:std::size_t
 #define __COMMA__ ,
 #include "currentSources.h"
 };
+#ifdef __JACOBIAN__
+template<enumBranches E>
+using createIndep = cjacobian<
+	mp_list<
+		mp_size_t<std::size_t(E)>
+	>
+>;
+#else
 constexpr std::size_t MAX = 1;
 template<enumBranches E>
 using createIndep = ctaylor<makeIndependent<std::size_t(E)>, MAX>;
+#endif
 struct vbic
 {
 #define __create__(a) const double a;
@@ -608,13 +626,21 @@ struct vbic
 	{	lufac::index2Double&m_rO;
 		lufac::index2Index2Double&m_r1;
 		double&m_rValue;
+#ifdef __JACOBIAN__
+		const cjacobian<T>&m_rV;
+#else
 		const ctaylor<T, MAX>&m_rV;
+#endif
 		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &m_pT;
 		copyOutput(
 			double&_rValue,
 			lufac::index2Double&_rO,
 			lufac::index2Index2Double&_r1,
+#ifdef __JACOBIAN__
+			const cjacobian<T>&_rV,
+#else
 			const ctaylor<T, MAX>&_rV,
+#endif
 			const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &_pT
 		)
 			:m_rO(_rO),
@@ -623,6 +649,9 @@ struct vbic
 			m_rValue(_rValue),
 			m_pT(_pT)
 		{
+#ifdef __JACOBIAN__
+			m_rValue += m_rV.m_s.back();
+#endif
 		}
 		constexpr enumCircuitNodes translate(const enumNodes _e) const
 		{	const auto i = m_pT[std::size_t(_e)];
@@ -656,6 +685,7 @@ struct vbic
 							r += d;
 				}
 		}
+#ifndef __JACOBIAN__
 		template<typename ENUM>
 		void operator()(const mp_list<mp_list<ENUM, mp_size_t<2> > >&) const
 		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM::value]);
@@ -698,9 +728,32 @@ struct vbic
 		void operator()(const mp_list<>&) const
 		{	m_rValue += m_rV.m_s.at(mp_find<T, mp_list<> >::value);
 		}
+#else
+		template<std::size_t ENUM>
+		void operator()(const mp_size_t<ENUM>&) const
+		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM]);
+			constexpr std::size_t POS = mp_find<T, mp_size_t<ENUM> >::value;
+			if (const double d = m_rV.m_s.at(POS))
+			{	if (sNodePair.first != enumCircuitNodes::NumberOfNodes)
+					m_rO[std::size_t(sNodePair.first)] -= d;
+				if (sNodePair.second != enumCircuitNodes::NumberOfNodes)
+					m_rO[std::size_t(sNodePair.second)] += d;
+			}
+		}
+#endif
 	};
 	template<typename T>
-	static void writeOutput(double&_rValue, lufac::index2Double&_rO, lufac::index2Index2Double&_r1, const ctaylor<T, MAX>&_rV, const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT)
+	static void writeOutput(
+		double&_rValue,
+		lufac::index2Double&_rO,
+		lufac::index2Index2Double&_r1,
+#ifdef __JACOBIAN__
+		const cjacobian<T>&_rV,
+#else
+		const ctaylor<T, MAX>&_rV,
+#endif
+		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT
+	)
 	{	assert(isfinite(_rV) && !isnan(_rV));
 		assert(std::isfinite(_rValue) && !std::isnan(_rValue));
 		mp_for_each<T>(copyOutput<T>(_rValue, _rO, _r1, _rV, _pT));
