@@ -92,3 +92,14 @@ It seems that clang++-15 is showing the best compile-time performance -- even be
 10/16/2024
 Adapted strategy of calculating norm and reducing delta-x from VBIC solver*.f.
 This makes everything converge fine but only with Newton's method, whereas before it converged faster with Halley's method
+
+10/17/2024
+VBIC does not seem to work well using Halley's method -- potentially due to the limiting of delta-X.
+Since the performance of ctaylor for a maximum order of derivative is low,
+I implemented cjacobian.h, which only calculates derivatives of first order but much faster.
+As ctaylor it is sparse!
+There are now two executables 
+vbic95Jac.exe
+vbic95Taylor.exe
+The latter compiled using ctaylor and the former using cjacobian.
+Both attempt to use Halley's method, but since the Hessian is zero (MAX=1) they default to Newton's method.

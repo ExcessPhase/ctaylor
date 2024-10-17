@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <cassert>
 #define SELF_HEATING
-//#define __DIODE__
 namespace vbic95
 {
 using namespace boost::mp11;
@@ -324,23 +323,6 @@ struct vbic
 	);
 #define __COMMA__
 #include "inputs.h"
-#ifdef __DIODE__
-		static constexpr auto IS = 1e-12;
-		constexpr auto VT = 0.025;
-		constexpr auto R1 = 1e3;
-#if 0
-		const auto ID0 = IS*(exp(VD0/VT) - 1.0);
-#else
-		const auto ID0 = IS*(EXP(VD0/VT, _VD0/VT, _pbLimit) - 1.0);
-#endif
-		const auto IR0 = VR0/R1;
-#if 0
-		const auto ID1 = IS*(exp(VD1/VT) - 1.0);
-#else
-		const auto ID1 = IS*(EXP(VD1/VT, _VD1/VT, _pbLimit) - 1.0);
-#endif
-		const auto IR1 = VR1/R1;
-#else
 #ifdef SELF_HEATING
 #define __create__(a, b) const auto a = b;
 #define __create2__(a, b) const auto a = b;
@@ -602,7 +584,6 @@ struct vbic
 	const auto &Irth = std::get<1>(Ith_Irth_Qcth);
 	const auto &Qcth = std::get<2>(Ith_Irth_Qcth);
 #endif
-#endif
 #define __create__(a, b, c)\
 {	{	const auto iBT = _pT[std::size_t(enumNodes::b)];\
 		if (iBT >= 0 && iBT != std::ptrdiff_t(enumCircuitNodes::NumberOfNodes))\
@@ -805,20 +786,6 @@ constexpr enumCircuitNodes translateNodes(const enumNodes _e)
 			throw std::logic_error("Invalid node ID!");
 		case enumNodes::NumberOfNodes:
 			return enumCircuitNodes::NumberOfNodes;
-#ifdef __DIODE__
-		case enumNodes::a0:
-			return enumCircuitNodes::a0;
-		case enumNodes::b0:
-			return enumCircuitNodes::b0;
-		case enumNodes::c0:
-			return enumCircuitNodes::NumberOfNodes;
-		case enumNodes::a1:
-			return enumCircuitNodes::a1;
-		case enumNodes::b1:
-			return enumCircuitNodes::b1;
-		case enumNodes::c1:
-			return enumCircuitNodes::NumberOfNodes;
-#else
 		case enumNodes::c:
 			return enumCircuitNodes::c;
 		case enumNodes::b:
@@ -852,7 +819,6 @@ constexpr enumCircuitNodes translateNodes(const enumNodes _e)
 			return enumCircuitNodes::xf1;
 		case enumNodes::xf2:
 			return enumCircuitNodes::xf2;
-#endif
 #endif
 	}
 }
@@ -1022,18 +988,10 @@ try
 #define __COMMA__ ,
 #include "nodes.h"
 	};
-#ifndef __DIODE__
 	for (double vb = 0.7; vb <= 1.00001; vb += 0.05)
 		for (double vc = 0.0; vc <= 5.00001; vc += 0.05)
-#else
-		for (double VD = 0.0; VD <= 5.00001; VD += 0.05)
-#endif
 		{	std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)> sV({});
 			std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)> sV1({});
-#ifdef __DIODE__
-			sV[std::ptrdiff_t(enumCircuitNodes::b0)] = VD;
-			sV[std::ptrdiff_t(enumCircuitNodes::b1)] = VD;
-#else
 			sV[std::ptrdiff_t(enumCircuitNodes::bx)] = vb;
 			sV[std::ptrdiff_t(enumCircuitNodes::bi)] = vb;
 			sV[std::ptrdiff_t(enumCircuitNodes::bp)] = vc;
@@ -1041,7 +999,6 @@ try
 			sV[std::ptrdiff_t(enumCircuitNodes::si)] = 0.0;
 			sV[std::ptrdiff_t(enumCircuitNodes::ci)] = vc;
 			sV[std::ptrdiff_t(enumCircuitNodes::cx)] = vc;
-#endif
 	//ve=0;vs=0
 			//for(vb=0.7;vb<=1.00001;vb+=0.05)
 			//for(vc=0.0;vc<=5.00001;vc+=0.05)
@@ -1053,30 +1010,9 @@ try
 				index2Double sValues;
 				//sV[std::ptrdiff_t(enumCircuitNodes::e)] = 0.0;
 				//sV[std::ptrdiff_t(enumCircuitNodes::s)] = 0.0;
-#if 0
-				for (const auto &r : sV)
-					std::cerr << "input[" << s_aCircuitNodeNames[&r - sV.data()] << "]=" << r << "\n";
-#endif
 				static_assert(std::ptrdiff_t(enumCircuitNodes::b) == -1);
 				static_assert(std::ptrdiff_t(enumCircuitNodes::c) == -2);
 				sI.calculate(sV, {vb, vc}, sH, sJ, sValues, sTrans, sTC);
-#if 0
-				for (const auto &r : sValues)
-					std::cerr << "rhs[" << s_aCircuitNodeNames[r.first] << "]=" << r.second << "\n";
-				for (const auto &r0 : sJ)
-					for (const auto &r1 : r0.second)
-						std::cerr << "J[" << s_aCircuitNodeNames[r0.first] << "][" << s_aCircuitNodeNames[r1.first] << "]=" << r1.second << "\n";
-				for (const auto &r0 : sH)
-				{	assert(r0.first < std::size(s_aCircuitNodeNames));
-					for (const auto &r1 : r0.second)
-					{	assert(r1.first < std::size(s_aCircuitNodeNames));
-						for (const auto &r2 : r1.second)
-						{	assert(r2.first < std::size(s_aCircuitNodeNames));
-							std::cerr << "H[" << s_aCircuitNodeNames[r0.first] << "][" << s_aCircuitNodeNames[r1.first] << "][" << s_aCircuitNodeNames[r2.first] << "]=" << r2.second << "\n";
-						}
-					}
-				}
-#endif
 				for (const auto &r0 : sH)
 					for (const auto &r1 : r0.second)
 						for (const auto &r2 : r1.second)
@@ -1089,29 +1025,6 @@ try
 				for (const auto &r : sValues)
 					if (!std::isfinite(r.second) || std::isnan(r.second))
 						throw std::logic_error("Calculate produces NAN!");
-#ifdef __DIODE__
-				sValues[std::ptrdiff_t(enumCircuitNodes::IVB0)] += VD - sV.at(std::ptrdiff_t(enumCircuitNodes::b0));
-				sValues[std::ptrdiff_t(enumCircuitNodes::b0)] += - sV.at(std::ptrdiff_t(enumCircuitNodes::IVB0));
-				sJ[std::ptrdiff_t(enumCircuitNodes::b0)][std::ptrdiff_t(enumCircuitNodes::IVB0)] += 1.0;
-				sJ[std::ptrdiff_t(enumCircuitNodes::IVB0)][std::ptrdiff_t(enumCircuitNodes::b0)] += 1.0;
-				
-				sValues[std::ptrdiff_t(enumCircuitNodes::IVB1)] += VD - sV.at(std::ptrdiff_t(enumCircuitNodes::b1));
-				sValues[std::ptrdiff_t(enumCircuitNodes::b1)] += - sV.at(std::ptrdiff_t(enumCircuitNodes::IVB1));
-				sJ[std::ptrdiff_t(enumCircuitNodes::b1)][std::ptrdiff_t(enumCircuitNodes::IVB1)] += 1.0;
-				sJ[std::ptrdiff_t(enumCircuitNodes::IVB1)][std::ptrdiff_t(enumCircuitNodes::b1)] += 1.0;
-#else
-				//sValues[std::ptrdiff_t(enumCircuitNodes::IVE)] += - sV.at(std::ptrdiff_t(enumCircuitNodes::e));
-				//sValues[std::ptrdiff_t(enumCircuitNodes::IVS)] += - sV.at(std::ptrdiff_t(enumCircuitNodes::s));
-				
-				//sValues[std::ptrdiff_t(enumCircuitNodes::e)] += -sV.at(std::ptrdiff_t(enumCircuitNodes::IVE));
-				//sValues[std::ptrdiff_t(enumCircuitNodes::s)] += -sV.at(std::ptrdiff_t(enumCircuitNodes::IVS));
-				
-				//sJ[std::ptrdiff_t(enumCircuitNodes::e)][std::ptrdiff_t(enumCircuitNodes::IVE)] += 1.0;
-				//sJ[std::ptrdiff_t(enumCircuitNodes::s)][std::ptrdiff_t(enumCircuitNodes::IVS)] += 1.0;
-				
-				//sJ[std::ptrdiff_t(enumCircuitNodes::IVE)][std::ptrdiff_t(enumCircuitNodes::e)] += 1.0;
-				//sJ[std::ptrdiff_t(enumCircuitNodes::IVS)][std::ptrdiff_t(enumCircuitNodes::s)] += 1.0;
-#endif
 				const auto sM = sqrT2(sJ) + FtF2(sValues, sH);
 				auto sValues1 = twoFtF1(sValues, sJ);
 				const auto sFactored = factor(sM, sValues1);
