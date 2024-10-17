@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include "merge_sorted_sets.h"
 namespace jacobian
 {
@@ -80,6 +81,7 @@ struct createIndicies2
 		findSourcePosition
 	> type;
 };
+/// for merging two meta vectors of IDs identifying independent variables
 template<typename T0, typename T1>
 struct merge
 {	typedef typename taylor::merge_sorted_sets<
@@ -88,10 +90,13 @@ struct merge
 		T1
 	>::type type;
 };
+/// this is the dual number class
 template<typename VECTOR>
 struct cjacobian
-{	static constexpr std::size_t SIZE = mp_size<VECTOR>::value + 1;
+{		/// SIZE of the vector is number of independent variables + 1 (0th derivative)
+	static constexpr std::size_t SIZE = mp_size<VECTOR>::value + 1;
 	typedef std::array<double, SIZE> ARRAY;
+		/// here are all the derivatives stored. 0th derivative at the end
 	ARRAY m_s;
 	cjacobian(void) = default;
 	cjacobian(const cjacobian&) = default;
@@ -114,6 +119,8 @@ struct cjacobian
 		:m_s(convert<T1>(_r.m_s))
 	{
 	}
+		/// for converting between different cjacobian types
+		/// target must contain all the source content and more
 	template<typename T1>
 	static ARRAY convert(const typename cjacobian<T1>::ARRAY&_r)
 	{	ARRAY s;
@@ -136,6 +143,11 @@ struct cjacobian
 	template<typename T1>
 	cjacobian&operator=(const cjacobian<T1>&_r)
 	{	m_s = convert<T1>(_r.m_s);
+		return *this;
+	}
+	cjacobian&operator=(const double _r)
+	{	std::fill(m_s.begin(), std::prev(m_s.end()), 0.0);
+		m_s.back() = _r;
 		return *this;
 	}
 	template<typename T1>
