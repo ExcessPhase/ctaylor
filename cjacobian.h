@@ -124,12 +124,13 @@ struct cjacobian
 			r.end(),
 			s.begin(),
 			[&](const std::size_t _i)
-			{	if (_i == cjacobian<T1>::SIZE)
+			{	if (_i == cjacobian<T1>::SIZE - 1)
 					return 0.0;
 				else
 					return _r[_i];
 			}
 		);
+		s.back() = _r.back();
 		return s;
 	}
 	template<typename T1>
