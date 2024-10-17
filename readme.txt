@@ -7,7 +7,8 @@ Austin, TX, USA
 
 email:	peter_foelsche@outlook.com
 
-A sparse, dual number implementation for calculating not just the 1th order of derivatives.
+A sparse, dual number implementation for calculating not just the 1th order of derivatives (ctaylor.h).
+
 Using this class to calculate derivative of max. 1th order, would constitute a waste,
 as a dual number implementation for 1th order derivative is much simpler and cheaper.
 Refer to ctaylor.cpp for a example usage.
@@ -15,6 +16,8 @@ Compile time under Visual C++ 2022 tends to be much longer than using g++.
 Requires C++14.
 Requires boost::mp11 (boost_1_86_0).
 There is intentionally no double-cast operator in order to facilitate a compiler error if an unimplemented function is being used.
+
+A sparse, dual number implementation for calculating the 1th derivative (cjacobian.h).
 
 There are three examples:
 
