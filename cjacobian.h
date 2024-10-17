@@ -320,6 +320,53 @@ struct cjacobian
 		s.m_s.back() = _d*dInv;
 		return s;
 	}
+	static double getValue(const double _d)
+	{	return _d;
+	}
+	template<typename T1>
+	bool operator<(const T1&_r) const
+	{	return m_s.back() < getValue(_r);
+	}
+	template<typename T1>
+	bool operator>(const T1&_r) const
+	{	return m_s.back() > getValue(_r);
+	}
+	template<typename T1>
+	bool operator<=(const T1&_r) const
+	{	return m_s.back() <= getValue(_r);
+	}
+	template<typename T1>
+	bool operator>=(const T1&_r) const
+	{	return m_s.back() >= getValue(_r);
+	}
+	template<typename T1>
+	bool operator==(const T1&_r) const
+	{	return m_s.back() == getValue(_r);
+	}
+	template<typename T1>
+	bool operator!=(const T1&_r) const
+	{	return m_s.back() != getValue(_r);
+	}
+
+	friend bool operator<(const double _d, const cjacobian&_r)
+	{	return _d < getValue(_r);
+	}
+	friend bool operator>(const double _d, const cjacobian&_r)
+	{	return _d > getValue(_r);
+	}
+	friend bool operator<=(const double _d, const cjacobian&_r)
+	{	return _d <= getValue(_r);
+	}
+	friend bool operator>=(const double _d, const cjacobian&_r)
+	{	return _d >= getValue(_r);
+	}
+	friend bool operator==(const double _d, const cjacobian&_r)
+	{	return _d == getValue(_r);
+	}
+	friend bool operator!=(const double _d, const cjacobian&_r)
+	{	return _d != getValue(_r);
+	}
+
 	friend std::ostream &operator<<(std::ostream&_rS, const cjacobian&_r)
 	{	_rS << "(";
 		for (std::size_t i = 0; i < SIZE; ++i)
