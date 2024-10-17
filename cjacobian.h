@@ -164,6 +164,31 @@ struct cjacobian
 		return s;
 	}
 	template<typename T1>
+	auto operator/(const cjacobian<T1>&_r) const
+	{	typedef typename merge<VECTOR, T1>::type MERGED;
+		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
+		auto &r = createStdArray2<INDICIES>::type::value;
+		cjacobian<MERGED> s;
+		const auto dInv = 1.0/_r.m_s.back();
+		const auto dInv2 = dInv*dInv*m_s.back();
+		std::transform(
+			r.begin(),
+			r.end(),
+			s.m_s.begin(),
+			[&](const std::pair<std::size_t, std::size_t>&_rI)
+			{	if (_rI.first == SIZE - 1)
+					return -dInv2*_r.m_s[_rI.second];
+				else
+				if (_rI.second == cjacobian<T1>::SIZE - 1)
+					return dInv*m_s[_rI.first];
+				else
+					return dInv*m_s[_rI.first] - dInv2*_r.m_s[_rI.second];
+			}
+		);
+		s.m_s.back() = m_s.back() * dInv;
+		return s;
+	}
+	template<typename T1>
 	auto operator+(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
@@ -231,9 +256,32 @@ struct cjacobian
 	cjacobian operator/(const cjacobian&_r) const
 	{	cjacobian s;
 		const auto dInv = 1.0/_r.m_s.back();
+		const auto dInv2 = dInv*dInv*m_s.back();
 		for (std::size_t i = 0; i < SIZE - 1; ++i)
-			s.m_s[i] = dInv*(m_s[i] - _r.m_s[i]*dInv*m_s.back());
-		s.m_s.back() = m_s.back()*_r.m_s.back();
+			s.m_s[i] = dInv*m_s[i] - dInv2*_r.m_s[i];
+		s.m_s.back() = m_s.back()*dInv;
+		return s;
+	}
+	cjacobian operator-(void) const
+	{	cjacobian s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = -m_s[i];
+		return s;
+	}
+	friend cjacobian operator+(const double _d, const cjacobian&_r)
+	{	cjacobian s(_r);
+		s.m_s.back() += _d;
+		return s;
+	}
+	friend cjacobian operator-(const double _d, const cjacobian&_r)
+	{	cjacobian s(-_r);
+		s.m_s.back() += _d;
+		return s;
+	}
+	friend cjacobian operator*(const double _d, const cjacobian&_r)
+	{	cjacobian s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = _d*_r.m_s[i];
 		return s;
 	}
 	friend std::ostream &operator<<(std::ostream&_rS, const cjacobian&_r)
