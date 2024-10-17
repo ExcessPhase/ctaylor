@@ -234,6 +234,33 @@ struct cjacobian
 		s.m_s.back() = m_s.back() - _r.m_s.back();
 		return s;
 	}
+	cjacobian operator+(const double _d) const
+	{	cjacobian s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = m_s[i];
+		s.m_s.back() += _d;
+		return s;
+	}
+	cjacobian operator-(const double _d) const
+	{	cjacobian s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = m_s[i];
+		s.m_s.back() -= _d;
+		return s;
+	}
+	cjacobian operator*(const double _d) const
+	{	cjacobian s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = m_s[i]*_d;
+		return s;
+	}
+	cjacobian operator/(const double _d) const
+	{	cjacobian s;
+		const auto dInv = 1.0/_d;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = m_s[i]*dInv;
+		return s;
+	}
 	cjacobian operator+(const cjacobian&_r) const
 	{	cjacobian s;
 		for (std::size_t i = 0; i < SIZE; ++i)
@@ -282,6 +309,15 @@ struct cjacobian
 	{	cjacobian s;
 		for (std::size_t i = 0; i < SIZE; ++i)
 			s.m_s[i] = _d*_r.m_s[i];
+		return s;
+	}
+	friend cjacobian operator/(const double _d, const cjacobian&_r)
+	{	cjacobian s;
+		const auto dInv = 1.0/_r.m_s.back();
+		const auto dInv2 = dInv*dInv*_d;
+		for (std::size_t i = 0; i < SIZE - 1; ++i)
+			s.m_s[i] = -dInv2*_r.m_s[i];
+		s.m_s.back() = _d*dInv;
 		return s;
 	}
 	friend std::ostream &operator<<(std::ostream&_rS, const cjacobian&_r)
