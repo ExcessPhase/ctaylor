@@ -498,6 +498,20 @@ struct cjacobian
 	friend auto sqr(const cjacobian&_r)
 	{	return _r*_r;
 	}
+	friend bool isnan(const cjacobian&_r)
+	{	return std::any_of(
+			_r.m_s.begin(),
+			_r.m_s.end(),
+			static_cast<bool(*)(double)>(&std::isnan)
+		);
+	}
+	friend bool isfinite(const cjacobian&_r)
+	{	return std::all_of(
+			_r.m_s.begin(),
+			_r.m_s.end(),
+			static_cast<bool(*)(double)>(&std::isfinite)
+		);
+	}
 #define __create__(sin)\
 	friend cjacobian sin(const cjacobian&_r)\
 	{	return nonlinear<sin>(_r);\
