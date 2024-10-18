@@ -28,11 +28,14 @@ enum class enumMembers
 #define __COMMA__ ,
 #include "members.h"
 };
+/// for indexing of const char* key inside std::map
 struct compare
 {	bool operator()(const char *const _p0, const char *const _p1) const
 	{	return std::strcmp(_p0, _p1) < 0;
 	}
 };
+/// translates parameter name into enumeration
+/// fails with an exception
 static enumParameters getParameterIdByName(const char *const _p)
 {	static const std::map<const char*, enumParameters, compare> s = {
 #define __create__(a, b) {#a, enumParameters::a}
@@ -47,6 +50,7 @@ using namespace jacobian;
 #else
 using namespace taylor;
 #endif
+/// part of the original VBIC standard
 template<typename P_T, typename EA_T, typename VTV_T, typename RT_T>
 auto psibi (const P_T& P, const EA_T&EA, const VTV_T&Vtv, const RT_T&rT) 
 {
@@ -54,6 +58,7 @@ auto psibi (const P_T& P, const EA_T&EA, const VTV_T&Vtv, const RT_T&rT)
 	const auto psiin = psiio * rT - 3.0 * Vtv * log ( rT ) - EA * ( rT - 1.0 );
 	return psiin + 2.0 * Vtv * log ( 0.5 * ( 1.0 + sqrt ( 1.0 + 4.0 * exp ( - psiin / Vtv ) ) ) );
 }
+/// part of the original VBIC standard
 template<typename V_T, typename P_T, typename M_T, typename FC_T, typename A_T>
 auto qj(const V_T&V, const P_T&P, const M_T&M, const FC_T&FC, const A_T&A )
 {
@@ -104,6 +109,7 @@ auto qj(const V_T&V, const P_T&P, const M_T&M, const FC_T&FC, const A_T&A )
 		}
 	);
 }
+/// part of the original VBIC standard
 template<typename V_T, typename P_T, typename M_T, typename AV1_T, typename AV2_T>
 auto avalm(const V_T&V, const P_T&P, const M_T&M, const AV1_T&AV1, const AV2_T&AV2)
 {
@@ -118,7 +124,8 @@ static constexpr double KB = 1.380662E-23;	// Boltzmann's constant, J/K
 static constexpr double QQ = 1.602189E-19;	// magnitude of electronic charge, C
 static constexpr double TABS = 2.731500E+02;	// 0 degrees C in degrees K
 static constexpr double TAMB = 27.0;
-static const double LOGSQRT2 = std::log(std::sqrt(2.0));
+/// reads parameters from an external file
+/// called from the constructor of VBIC
 static enumMembers2double readParams(const char *const _p)
 {	std::ifstream sFile(_p);
 	sFile.exceptions(std::ios_base::badbit | std::ios_base::failbit);
@@ -157,7 +164,8 @@ static enumMembers2double readParams(const char *const _p)
 #endif
 	return sRet;
 }
-
+/// enumeration for circuit nodes
+/// negative nodes are not part of the matrix and have a nonzero voltage associated with them
 enum class enumCircuitNodes:std::ptrdiff_t
 {
 #define __create__(a) a
@@ -165,19 +173,21 @@ enum class enumCircuitNodes:std::ptrdiff_t
 #define __COMMA__ ,
 #include "circuitNodes.h"
 };
-static_assert(std::size_t(enumCircuitNodes::cx) == 0, "cx must be zero!");
+/// nodes which are part of the transistor
 enum class enumNodes
 {
 #define __create__(a) a
 #define __COMMA__ ,
 #include "nodes.h"
 };
+/// names of transistor nodes
 static const char*const s_aNodeNames[] =
 {
 #define __create__(a) #a
 #define __COMMA__ ,
 #include "nodes.h"
 };
+/// names of circuit nodes
 static const char*const s_aCircuitNodeNames[] =
 {
 #define __create__(a) #a,
@@ -185,24 +195,29 @@ static const char*const s_aCircuitNodeNames[] =
 #define __COMMA__
 #include "circuitNodes.h"
 };
+/// input voltages branches
 enum class enumBranches:std::size_t
 {
 #define __COMMA__ ,
 #define __create__(a, b, c) a
 #include "inputs.h"
 };
+/// input voltage branches as pairs of transistor nodes
 static constexpr const std::pair<enumNodes, enumNodes> s_aInput2NodePair[] =
 {
 #define __COMMA__ ,
 #define __create__(a, b, c) {enumNodes::b, enumNodes::c}
 #include "inputs.h"
 };
+/// current sources inside the transistor
 enum class enumCurrentOutputs:std::size_t
 {
 #define __create__(a, b, c) a
 #define __COMMA__ ,
 #include "currentSources.h"
 };
+/// are we using cjacobian.h or ctaylor.h
+/// definition of the input voltage type
 #ifdef __JACOBIAN__
 template<enumBranches E>
 using createIndep = cjacobian<
@@ -211,15 +226,20 @@ using createIndep = cjacobian<
 	>
 >;
 #else
+	/// !
+	/// here one needs to change to 2 in order to use Halley's method
+	/// which is incompatible with the delta-x scaling
 constexpr std::size_t MAX = 1;
 template<enumBranches E>
 using createIndep = ctaylor<makeIndependent<std::size_t(E)>, MAX>;
 #endif
+/// the transistor instance
 struct vbic
 {
 #define __create__(a) const double a;
 #define __COMMA__
 #include "members.h"
+		/// the constructor
 	vbic(const enumMembers2double &_r)
 		:
 #define __create__(a) a(_r.at(enumMembers::a))
@@ -227,63 +247,15 @@ struct vbic
 #include "members.h"
 	{
 	}
-#if 0
-	template<typename T>
-	static auto EXP(const ctaylor<T, MAX>&vnew, const double vold, bool *const _pbLimit) -> decltype(exp(vnew))
-	{	if (!_pbLimit)
-			return exp(vnew);
-		else
-#if 1
-		if (_pbLimit && vnew > vold + 1.0e-1)
-		{	*_pbLimit = true;
-			const auto YOLD = std::exp(vold);
-			const auto YPOLD = YOLD;
-			const auto YINTENDED = YOLD + YPOLD*(value(vnew) - vold);
-			const auto XINTENDED = log(YINTENDED);
-			return YINTENDED*(vnew - value(vnew) + 1.0) - YINTENDED*(XINTENDED - value(vnew));
-		}
-		else
-			return exp(vnew);
-#else
-		{	const auto vcrit = log(1.0/(std::sqrt(2.0)*IS));
-			if (vnew > vcrit && abs(vnew - vold) > 2.0)
-			{	*_pbLimit = true;
-				if (vold > 0.0)
-				{	const auto arg = 1.0 + vnew - vold;
-					if (arg > 0)
-						return exp(vold + log(arg));
-					else
-						return exp(vcrit);
-				}
-				else
-					return vnew;
-			}
-			else
-				return exp(vnew);
-		}
-#if 0
-	if (vnew > vcrit && std::abs(vnew - vold) > vt + vt)
-	{	*icheck = 1;
-		if (vold > 0)
-		{	const auto arg = 1 + (vnew - vold) / vt;
-			if (arg > 0)
-				return vold + vt * log(arg);
-			else
-				return vcrit;
-		}
-		else
-			return vt *log(vnew/vt);
-	}
-	else
-		return vnew;
-#endif
-#endif
-	}
-#endif
+		/// access of the input voltage of a transistor node
 	template<enumNodes _e>
 	static double getInputVoltage(
+			/// fixed voltages for certain nodes not part of the circuit matrix
 		const std::array<double, 2>&_rN,
+			/// the node voltages part of the circuit matrix
 		const std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)>& _rP,
+			/// mapping of internal nodes to external ones
+			/// negative enums are connected to fixed voltages
 		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT
 	)
 	{	if (_e == enumNodes::NumberOfNodes)
@@ -299,6 +271,7 @@ struct vbic
 				return _rP.at(i);
 		}
 	}
+		/// the same for node pairs
 	template<enumNodes _e0, enumNodes _e1>
 	static double getInputVoltage(
 		const std::array<double, 2>&_rN,
@@ -307,22 +280,32 @@ struct vbic
 	)
 	{	return getInputVoltage<_e0>(_rN, _rP, _pT) - getInputVoltage<_e1>(_rN, _rP, _pT);
 	}
+		/// the entry point for calculation
 	auto calculate(
+			/// node voltages part of the matrix
 		const std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)>& _rNodeVoltages,
+			/// fixed node voltages
 		const std::array<double, std::size_t(2)>& _rNodeVoltages2,
+			/// the 3-dimensional hessian
 		lufac::index2Index2Index2Double&_r2,
+			/// the 2-dimensional jacobian
 		lufac::index2Index2Double&_rO,
+			/// the 1-dim output value
 		lufac::index2Double &_rV,
+			/// translation of the internal transistor nodes to circuit Nodes
 		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT,
+			/// for returning the DC terminal currents
 		std::array<double, 4>&_rTC
 	) const
 	{
+		/// creating the input voltages with correct type
 #define __create__(Vbe, b, e) const auto Vbe = createIndep<enumBranches::Vbe>(\
 		getInputVoltage<enumNodes::b, enumNodes::e>(_rNodeVoltages2, _rNodeVoltages, _pT),\
 		false\
 	);
 #define __COMMA__
 #include "inputs.h"
+		/// self-heating code
 #ifdef SELF_HEATING
 #define __create__(a, b) const auto a = b;
 #define __create2__(a, b) const auto a = b;
@@ -408,20 +391,20 @@ struct vbic
 		},
 		[&](void)
 		{	const auto Vbcx = Vbci - Vrci;
-			assert(std::isfinite(value(Vbcx)) && !std::isnan(value(Vbcx)));
+			assert(isfinite(Vbcx) && !isnan(Vbcx));
 			const auto Kbci = sqrt ( 1.0 + GAMM * exp ( Vbci / Vtv ) );
-			assert(std::isfinite(value(Kbci)) && !std::isnan(value(Kbci)));
+			assert(isfinite(Kbci) && !isnan(Kbci));
 			const auto Kbcx = sqrt ( 1.0 + GAMM * exp ( Vbcx / Vtv ) );
-			assert(std::isfinite(value(Kbcx)) && !std::isnan(value(Kbcx)));
+			assert(isfinite(Kbcx) && !isnan(Kbcx));
 			const auto rKp1 = ( Kbci + 1.0 ) / ( Kbcx + 1.0 );
-			assert(std::isfinite(value(rKp1)) && !std::isnan(value(rKp1)));
+			assert(isfinite(rKp1) && !isnan(rKp1));
 			const auto Iohm = ( Vrci + Vtv * ( Kbci - Kbcx - log ( rKp1 ) ) ) / RCI;
-			assert(std::isfinite(value(Iohm)) && !std::isnan(value(Iohm)));
+			assert(isfinite(Iohm) && !isnan(Iohm));
 			const auto derf = IVO * RCI * Iohm / ( 1.0 + 0.5 * IVO * IHRCF *
 				sqrt ( Vrci * Vrci +  0.01 ) );
-			assert(std::isfinite(value(derf)) && !std::isnan(value(derf)));
+			assert(isfinite(derf) && !isnan(derf));
 			const auto Irci = Iohm / sqrt ( 1.0 + derf * derf  );
-			assert(std::isfinite(value(Irci)) && !std::isnan(value(Irci)));
+			assert(isfinite(Irci) && !isnan(Irci));
 			return std::make_tuple(Irci, Kbci, Kbcx);
 		}
 	);
@@ -584,6 +567,7 @@ struct vbic
 	const auto &Irth = std::get<1>(Ith_Irth_Qcth);
 	const auto &Qcth = std::get<2>(Ith_Irth_Qcth);
 #endif
+		/// creating code to write into RHS and jacobian and hessian
 #define __create__(a, b, c)\
 {	{	const auto iBT = _pT[std::size_t(enumNodes::b)];\
 		if (iBT >= 0 && iBT != std::ptrdiff_t(enumCircuitNodes::NumberOfNodes))\
@@ -597,11 +581,13 @@ struct vbic
 #define __COMMA__
 #include "currentSources.h"
 //	End of equations.
+			/// code for calculating DC terminal currents
 		_rTC[0]=value(Itzf-Itzr-Ibc+Igc+Irbp);
 		_rTC[1]=value(Ibe+Ibex+Ibc-Igc+Ibep+Iccp);
 		_rTC[2]=value(-Itzf+Itzr-Ibe-Ibex);
 		_rTC[3]=-_rTC[0]-_rTC[1]-_rTC[2];
 	}
+		/// instantiated in writeOutput with the template argument being identical to the argument to cjacobian/ctaylor
 	template<typename T>
 	struct copyOutput
 	{	lufac::index2Double&m_rO;
@@ -613,6 +599,7 @@ struct vbic
 		const ctaylor<T, MAX>&m_rV;
 #endif
 		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> &m_pT;
+			/// constructor
 		copyOutput(
 			double&_rValue,
 			lufac::index2Double&_rO,
@@ -631,9 +618,11 @@ struct vbic
 			m_pT(_pT)
 		{
 #ifdef __JACOBIAN__
+				/// writing the RHS which is not part of the template argument in case of jacobian.h
 			m_rValue += m_rV.m_s.back();
 #endif
 		}
+			/// translating internal nodes to external nodes
 		constexpr enumCircuitNodes translate(const enumNodes _e) const
 		{	const auto i = m_pT[std::size_t(_e)];
 			if (i < 0)
@@ -644,9 +633,11 @@ struct vbic
 				return enumCircuitNodes(i);
 			}
 		}
+			/// dito for a pair of nodes
 		constexpr std::pair<enumCircuitNodes, enumCircuitNodes> translate(const std::pair<enumNodes, enumNodes>&_r) const
 		{	return std::make_pair(translate(_r.first), translate(_r.second));
 		}
+			/// callback for second order derivatives
 		template<std::size_t POS>
 		void operator()(const enumCircuitNodes _e0, const enumCircuitNodes _e1, const mp_size_t<POS>&, const bool _bMinus, const bool _bDouble = false) const
 		{	assert(std::ptrdiff_t(_e0) >= std::ptrdiff_t());
@@ -667,6 +658,7 @@ struct vbic
 				}
 		}
 #ifndef __JACOBIAN__
+			/// second order same derivative
 		template<typename ENUM>
 		void operator()(const mp_list<mp_list<ENUM, mp_size_t<2> > >&) const
 		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM::value]);
@@ -677,6 +669,7 @@ struct vbic
 			(*this)(sNodePair.first, sNodePair.second, mp_size_t<POS>(), true, true);
 			(*this)(sNodePair.second, sNodePair.first, mp_size_t<POS>(), true, true);
 		}
+			/// second order cross derivatives
 		template<typename ENUM0, typename ENUM1>
 		void operator()(const mp_list<mp_list<ENUM0, mp_size_t<1> >, mp_list<ENUM1, mp_size_t<1> > >&) const
 		{	const auto sNodePair0 = translate(s_aInput2NodePair[ENUM0::value]);
@@ -694,6 +687,7 @@ struct vbic
 			(*this)(sNodePair1.first, sNodePair0.second, mp_size_t<POS>(), true);
 			(*this)(sNodePair1.second, sNodePair0.first, mp_size_t<POS>(), true);
 		}
+			/// first order
 		template<typename ENUM>
 		void operator()(const mp_list<mp_list<ENUM, mp_size_t<1> > >&) const
 		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM::value]);
@@ -706,10 +700,12 @@ struct vbic
 					m_rO[std::size_t(sNodePair.second)] += d;
 			}
 		}
+			/// 0th order
 		void operator()(const mp_list<>&) const
 		{	m_rValue += m_rV.m_s.at(mp_find<T, mp_list<> >::value);
 		}
 #else
+			/// for jacobian.h
 		template<std::size_t ENUM>
 		void operator()(const mp_size_t<ENUM>&) const
 		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM]);
@@ -723,6 +719,7 @@ struct vbic
 		}
 #endif
 	};
+		/// writing output
 	template<typename T>
 	static void writeOutput(
 		double&_rValue,
@@ -780,6 +777,7 @@ std::ostream &operator<<(std::ostream &_rS, const std::map<K, V>&_r)
 	--s_iIndent;
 	return _rS;
 }
+/// translation of internal transistor nodes to external circuit nodes
 constexpr enumCircuitNodes translateNodes(const enumNodes _e)
 {	switch (_e)
 	{	default:
@@ -923,32 +921,6 @@ lufac::index2Double operator-(const lufac::index2Double&_r)
 		s[r.first] = -r.second;
 	return s;
 }
-#if 0
-lufac::index2Index2Double operator-(const lufac::index2Index2Double&_r0, const lufac::index2Index2Double&_r1)
-{	lufac::index2Index2Double sRet;
-	lufac::index2Index2Double::const_iterator pR0, pR1;
-	for (pR0 = _r0.begin(), pR1 = _r1.begin(); pR0 != _r0.end() && pR1 != _r1.end(); )
-		if (pR0->first < pR1->first)
-		{	sRet[pR0->first] = pR0->second;
-			++pR0;
-		}
-		else
-		if (pR0->first > pR1->first)
-		{	sRet[pR1->first] = -pR1->second;
-			++pR1;
-		}
-		else
-		{	sRet[pR0->first] = pR0->second - pR1->second;
-			++pR0;
-			++pR1;
-		}
-	for (; pR0 != _r0.end(); ++pR0)
-		sRet[pR0->first] = pR0->second;
-	for (; pR1 != _r1.end(); ++pR1)
-		sRet[pR1->first] = -pR1->second;
-	return sRet;
-}
-#endif
 lufac::index2Index2Double operator+(const lufac::index2Index2Double&_r0, const lufac::index2Index2Double&_r1)
 {	lufac::index2Index2Double sRet;
 	lufac::index2Index2Double::const_iterator pR0, pR1;
@@ -982,16 +954,20 @@ try
 	{	std::cerr << argv[0] << ": usage: " << argv[0] << " PARS" << std::endl;
 		return 1;
 	}
-	vbic sI(readParams(argv[1]));
+		/// single transistor instance
+	const vbic sI(readParams(argv[1]));
+		/// translation of internal nodes to external ones
 	const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> sTrans{
 #define __create__(a) std::ptrdiff_t(translateNodes(enumNodes::a))
 #define __COMMA__ ,
 #include "nodes.h"
 	};
+		/// the voltage sweep
 	for (double vb = 0.7; vb <= 1.00001; vb += 0.05)
 		for (double vc = 0.0; vc <= 5.00001; vc += 0.05)
-		{	std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)> sV({});
-			std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)> sV1({});
+		{		/// the external voltages (RHS)
+			std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)> sV({});
+				/// guess for internal voltages to be identical to external ones
 			sV[std::ptrdiff_t(enumCircuitNodes::bx)] = vb;
 			sV[std::ptrdiff_t(enumCircuitNodes::bi)] = vb;
 			sV[std::ptrdiff_t(enumCircuitNodes::bp)] = vc;
@@ -1003,15 +979,16 @@ try
 			//for(vb=0.7;vb<=1.00001;vb+=0.05)
 			//for(vc=0.0;vc<=5.00001;vc+=0.05)
 		//print vc,vb,ve,vs
+				/// terminal currents
 			std::array<double, 4> sTC;
 			for (std::size_t i = 0; i < 200; ++i)
 			{	index2Index2Index2Double sH;
 				index2Index2Double sJ;
 				index2Double sValues;
-				//sV[std::ptrdiff_t(enumCircuitNodes::e)] = 0.0;
-				//sV[std::ptrdiff_t(enumCircuitNodes::s)] = 0.0;
 				static_assert(std::ptrdiff_t(enumCircuitNodes::b) == -1);
 				static_assert(std::ptrdiff_t(enumCircuitNodes::c) == -2);
+					/// calling the single transistor instance
+					/// second argument are the fixed external voltages (with negative indicies)
 				sI.calculate(sV, {vb, vc}, sH, sJ, sValues, sTrans, sTC);
 				for (const auto &r0 : sH)
 					for (const auto &r1 : r0.second)
@@ -1032,6 +1009,8 @@ try
 				for (const auto &r : sDelta)
 					if (!std::isfinite(r.second) || std::isnan(r.second))
 						throw std::logic_error("solve produces NAN!");
+					/// calculating the norm of the RHS
+					/// not divided by number to be identical to original solver.f
 				const auto dNormO = std::sqrt(
 					std::accumulate(
 						sValues1.begin(),
@@ -1052,6 +1031,8 @@ try
 					if (std::abs(r.second)/dvmax*vscale > 1.0)
 						vscale = std::abs(dvmax/r.second);
 #endif
+					/// calculating the norm of the resulting delta
+					/// not divided by number to be identical to original solver.f
 				const auto dNorm = std::sqrt(
 					std::accumulate(
 						sDelta.begin(),
@@ -1068,6 +1049,9 @@ try
 						}
 					)
 				);
+					/// applying the delta
+					/// making certain temperature can not become negative
+					/// the transistor does not cool the environment
 				for (const auto &r : sDelta)
 				{	double &rD = sV[r.first] += vscale*r.second;
 #ifdef SELF_HEATING
@@ -1076,9 +1060,11 @@ try
 							rD = 0.0;
 #endif
 				}
+					/// are we converged
 				if (dNorm < 1e-6 && dNormO < 1e-6)
 					break;
 			}
+				/// display the result in the same way as the original solver.f
 #ifdef SELF_HEATING
 			std::cout << vc << "\t" << vb << "\t" << sTC[0] << "\t" << sTC[1] << "\t" << -sV[std::size_t(enumCircuitNodes::dt)];
 #else
