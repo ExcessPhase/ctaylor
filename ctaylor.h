@@ -23,8 +23,10 @@ namespace taylor
 {
 namespace implementation
 {
+	/// meta function for merging different result types
 template<typename, typename>
 struct common_type;
+	/// function for merginig different result tyoes
 template<typename T, typename F>
 typename common_type<
 	typename std::decay<decltype(std::declval<T>()())>::type,
@@ -35,6 +37,8 @@ typename common_type<
 	F&&_rF
 );
 using namespace boost::mp11;
+	/// to be passed to mp_for_each with a vector/set argument to ctaylor
+	/// for debgging purposes
 struct output
 {	std::ostream&m_r;
 	output(std::ostream&_r)
@@ -129,6 +133,7 @@ using add_second=std::integral_constant<
 	std::size_t,
 	SUM::value + mp_second<PAIR>::value
 >;
+	/// for determining the order
 template<typename LIST>
 struct order
 {	static const auto value = mp_fold<LIST, mp_size_t<0>, add_second>::value;
@@ -297,41 +302,7 @@ template<>
 struct merge<mp_list<>, mp_list<> >
 {	typedef mp_list<> type;
 };
-	/// copy from a source to a target
-	/// target must contain all the elements of source and more
-#if 0
-template<std::size_t TARGET, std::size_t SOURCE>
-struct copy
-{	std::array<double, TARGET> &m_rTarget;
-	const std::array<double, SOURCE> &m_rSource;
-	copy(
-		std::array<double, TARGET> &_rTarget,
-		const std::array<double, SOURCE> &_rSource
-	)
-		:m_rTarget(_rTarget),
-		m_rSource(_rSource)
-	{
-	}
-	template<std::size_t TPOS, std::size_t SPOS>
-	void operator()(
-		const mp_list<
-			std::integral_constant<std::size_t, TPOS>,
-			std::integral_constant<std::size_t, SPOS>
-		>&
-	) const
-	{	m_rTarget[TPOS] = m_rSource[SPOS];
-	}
-	template<std::size_t TPOS>
-	void operator()(
-		const mp_list<
-			std::integral_constant<std::size_t, TPOS>,
-			std::integral_constant<std::size_t, std::numeric_limits<std::size_t>::max()>
-		>&
-	) const
-	{	m_rTarget[TPOS] = 0.0;
-	}
-};
-#endif
+	/// convert meta ARRAY into std::array
 template<typename, typename>
 struct convertToStdArrayImpl;
 template<typename LIST, std::size_t ...INDICES>
@@ -370,6 +341,7 @@ template<typename LIST>
 struct convertToStdArray2
 {	typedef convertToStdArray2Impl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
 };
+/// for implementing addition and subtraction
 template<std::size_t TARGET, std::size_t SOURCE0, std::size_t SOURCE1, typename PLUS=mp_true>
 struct addSub
 {	std::array<double, TARGET> &m_rTarget;
@@ -416,6 +388,9 @@ struct addSub
 	{	m_rTarget[TPOS] = PLUS::value ? m_rSource1[S1] : -m_rSource1[S1];
 	}
 };
+	/// for creating the type result of multiplying one element of a ctaylor array with another
+	/// second and third arguments are an element of the first template argument of ctaylor
+	/// calls itself recursively
 template<typename, typename, typename>
 struct multiply_1_1_R;
 template<typename RESULT>
@@ -471,6 +446,8 @@ struct multiply_1_1_R<RESULT, mp_list<T0, R0...>, mp_list<T1, R1...> >
 		>::type
 	>::type::type type;
 };
+	/// invokes multiply_1_1_R
+	/// only if the resuling order would be smaller or equal MAX
 template<typename STATE, typename T0E>
 using multiply_1_1 = mp_list<
 	typename std::conditional<
@@ -488,6 +465,7 @@ using multiply_1_1 = mp_list<
 	mp_second<STATE>,//T1E
 	mp_third<STATE>//MAX
 >;
+	/// multiplies all elements of a template argument to ctaylor with one element
 template<typename STATE, typename T1E>
 using multiply_2_1 = mp_list<
 	mp_first<STATE>,//T0
@@ -507,6 +485,7 @@ using multiply_2_1 = mp_list<
 	>::type,
 	mp_third<STATE>//MAX
 >;
+	/// multiplies two template arguments to ctaylor with each other
 template<typename T0, typename T1, std::size_t MAX>
 using multiply_2_2 = mp_second<
 	mp_fold<
@@ -531,6 +510,13 @@ struct TypeDisplayer
 		"types are not identical!"
 	);
 };
+	/// the class
+	/// first template argument is a vector of a vector of pairs of independent variable enum and order
+	/// all vectors must be sorted
+	/// usually first entry is mp_list<> indicating 0th derivative or value
+	/// MAX indicates maximum order of derivatives calculated
+	/// MAX should be minimally 1 for it to work
+	/// MAX should be minimally 2 for application of this class to make sense otherwise jacobian.h ought to be used
 template<typename T, std::size_t MAX>
 struct ctaylor
 {	typedef T SET;
@@ -548,7 +534,6 @@ struct ctaylor
 	static ARRAY convert(const typename ctaylor<T1, MAX>::ARRAY&_r, const mp_bool<CHECK>& = mp_bool<CHECK>())
 	{	typedef typename findPositions<T, T1, CHECK>::type SOURCE_POSITIONS;
 		ARRAY s;
-#if 1
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS>::type::value;
 		std::transform(
 			rT.begin(),
@@ -561,11 +546,6 @@ struct ctaylor
 					return _r[_i];
 			}
 		);
-#else
-		mp_for_each<
-			SOURCE_POSITIONS
-		>(copy<SIZE, ctaylor<T1, MAX>::SIZE>(s, _r));
-#endif
 		return s;
 	}
 	template<typename T1>
