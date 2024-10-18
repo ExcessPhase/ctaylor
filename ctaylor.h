@@ -538,7 +538,6 @@ struct ctaylor
 	//static_assert(SIZE > 0, "size must be at least one!");
 	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef std::array<double, SIZE> ARRAY;
-	//alignas(SIZE < 4 ? 16 : (SIZE < 8 ? 32 : 64))
 	ARRAY m_s;
 	ctaylor(void) = default;
 	ctaylor(ctaylor&&) = default;

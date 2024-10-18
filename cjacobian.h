@@ -1,3 +1,11 @@
+/// published under MIT license
+/// Author: Peter Foelsche
+/// October-17th 2024
+/// Austin, TX, USA
+/// email:	peter_foelsche@outlook.com
+/// A sparse, dual number implementation for calculating the 0th and 1th order of derivatives
+/// Refer to VBIC95.cpp for a example usage (__JACOBIAN__ defined).
+/// Requires C++14 and boost
 #pragma once
 #include <iostream>
 #include <type_traits>
@@ -103,17 +111,24 @@ struct cjacobian
 	cjacobian(cjacobian&&) = default;
 	cjacobian&operator=(const cjacobian&) = default;
 	cjacobian&operator=(cjacobian&&) = default;
+		/// constructing from a plain value
+		/// all derivatives are zero
 	cjacobian(const double _d)
 		:m_s({})
 	{	m_s.back() = _d;
 	}
+		/// create an independent variable
+		/// derivative is 1.0
 	cjacobian(const double _d, const bool)
 		:m_s({1.0, _d})
 	{	static_assert(SIZE == 2, "size must be exactly 2!");
 	}
+		/// retrieve the 0th derivative (value)
 	friend double value(const cjacobian&_r)
 	{	return _r.m_s.back();
 	}
+		/// a conversion constructor
+		/// it is impossible to forget derivatives
 	template<typename T1>
 	cjacobian(const cjacobian<T1>&_r)
 		:m_s(convert<T1>(_r.m_s))
@@ -140,11 +155,15 @@ struct cjacobian
 		s.back() = _r.back();
 		return s;
 	}
+		/// a conversion constructor
+		/// impossible to forget derivatives
 	template<typename T1>
 	cjacobian&operator=(const cjacobian<T1>&_r)
 	{	m_s = convert<T1>(_r.m_s);
 		return *this;
 	}
+		/// assignment operator from a double
+		/// all derivatives will be zero
 	cjacobian&operator=(const double _r)
 	{	std::fill(m_s.begin(), std::prev(m_s.end()), 0.0);
 		m_s.back() = _r;
