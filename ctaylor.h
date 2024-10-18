@@ -341,53 +341,6 @@ template<typename LIST>
 struct convertToStdArray2
 {	typedef convertToStdArray2Impl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
 };
-/// for implementing addition and subtraction
-template<std::size_t TARGET, std::size_t SOURCE0, std::size_t SOURCE1, typename PLUS=mp_true>
-struct addSub
-{	std::array<double, TARGET> &m_rTarget;
-	const std::array<double, SOURCE0> &m_rSource0;
-	const std::array<double, SOURCE1> &m_rSource1;
-	addSub(
-		std::array<double, TARGET> &_rTarget,
-		const std::array<double, SOURCE0> &_rSource0,
-		const std::array<double, SOURCE1> &_rSource1
-	)
-		:m_rTarget(_rTarget),
-		m_rSource0(_rSource0),
-		m_rSource1(_rSource1)
-	{
-	}
-	template<std::size_t TPOS, std::size_t S0, std::size_t S1>
-	void operator()(
-		const mp_list<
-			std::integral_constant<std::size_t, TPOS>,
-			std::integral_constant<std::size_t, S0>,
-			std::integral_constant<std::size_t, S1>
-		>&
-	) const
-	{	m_rTarget[TPOS] = PLUS::value ? m_rSource0[S0] + m_rSource1[S1] : m_rSource0[S0] - m_rSource1[S1];
-	}
-	template<std::size_t TPOS, std::size_t S0>
-	void operator()(
-		const mp_list<
-			std::integral_constant<std::size_t, TPOS>,
-			std::integral_constant<std::size_t, S0>,
-			std::integral_constant<std::size_t, std::numeric_limits<std::size_t>::max()>
-		>&
-	) const
-	{	m_rTarget[TPOS] = m_rSource0[S0];
-	}
-	template<std::size_t TPOS, std::size_t S1>
-	void operator()(
-		const mp_list<
-			std::integral_constant<std::size_t, TPOS>,
-			std::integral_constant<std::size_t, std::numeric_limits<std::size_t>::max()>,
-			std::integral_constant<std::size_t, S1>
-		>&
-	) const
-	{	m_rTarget[TPOS] = PLUS::value ? m_rSource1[S1] : -m_rSource1[S1];
-	}
-};
 	/// for creating the type result of multiplying one element of a ctaylor array with another
 	/// second and third arguments are an element of the first template argument of ctaylor
 	/// calls itself recursively
@@ -530,6 +483,10 @@ struct ctaylor
 	ctaylor(const ctaylor&) = default;
 	ctaylor&operator=(const ctaylor&) = default;
 	ctaylor&operator=(ctaylor&&) = default;
+		/// copying all elements from the source array to the destination array
+		/// the destination array is necessarily larger
+		/// and some elements will have to be initialized with zero
+		/// used by copy constructor and assignment operator
 	template<typename T1, bool CHECK = true>
 	static ARRAY convert(const typename ctaylor<T1, MAX>::ARRAY&_r, const mp_bool<CHECK>& = mp_bool<CHECK>())
 	{	typedef typename findPositions<T, T1, CHECK>::type SOURCE_POSITIONS;
@@ -591,7 +548,6 @@ struct ctaylor
 			s.m_s[i] = m_s[i] - _r.m_s[i];
 		return s;
 	}
-#if 1
 	template<typename T1>
 	ctaylor<typename merge<T, T1>::type, MAX> operator+(const ctaylor<T1, MAX>&_r) const
 	{	typedef typename merge<T, T1>::type TT;
@@ -640,24 +596,6 @@ struct ctaylor
 		);
 		return s;
 	}
-#else
-	template<typename T1>
-	ctaylor<typename merge<T, T1>::type, MAX> operator+(const ctaylor<T1, MAX>&_r) const
-	{	typedef typename merge<T, T1>::type TT;
-		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
-		ctaylor<TT, MAX> s;
-		mp_for_each<SOURCE_POSITIONS>(addSub<ctaylor<TT, MAX>::SIZE, ctaylor<T, MAX>::SIZE, ctaylor<T1, MAX>::SIZE>(s.m_s, m_s, _r.m_s));
-		return s;
-	}
-	template<typename T1>
-	ctaylor<typename merge<T, T1>::type, MAX> operator-(const ctaylor<T1, MAX>&_r) const
-	{	typedef typename merge<T, T1>::type TT;
-		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
-		ctaylor<TT, MAX> s;
-		mp_for_each<SOURCE_POSITIONS>(addSub<ctaylor<TT, MAX>::SIZE, ctaylor<T, MAX>::SIZE, ctaylor<T1, MAX>::SIZE, mp_false>(s.m_s, m_s, _r.m_s));
-		return s;
-	}
-#endif
 	auto operator-(void) const
 	{	ctaylor s;
 		for (std::size_t i = 0; i < SIZE; ++i)
