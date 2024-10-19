@@ -431,7 +431,8 @@ struct cjacobian
 	friend auto pow(const double _d0, const cjacobian&_r1)
 	{	return exp(log(_d0)*_r1);
 	}
-	template<std::pair<double, double>(*P)(const double)>
+	typedef std::pair<double, double> doublePair;
+	template<doublePair(*P)(const double)>
 	static cjacobian nonlinear(const cjacobian&_r)
 	{	cjacobian s;
 		const auto sPair = P(value(_r));
@@ -440,58 +441,58 @@ struct cjacobian
 		s.m_s.back() = sPair.first;
 		return s;
 	}
-	static auto sin(const double _d)
+	static doublePair sin(const double _d)
 	{	return std::make_pair(std::sin(_d), std::cos(_d));
 	}
-	static auto cos(const double _d)
+	static doublePair cos(const double _d)
 	{	return std::make_pair(std::cos(_d), -std::sin(_d));
 	}
-	static auto tan(const double _d)
+	static doublePair tan(const double _d)
 	{	const auto d = std::tan(_d);
 		return std::make_pair(d, 1.0 + d*d);
 	}
-	static auto asin(const double _d)
+	static doublePair asin(const double _d)
 	{	return std::make_pair(std::asin(_d), 1.0/std::sqrt(1.0 - _d*_d));
 	}
-	static auto acos(const double _d)
+	static doublePair acos(const double _d)
 	{	return std::make_pair(std::acos(_d), -1.0/std::sqrt(1.0 - _d*_d));
 	}
-	static auto atan(const double _d)
+	static doublePair atan(const double _d)
 	{	return std::make_pair(std::atan(_d), 1.0/(1.0 + _d*_d));
 	}
 
-	static auto sinh(const double _d)
+	static doublePair sinh(const double _d)
 	{	return std::make_pair(std::sinh(_d), std::cosh(_d));
 	}
-	static auto cosh(const double _d)
+	static doublePair cosh(const double _d)
 	{	return std::make_pair(std::cosh(_d), std::sinh(_d));
 	}
-	static auto tanh(const double _d)
+	static doublePair tanh(const double _d)
 	{	const auto d = std::tanh(_d);
 		return std::make_pair(d, 1.0 - d*d);
 	}
-	static auto asinh(const double _d)
+	static doublePair asinh(const double _d)
 	{	return std::make_pair(std::asinh(_d), 1.0/std::sqrt(1.0 + _d*_d));
 	}
-	static auto acosh(const double _d)
+	static doublePair acosh(const double _d)
 	{	return std::make_pair(std::acosh(_d), 1.0/std::sqrt(_d*_d - 1));
 	}
-	static auto atanh(const double _d)
+	static doublePair atanh(const double _d)
 	{	return std::make_pair(std::atan(_d), 1.0/(1.0 - _d*_d));
 	}
 
-	static auto exp(const double _d)
+	static doublePair exp(const double _d)
 	{	const auto d = std::exp(_d);
 		return std::make_pair(d, d);
 	}
-	static auto log(const double _d)
+	static std::pair<double, double> log(const double _d)
 	{	return std::make_pair(std::log(_d), 1.0/_d);
 	}
 	static const double s_dLog10;
-	static auto log10(const double _d)
+	static doublePair log10(const double _d)
 	{	return std::make_pair(std::log10(_d), 1.0/(s_dLog10*_d));
 	}
-	static auto sqrt(const double _d)
+	static doublePair sqrt(const double _d)
 	{	const auto d = std::sqrt(_d);
 		return std::make_pair(d, 0.5/d);
 	}
