@@ -1,9 +1,12 @@
 ifndef BOOST_ROOT
 $(error BOOST_ROOT is not set)
 endif
-all: ctaylor.exe vbic95Jac.exe vbic95Taylor.exe black_scholes.exe
+all: ctaylor.exe vbic95Jac.exe vbic95Taylor.exe black_scholes.exe cjacobian.exe
 CC=g++
 CFLAGS=-std=c++14 -DNDEBUG -O3 -march=native -flto -isystem $(BOOST_ROOT)/include
+
+cjacobian.exe: cjacobian.cpp
+	$(CC) $(CFLAGS) -o cjacobian.exe cjacobian.cpp
 
 ctaylor.exe: ctaylor.cpp
 	$(CC) $(CFLAGS) -o ctaylor.exe ctaylor.cpp

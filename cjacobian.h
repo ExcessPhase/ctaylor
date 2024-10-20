@@ -127,6 +127,13 @@ struct cjacobian
 	friend double value(const cjacobian&_r)
 	{	return _r.m_s.back();
 	}
+		/// retrieve the derivative vs. the independent variable with index I
+		/// does not compile if there is no such derivative
+	template<std::size_t I>
+	double getDer(const mp_size_t<I>&) const
+	{	static_assert(mp_find<VECTOR, mp_size_t<I> >::value + 1 < SIZE, "derivative pattern not found!");
+		return m_s.at(mp_find<VECTOR, mp_size_t<I> >::value);
+	}
 		/// a conversion constructor
 		/// it is impossible to forget derivatives
 	template<typename T1>
