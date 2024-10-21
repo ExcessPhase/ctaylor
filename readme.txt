@@ -49,7 +49,6 @@ The type of the dual numbers object depends on how many independent variables ar
 So it is a good idea to avoid declaring variables in a different way than letting the compiler decide the type by using auto.
 Reusing a variable for different purposes, is likely to fail (see the original bsim3 code).
 For joining two different types, I created the taylor::if_() function, which operates like an terniary operator -- with double and ctaylor and tuples of such.
-I think I've yet to implement an assignment operator -- which would look similar like the copy-constructor.
 
 10/10/2024:
 implemented assignment operators and cbrt()
