@@ -26,12 +26,12 @@ ctaylor.cpp
 ctaylor.exe
 Reads arguments from the commandline as otherwise the g++ compiler simply incorporates the at compile-time calculated results into the executable.
 2) 
-VBIC95.cpp -- simulates a single transistor using Halley's method (used to use Newton's method).
+VBIC95.cpp -- simulates a single transistor using Newton's method.
 yields vbic95Taylor.exe and vbic95Jac.exe.
-The first one using ctaylor.h and calculating 1th order derivative (can be changed by setting MAX=2, which yields non-convergence).
+The first one using ctaylor.h and calculating 1th order derivative
+(can be changed by setting MAX=2, which yields non-convergence as the delta-x limiting is interferring with Halley's method).
 The latter using cjacobian.h and calculating also only the 1th order derivative but yielding better runtime and compile time performance.
 Reads parameters from file named PARS.
-Still not fully tested.
 Yields the same results as the standard.
 The major weak point is the quick&dirty matrix package.
 3)
