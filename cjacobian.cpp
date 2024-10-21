@@ -24,4 +24,7 @@ int main(int argc, char**argv)
 	std::cerr << "s3=" << s3 << "\n";
 	std::cerr << "s0/s2=" << s0/s2 << "\n";
 	std::cerr << "s3.getDer(mp_size_t<0>())=" << s3.getDer(mp_size_t<0>()) << std::endl;
+	std::cerr << "s3.getDer(mp_size_t<1>())=" << s3.getDer(mp_size_t<1>()) << std::endl;
+	std::cerr << "s3.getDer(mp_size_t<2>())=" << s3.getDer(mp_size_t<2>()) << std::endl;
+	std::cerr << "value(s3)=" << value(s3) << std::endl;
 }

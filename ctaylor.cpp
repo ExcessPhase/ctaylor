@@ -31,7 +31,7 @@ int main(int argc, char**argv)
 			mp_size_t<MAX>	// to the order of MAX
 		>
 	> LIST_OF_PAIRS;
-	std::cout << "der()=" << s5.getDer((LIST_OF_PAIRS())) << "\n";
+	std::cout << "s5.getDer(LIST_OF_PAIRS())=" << s5.getDer(LIST_OF_PAIRS()) << "\n";
 	typedef mp_list<
 			/// elements must be sorted by variable-enum
 		mp_list<
@@ -43,5 +43,5 @@ int main(int argc, char**argv)
 			mp_size_t<1>	// to the order of 1
 		>
 	> LIST_OF_PAIRS_2;
-	std::cout << "der()=" << s5.getDer((LIST_OF_PAIRS_2())) << "\n";
+	std::cout << "s5.getDer(LIST_OF_PAIRS_2())=" << s5.getDer(LIST_OF_PAIRS_2()) << "\n";
 }
