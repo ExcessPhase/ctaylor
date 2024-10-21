@@ -985,8 +985,8 @@ try
 			{	index2Index2Index2Double sH;
 				index2Index2Double sJ;
 				index2Double sValues;
-				static_assert(std::ptrdiff_t(enumCircuitNodes::b) == -1);
-				static_assert(std::ptrdiff_t(enumCircuitNodes::c) == -2);
+				static_assert(std::ptrdiff_t(enumCircuitNodes::b) == -1, "circuit node b must be negative!");
+				static_assert(std::ptrdiff_t(enumCircuitNodes::c) == -2, "circuit node c must be negative!");
 					/// calling the single transistor instance
 					/// second argument are the fixed external voltages (with negative indicies)
 				sI.calculate(sV, {vb, vc}, sH, sJ, sValues, sTrans, sTC);
