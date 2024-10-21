@@ -617,6 +617,19 @@ struct cjacobian
 	friend auto fmod(const cjacobian&_r0, const cjacobian<T1>&_r1)
 	{	return _r0 - static_cast<int>(value(_r0)/value(_r1))*_r1;
 	}
+	template<typename T1>
+	friend auto hypot(
+		const cjacobian&_r0,
+		const cjacobian<T1>&_r1
+	)
+	{	return sqrt(sqr(_r0) + sqr(_r1));
+	}
+	friend auto hypot(const cjacobian&_rX, const double _dY)
+	{	return sqrt(sqr(_rX) + _dY*_dY);
+	}
+	friend auto hypot(const double _dX, const cjacobian&_rY)
+	{	return sqrt(sqr(_rY) + _dX*_dX);
+	}
 #define __create__(sin)\
 	friend cjacobian sin(const cjacobian&_r)\
 	{	return nonlinear<sin>(_r);\
