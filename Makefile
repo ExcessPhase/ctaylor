@@ -29,3 +29,29 @@ clean:
 $(BOOST_ROOT)/include:
 	@echo \$$\(BOOST_ROOT\)/include does not exist!
 	@exit 1
+
+VBIC95/VBIC95.o: LUFAC/lufac.h \
+ctaylor.h \
+VBIC95/circuitNodes.h \
+VBIC95/currentSources.h \
+VBIC95/inputs.h \
+VBIC95/members.h \
+VBIC95/nodes.h \
+VBIC95/parameters.h \
+VBIC95/temperatureSetup.h
+
+VBIC95/VBIC95Jac.o: LUFAC/lufac.h \
+cjacobian.h \
+VBIC95/circuitNodes.h \
+VBIC95/currentSources.h \
+VBIC95/inputs.h \
+VBIC95/members.h \
+VBIC95/nodes.h \
+VBIC95/parameters.h \
+VBIC95/temperatureSetup.h
+
+ctaylor.o:ctaylor.h
+
+cjacobian.o:cjacobian.h
+
+BLACK_SCHOLES/autodiff_black_scholes.o:ctaylor.h
