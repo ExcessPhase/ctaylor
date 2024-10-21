@@ -23,19 +23,27 @@ There are three examples:
 
 1) 
 ctaylor.cpp
+ctaylor.exe
 Reads arguments from the commandline as otherwise the g++ compiler simply incorporates the at compile-time calculated results into the executable.
 2) 
 VBIC95.cpp -- simulates a single transistor using Halley's method (used to use Newton's method).
+yields vbic95Taylor.exe and vbic95Jac.exe.
+The first one using ctaylor.h and calculating 1th order derivative (can be changed by setting MAX=2, which yields non-convergence).
+The latter using cjacobian.h and calculating also only the 1th order derivative but yielding better runtime and compile time performance.
 Reads parameters from file named PARS.
 Still not fully tested.
 Yields the same results as the standard.
 The major weak point is the quick&dirty matrix package.
 3)
 BLACK_SCHOLES
+yields black_scholes.exe
+using ctaylor.h
 Example code from the boost library. If it would be started in a loop without printouts, it would show a dramatic performance improvement compared to boost::autodiff.
 This example is extracting values from complicated expressions involving ctaylor variables.
 This constitutes unnecessary calculation of derivatives just to increase entropy of the universe.
 I don't know if the compiler is smart enough to avoid this.
+4)
+cjacobian.cpp yields cjacobian.exe using cjacobian.h
 
 The type of the dual numbers object depends on how many independent variables are involved and their cross-products and order.
 So it is a good idea to avoid declaring variables in a different way than letting the compiler decide the type by using auto.
