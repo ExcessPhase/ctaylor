@@ -495,7 +495,11 @@ struct cjacobian
 	static std::pair<double, double> log(const double _d)
 	{	return std::make_pair(std::log(_d), 1.0/_d);
 	}
+#if defined(__GNUC__) && !defined(__clang__)
+	static constexpr double s_dLog10 = std::log(10.0);
+#else
 	static const double s_dLog10;
+#endif
 	static doublePair log10(const double _d)
 	{	return std::make_pair(std::log10(_d), 1.0/(s_dLog10*_d));
 	}
@@ -630,10 +634,24 @@ struct cjacobian
 	friend auto hypot(const double _dX, const cjacobian&_rY)
 	{	return sqrt(sqr(_rY) + _dX*_dX);
 	}
+	static doublePair erf(const double _d)
+	{	return std::make_pair(
+			std::erf(_d),
+			s_dTwoOverSqrtPi*std::exp(-_d*_d)
+		);
+	}
+	static doublePair erfc(const double _d)
+	{	return std::make_pair(
+			std::erfc(_d),
+			-s_dTwoOverSqrtPi*std::exp(-_d*_d)
+		);
+	}
 #define __create__(sin)\
 	friend cjacobian sin(const cjacobian&_r)\
 	{	return nonlinear<sin>(_r);\
 	}
+	__create__(erfc)
+	__create__(erf)
 	__create__(sqrt)
 	__create__(exp)
 	__create__(log)
@@ -651,9 +669,18 @@ struct cjacobian
 	__create__(acosh)
 	__create__(atanh)
 #undef __create__
+#if defined(__GNUC__) && !defined(__clang__)
+	static constexpr double s_dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
+#else
+	static const double s_dTwoOverSqrtPi;
+#endif
 };
+#if !defined(__GNUC__) || defined(__clang__)
+template<typename T>
+const double cjacobian<T>::s_dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
 template<typename VECTOR>
 const double cjacobian<VECTOR>::s_dLog10 = std::log(10.0);
+#endif
 template<typename, typename>
 struct common_type;
 template<typename T>
