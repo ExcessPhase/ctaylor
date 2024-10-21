@@ -520,6 +520,103 @@ struct cjacobian
 			static_cast<bool(*)(double)>(&std::isfinite)
 		);
 	}
+	template<typename T1>
+	friend auto atan2(
+		const cjacobian&_rY,
+		const cjacobian<T1>&_rX
+	)
+	{	return atan(_rY/_rX);
+	}
+	friend auto atan2(const cjacobian&_rY, const double _dX)
+	{	return atan(_rY/_dX);
+	}
+	friend auto atan2(const double _dY, const cjacobian&_rX)
+	{	return atan(_dY/_rX);
+	}
+	template<typename T1>
+	friend auto max(const cjacobian&_r0, const double _r1)
+	{	return if_(
+			_r0 > _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+	template<typename T1>
+	friend auto max(const double _r0, const cjacobian&_r1)
+	{	return if_(
+			_r0 > _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+		/// if this does not compile, check the order of ENUM-order pairs
+	template<typename T1>
+	friend auto max(const cjacobian&_r0, const cjacobian<T1>&_r1)
+	{	return if_(
+			_r0 > _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+	template<typename T1>
+	friend auto min(const cjacobian&_r0, const double _r1)
+	{	return if_(
+			_r0 < _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+	template<typename T1>
+	friend auto min(const double _r0, const cjacobian&_r1)
+	{	return if_(
+			_r0 < _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+		/// if this does not compile, check the order of ENUM-order pairs
+	template<typename T1>
+	friend auto min(const cjacobian&_r0, const cjacobian<T1>&_r1)
+	{	return if_(
+			_r0 < _r1,
+			[&](void)
+			{	return _r0;
+			},
+			[&](void)
+			{	return _r1;
+			}
+		);
+	}
+	friend auto fmod(const cjacobian&_r0, const double _r1)
+	{	return _r0 - static_cast<int>(value(_r0)/_r1)*_r1;
+	}
+	friend auto fmod(const double _r0, const cjacobian&_r1)
+	{	return _r0 - static_cast<int>(_r0/value(_r1))*_r1;
+	}
+	template<typename T1>
+	friend auto fmod(const cjacobian&_r0, const cjacobian<T1>&_r1)
+	{	return _r0 - static_cast<int>(value(_r0)/value(_r1))*_r1;
+	}
 #define __create__(sin)\
 	friend cjacobian sin(const cjacobian&_r)\
 	{	return nonlinear<sin>(_r);\
