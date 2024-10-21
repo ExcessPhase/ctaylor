@@ -507,6 +507,13 @@ struct cjacobian
 	{	const auto d = std::sqrt(_d);
 		return std::make_pair(d, 0.5/d);
 	}
+	static doublePair cbrt(const double _d)
+	{	const double d0 = std::cbrt(_d);
+		return std::make_pair(
+			d0,
+			1.0/(3.0*d0*d0)
+		);
+	}
 	friend auto sqr(const cjacobian&_r)
 	{	return _r*_r;
 	}
@@ -650,6 +657,7 @@ struct cjacobian
 	friend cjacobian sin(const cjacobian&_r)\
 	{	return nonlinear<sin>(_r);\
 	}
+	__create__(cbrt)
 	__create__(erfc)
 	__create__(erf)
 	__create__(sqrt)
