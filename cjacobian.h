@@ -132,7 +132,7 @@ struct cjacobian
 	template<std::size_t I>
 	double getDer(const mp_size_t<I>&) const
 	{	static_assert(mp_find<VECTOR, mp_size_t<I> >::value + 1 < SIZE, "derivative pattern not found!");
-		return m_s.at(mp_find<VECTOR, mp_size_t<I> >::value);
+		return m_s[mp_find<VECTOR, mp_size_t<I> >::value];
 	}
 		/// a conversion constructor
 		/// it is impossible to forget derivatives
