@@ -15,25 +15,25 @@ template<typename A>
 struct combineTwo<A, A>
 {	typedef A type;
 };
-template<template<typename, typename> typename F, typename Set1, typename Set2, template<typename, typename> typename MERGE=combineTwo>
+template<template<typename, typename> class F, typename Set1, typename Set2, template<typename, typename> class MERGE=combineTwo>
 struct merge_sorted_sets;
 
-template<template<typename, typename> typename F, template<typename, typename> typename MERGE>
+template<template<typename, typename> class F, template<typename, typename> class MERGE>
 struct merge_sorted_sets<F, mp_list<>, mp_list<>, MERGE>
 {	using type = mp_list<>;
 };
 
-template<template<typename, typename> typename F, typename... Ts, template<typename, typename> typename MERGE>
+template<template<typename, typename> class F, typename... Ts, template<typename, typename> class MERGE>
 struct merge_sorted_sets<F, mp_list<Ts...>, mp_list<>, MERGE>
 {	using type = mp_list<Ts...>;
 };
 
-template<template<typename, typename> typename F, typename... Ts, template<typename, typename> typename MERGE>
+template<template<typename, typename> class F, typename... Ts, template<typename, typename> class MERGE>
 struct merge_sorted_sets<F, mp_list<>, mp_list<Ts...>, MERGE>
 {	using type = mp_list<Ts...>;
 };
 
-template<template<typename, typename> typename F, typename T1, typename... Ts1, typename T2, typename... Ts2, template<typename, typename> typename MERGE>
+template<template<typename, typename> class F, typename T1, typename... Ts1, typename T2, typename... Ts2, template<typename, typename> class MERGE>
 struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 {
 #if 1
@@ -43,7 +43,8 @@ struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 			merge_sorted_sets<
 				F,
 				mp_list<Ts1...>,
-				mp_list<T2, Ts2...>
+				mp_list<T2, Ts2...>,
+				MERGE
 			>,
 			mp_identity<T1>
 		>,
@@ -53,7 +54,8 @@ struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 				merge_sorted_sets<
 					F,
 					mp_list<T1, Ts1...>,
-					mp_list<Ts2...>
+					mp_list<Ts2...>,
+					MERGE
 				>,
 				mp_identity<T2>
 			>,
@@ -61,7 +63,8 @@ struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 				merge_sorted_sets<
 					F,
 					mp_list<Ts1...>,
-					mp_list<Ts2...>
+					mp_list<Ts2...>,
+					MERGE
 				>,
 				MERGE<T2, T1>
 			>
