@@ -16,6 +16,7 @@
 #include <boost/mp11.hpp>
 #include <cstdlib>
 #include <algorithm>
+#include <numeric>
 #include "merge_sorted_sets.h"
 #include "taylor_series_expansions.h"
 
@@ -113,6 +114,8 @@ struct accumulatedFactorial<
 };
 template<typename T>
 struct containsValue;
+template<typename T>
+struct containsValue2;
 /// creates a type ready for passing to ctaylor
 /// with the value as the first element
 /// and the 1th order derivative as the second element
@@ -183,6 +186,10 @@ struct compareListOfPairs
 			lexicographical_compare<T0, T1>
 		>::type
 	>::type::type type;
+};
+template<typename T0, typename T1>
+struct compareListOfPairs2
+{	typedef typename compareListOfPairs<mp_first<T0>, mp_first<T1> >::type type;
 };
 #if 0
 template<typename LIST>
@@ -273,36 +280,116 @@ struct findPositions2
 		typename findPositions<TARGET, SOURCE1>::type
 	> type;
 };
-
+template<typename A, typename B>
+struct combineTwoPairs;
+template<typename A, typename ...B, typename ...C>
+struct combineTwoPairs<
+	mp_list<A, mp_list<B...> >,
+	mp_list<A, mp_list<C...> >
+>
+{	typedef mp_list<
+		A,
+		mp_append<
+			mp_list<B...>,
+			mp_list<C...>
+		>
+	> type;
+};
+/// new merge<>
+/// COMPARE= compareListOfPairs2
+/// MERGE=combineTwoPairs
+/// CONTAINS_VALUE=containsValue2
 /// merge two sets of list_of_list
-template<typename T0, typename T1>
+template<
+	typename T0,
+	typename T1,
+	template<typename, typename> class COMPARE=compareListOfPairs,
+	template<typename, typename> class MERGE=combineTwo,
+	template<typename> class CONTAINS_VALUE=containsValue
+>
 struct merge
 {	static_assert(mp_is_set<T0>::value, "must be a set!");
 	static_assert(mp_is_set<T1>::value, "must be a set!");
 	typedef typename merge_sorted_sets<
-		compareListOfPairs,
+		COMPARE,
 		T0,
-		T1
+		T1,
+		MERGE
 	>::type type;
 	static_assert(
-		containsValue<type>::type::value == mp_or<
-			typename containsValue<T0>::type,
-			typename containsValue<T1>::type
+		CONTAINS_VALUE<type>::type::value == mp_or<
+			typename CONTAINS_VALUE<T0>::type,
+			typename CONTAINS_VALUE<T1>::type
 		>::value, "value in merge result!");
 };
-template<typename T>
-struct merge<T, mp_list<> >
+template<
+	typename T,
+	template<typename, typename> class COMPARE,
+	template<typename, typename> class MERGE,
+	template<typename> class CONTAINS_VALUE
+>
+struct merge<T, mp_list<>, COMPARE, MERGE, CONTAINS_VALUE>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
 };
-template<typename T>
-struct merge<mp_list<>, T>
+template<
+	typename T,
+	template<typename, typename> class COMPARE,
+	template<typename, typename> class MERGE,
+	template<typename> class CONTAINS_VALUE
+>
+struct merge<mp_list<>, T, COMPARE, MERGE, CONTAINS_VALUE>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
 };
-template<>
-struct merge<mp_list<>, mp_list<> >
+template<
+	template<typename, typename> class COMPARE,
+	template<typename, typename> class MERGE,
+	template<typename> class CONTAINS_VALUE
+>
+struct merge<mp_list<>, mp_list<>, COMPARE, MERGE, CONTAINS_VALUE>
 {	typedef mp_list<> type;
+};
+
+template<typename, typename>
+struct convertToStdInitializerListImpl;
+template<typename LIST, std::size_t ...INDICES>
+struct convertToStdInitializerListImpl<LIST, std::index_sequence<INDICES...> >
+{	static constexpr const std::initializer_list<std::pair<std::size_t, std::size_t> > value =
+	{	std::make_pair(
+			mp_first<mp_at_c<LIST, INDICES> >::value,
+			mp_second<mp_at_c<LIST, INDICES> >::value
+		)...
+	};
+};
+template<typename LIST, std::size_t ...INDICES>
+constexpr const std::initializer_list<std::pair<std::size_t, std::size_t> >
+convertToStdInitializerListImpl<LIST, std::index_sequence<INDICES...> >::value;
+template<typename LIST>
+struct convertToStdInitializerList
+{	typedef convertToStdInitializerListImpl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
+};
+
+template<typename, typename>
+struct convertToStdArray3Impl;
+template<typename LIST, std::size_t ...INDICES>
+struct convertToStdArray3Impl<LIST, std::index_sequence<INDICES...> >
+{	static constexpr const std::array<
+		std::initializer_list<std::pair<std::size_t, std::size_t> >,
+		mp_size<LIST>::value
+	> value = {
+		convertToStdInitializerList<mp_at_c<LIST, INDICES> >::type::value...
+	};
+};
+template<typename LIST, std::size_t ...INDICES>
+constexpr const std::array<
+	std::initializer_list<std::pair<std::size_t, std::size_t> >,
+	mp_size<LIST>::value
+>
+convertToStdArray3Impl<LIST, std::index_sequence<INDICES...> >::value;
+template<typename LIST>
+struct convertToStdArray3
+{	typedef convertToStdArray3Impl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
 };
 	/// convert meta ARRAY into std::array
 template<typename, typename>
@@ -406,14 +493,22 @@ struct multiply_1_1_R<RESULT, mp_list<T0, R0...>, mp_list<T1, R1...> >
 template<typename STATE, typename T0E>
 using multiply_1_1 = mp_list<
 	typename std::conditional<
-		(order<T0E>::value + order<mp_second<STATE> >::value <= mp_third<STATE>::value),
+		(order<mp_first<T0E> >::value + order<mp_first<mp_second<STATE> > >::value <= mp_third<STATE>::value),
 		mp_push_back<
 			mp_first<STATE>,
-			typename multiply_1_1_R<
-				mp_list<>,
-				T0E,
-				mp_second<STATE>// T1E
-			>::type
+			mp_list<
+				typename multiply_1_1_R<
+					mp_list<>,
+					mp_first<T0E>,
+					mp_first<mp_second<STATE> >// T1E
+				>::type,
+				mp_list<
+					mp_list<
+						mp_second<T0E>,
+						mp_second<mp_second<STATE> >
+					>
+				>
+			>
 		>,
 		mp_first<STATE>
 	>::type,
@@ -436,17 +531,27 @@ using multiply_2_1 = mp_list<
 				multiply_1_1
 			>
 		>,
-		mp_second<STATE>
+		mp_second<STATE>,
+		compareListOfPairs2,
+		combineTwoPairs,
+		containsValue2
 	>::type,
 	mp_third<STATE>//MAX
+>;
+// Transform function to pair each type with its index
+template<typename L>
+using add_index = mp_transform<
+	mp_list,
+	L,
+	mp_iota_c<mp_size<L>::value>
 >;
 	/// multiplies two template arguments to ctaylor with each other
 template<typename T0, typename T1, std::size_t MAX>
 using multiply_2_2 = mp_second<
 	mp_fold<
-		T1,
+		add_index<T1>,
 		mp_list<
-			T0,
+			add_index<T0>,
 			mp_list<>,
 			mp_size_t<MAX>
 		>,
@@ -635,19 +740,39 @@ struct ctaylor
 	}
 	template<typename T1>
 	auto operator*(const ctaylor<T1, MAX>&_r) const
-	{	typedef typename std::decay<decltype(multiply<T, MAX, SIZE, T1>(*this, _r)())>::type::SET ACTUAL;
-		typedef multiply_2_2<T, T1, MAX> CALCULATED;
-		TypeDisplayer<ACTUAL, CALCULATED> sCompare;
-#if 0
-		static_assert(
-			std::is_same<
-				CALCULATED,
-				ACTUAL
-			>::value,
-			"must be the same!"
+	{	//typedef typename std::decay<decltype(multiply<T, MAX, SIZE, T1>(*this, _r)())>::type::SET ACTUAL;
+		typedef multiply_2_2<T, T1, MAX> CALCULATED_PAIRS;
+		typedef mp_transform<
+			mp_first,
+			CALCULATED_PAIRS
+		> CALCULATED;
+		typedef mp_transform<
+			mp_second,
+			CALCULATED_PAIRS
+		> POSITIONS;
+		//TypeDisplayer<ACTUAL, CALCULATED> sCompare;
+#if 1
+		ctaylor<CALCULATED, MAX> s;
+		auto &r = convertToStdArray3<POSITIONS>::type::value;
+		std::transform(
+			r.begin(),
+			r.end(),
+			s.m_s.begin(),
+			[&](const std::initializer_list<std::pair<std::size_t, std::size_t> >&_rIL)
+			{	return std::accumulate(
+					_rIL.begin(),
+					_rIL.end(),
+					double(),
+					[&](const double _d, const std::pair<std::size_t, std::size_t> &_rP)
+					{	return _d + m_s[_rP.first]*_r.m_s[_rP.second];
+					}
+				);
+			}
 		);
-#endif
+		return s;
+#else
 		return multiply<T, MAX, SIZE, T1>(*this, _r)();
+#endif
 	}
 	template<
 		typename U=T,
@@ -1330,8 +1455,18 @@ template<typename T, std::size_t MAX>
 const double ctaylor<T, MAX>::dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
 #endif
 template<typename T>
+struct containsValue2
+{	typedef mp_empty<
+		mp_first<
+			mp_first<T>
+		>
+	> type;
+};
+template<typename T>
 struct containsValue
-{	typedef mp_empty<mp_first<T> > type;
+{	typedef mp_empty<
+		mp_first<T>
+	> type;
 };
 template<>
 struct containsValue<mp_list<> >
@@ -1459,4 +1594,5 @@ typename common_type<
 using implementation::ctaylor;
 using implementation::makeIndependent;
 using implementation::if_;
+using namespace implementation;
 }
