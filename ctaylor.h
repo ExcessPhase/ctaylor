@@ -275,12 +275,12 @@ struct findPositions2
 };
 
 /// merge two sets of list_of_list
-template<typename T0, typename T1>
+template<typename T0, typename T1, template<typename, typename> typename COMPARE=compareListOfPairs>
 struct merge
 {	static_assert(mp_is_set<T0>::value, "must be a set!");
 	static_assert(mp_is_set<T1>::value, "must be a set!");
 	typedef typename merge_sorted_sets<
-		compareListOfPairs,
+		COMPARE,
 		T0,
 		T1
 	>::type type;
@@ -290,18 +290,18 @@ struct merge
 			typename containsValue<T1>::type
 		>::value, "value in merge result!");
 };
-template<typename T>
-struct merge<T, mp_list<> >
+template<typename T, template<typename, typename> typename COMPARE>
+struct merge<T, mp_list<>, COMPARE>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
 };
-template<typename T>
-struct merge<mp_list<>, T>
+template<typename T, template<typename, typename> typename COMPARE>
+struct merge<mp_list<>, T, COMPARE>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
 };
-template<>
-struct merge<mp_list<>, mp_list<> >
+template<template<typename, typename> typename COMPARE>
+struct merge<mp_list<>, mp_list<>, COMPARE>
 {	typedef mp_list<> type;
 };
 	/// convert meta ARRAY into std::array
