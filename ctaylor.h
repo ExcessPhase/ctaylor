@@ -275,33 +275,54 @@ struct findPositions2
 };
 
 /// merge two sets of list_of_list
-template<typename T0, typename T1, template<typename, typename> typename COMPARE=compareListOfPairs>
+template<
+	typename T0,
+	typename T1,
+	template<typename, typename> typename COMPARE=compareListOfPairs,
+	template<typename, typename> typename MERGE=combineTwo,
+	template<typename> typename CONTAINS_VALUE=containsValue
+>
 struct merge
 {	static_assert(mp_is_set<T0>::value, "must be a set!");
 	static_assert(mp_is_set<T1>::value, "must be a set!");
 	typedef typename merge_sorted_sets<
 		COMPARE,
 		T0,
-		T1
+		T1,
+		MERGE
 	>::type type;
 	static_assert(
-		containsValue<type>::type::value == mp_or<
-			typename containsValue<T0>::type,
-			typename containsValue<T1>::type
+		CONTAINS_VALUE<type>::type::value == mp_or<
+			typename CONTAINS_VALUE<T0>::type,
+			typename CONTAINS_VALUE<T1>::type
 		>::value, "value in merge result!");
 };
-template<typename T, template<typename, typename> typename COMPARE>
-struct merge<T, mp_list<>, COMPARE>
+template<
+	typename T,
+	template<typename, typename> typename COMPARE,
+	template<typename, typename> typename MERGE,
+	template<typename> typename CONTAINS_VALUE
+>
+struct merge<T, mp_list<>, COMPARE, MERGE, CONTAINS_VALUE>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
 };
-template<typename T, template<typename, typename> typename COMPARE>
-struct merge<mp_list<>, T, COMPARE>
+template<
+	typename T,
+	template<typename, typename> typename COMPARE,
+	template<typename, typename> typename MERGE,
+	template<typename> typename CONTAINS_VALUE
+>
+struct merge<mp_list<>, T, COMPARE, MERGE, CONTAINS_VALUE>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
 };
-template<template<typename, typename> typename COMPARE>
-struct merge<mp_list<>, mp_list<>, COMPARE>
+template<
+	template<typename, typename> typename COMPARE,
+	template<typename, typename> typename MERGE,
+	template<typename> typename CONTAINS_VALUE
+>
+struct merge<mp_list<>, mp_list<>, COMPARE, MERGE, CONTAINS_VALUE>
 {	typedef mp_list<> type;
 };
 	/// convert meta ARRAY into std::array
@@ -1332,6 +1353,28 @@ const double ctaylor<T, MAX>::dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
 template<typename T>
 struct containsValue
 {	typedef mp_empty<mp_first<T> > type;
+#if 0
+	typedef mp_is_list<
+		mp_first<T>
+	> is_list;
+	typedef mp_empty<
+		mp_first<mp_first<T> >
+	> is_empty;
+	typedef mp_is_list<
+		mp_second<mp_first<T> >
+	> is_list_2;
+	typedef mp_not<
+		mp_empty<
+			mp_second<mp_first<T> >
+		>
+	> is_not_empty;
+#endif
+#if 0
+		mp_list<
+			mp_list<>
+			mp_list<A...>
+		>
+#endif
 };
 template<>
 struct containsValue<mp_list<> >
