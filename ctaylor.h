@@ -549,7 +549,7 @@ struct ctaylor
 		return s;
 	}
 	template<typename T1>
-	ctaylor<typename merge<T, T1>::type, MAX> operator+(const ctaylor<T1, MAX>&_r) const
+	auto operator+(const ctaylor<T1, MAX>&_r) const
 	{	typedef typename merge<T, T1>::type TT;
 		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
 		ctaylor<TT, MAX> s;
@@ -573,7 +573,7 @@ struct ctaylor
 		return s;
 	}
 	template<typename T1>
-	ctaylor<typename merge<T, T1>::type, MAX> operator-(const ctaylor<T1, MAX>&_r) const
+	auto operator-(const ctaylor<T1, MAX>&_r) const
 	{	typedef typename merge<T, T1>::type TT;
 		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
 		ctaylor<TT, MAX> s;
@@ -632,7 +632,7 @@ struct ctaylor
 	{	return _r*_d;
 	}
 	template<typename T1>
-	ctaylor<multiply_2_2<T, T1, MAX>, MAX> operator*(const ctaylor<T1, MAX>&_r) const
+	auto operator*(const ctaylor<T1, MAX>&_r) const
 	{	typedef typename std::decay<decltype(multiply<T, MAX, SIZE, T1>(*this, _r)())>::type::SET ACTUAL;
 		typedef multiply_2_2<T, T1, MAX> CALCULATED;
 		TypeDisplayer<ACTUAL, CALCULATED> sCompare;
