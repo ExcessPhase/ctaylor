@@ -779,7 +779,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -821,7 +821,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -884,7 +884,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = sTan.m_s[0];
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -926,7 +926,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = sTanh.m_s[0];
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -942,7 +942,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -958,7 +958,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -974,7 +974,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -990,7 +990,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1006,7 +1006,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1022,7 +1022,7 @@ struct ctaylor
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s.at(i - 1)/i;
+			s[i] = s1.m_s[i - 1]/i;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<typename T1>
@@ -1240,7 +1240,7 @@ struct ctaylor
 	template<typename LIST_OF_PAIRS>
 	auto getDer(const LIST_OF_PAIRS&) const
 	{	static_assert(mp_find<T, LIST_OF_PAIRS>::value < SIZE, "derivative pattern not found! (wrong sorting?)");
-		return m_s.at(mp_find<T, LIST_OF_PAIRS>::value)*accumulatedFactorial<LIST_OF_PAIRS>::value;
+		return m_s[mp_find<T, LIST_OF_PAIRS>::value]*accumulatedFactorial<LIST_OF_PAIRS>::value;
 	}
 
 	template<typename T1>
