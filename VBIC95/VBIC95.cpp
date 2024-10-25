@@ -704,6 +704,11 @@ struct vbic
 		void operator()(const mp_list<>&) const
 		{	m_rValue += m_rV.m_s.at(mp_find<T, mp_list<> >::value);
 		}
+			/// in case of someone sets MAX to something larger than 2
+		template<typename ...PAIRS>
+		void operator()(const mp_list<PAIRS...>&) const
+		{	static_assert(implementation::order<mp_list<PAIRS...> >::value > 2, "order must be larger than 2!");
+		}
 #else
 			/// for jacobian.h
 		template<std::size_t ENUM>
