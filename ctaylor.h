@@ -184,6 +184,7 @@ struct compareListOfPairs
 		>::type
 	>::type::type type;
 };
+#if 0
 template<typename LIST>
 struct listOfListsIsSorted;
 
@@ -202,6 +203,7 @@ struct listOfListsIsSorted<mp_list<T0, T1, REST...> >
 		typename listOfListsIsSorted<mp_pop_front<mp_list<T0, T1, REST...> > >::type
 	> type;
 };
+#endif
 template<typename STATE, typename SOURCE_ELEMENT>
 using checkPosition = mp_list<
 	typename std::conditional<
