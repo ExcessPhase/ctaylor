@@ -184,6 +184,7 @@ struct compareListOfPairs
 		>::type
 	>::type::type type;
 };
+#if 0
 template<typename LIST>
 struct listOfListsIsSorted;
 
@@ -202,6 +203,7 @@ struct listOfListsIsSorted<mp_list<T0, T1, REST...> >
 		typename listOfListsIsSorted<mp_pop_front<mp_list<T0, T1, REST...> > >::type
 	> type;
 };
+#endif
 template<typename STATE, typename SOURCE_ELEMENT>
 using checkPosition = mp_list<
 	typename std::conditional<
@@ -273,12 +275,12 @@ struct findPositions2
 };
 
 /// merge two sets of list_of_list
-template<typename T0, typename T1>
+template<typename T0, typename T1, template<typename, typename> typename COMPARE_LIST_OF_PAIRS=compareListOfPairs>
 struct merge
 {	static_assert(mp_is_set<T0>::value, "must be a set!");
 	static_assert(mp_is_set<T1>::value, "must be a set!");
 	typedef typename merge_sorted_sets<
-		compareListOfPairs,
+		COMPARE_LIST_OF_PAIRS,
 		T0,
 		T1
 	>::type type;
@@ -288,18 +290,18 @@ struct merge
 			typename containsValue<T1>::type
 		>::value, "value in merge result!");
 };
-template<typename T>
-struct merge<T, mp_list<> >
+template<typename T, template<typename, typename> typename COMPARE_LIST_OF_PAIRS>
+struct merge<T, mp_list<>, COMPARE_LIST_OF_PAIRS>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
 };
-template<typename T>
-struct merge<mp_list<>, T>
+template<typename T, template<typename, typename> typename COMPARE_LIST_OF_PAIRS>
+struct merge<mp_list<>, T, COMPARE_LIST_OF_PAIRS>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
 };
-template<>
-struct merge<mp_list<>, mp_list<> >
+template<template<typename, typename> typename COMPARE_LIST_OF_PAIRS>
+struct merge<mp_list<>, mp_list<>, COMPARE_LIST_OF_PAIRS>
 {	typedef mp_list<> type;
 };
 	/// convert meta ARRAY into std::array
