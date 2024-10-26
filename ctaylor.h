@@ -351,45 +351,65 @@ struct merge<mp_list<>, mp_list<>, COMPARE, MERGE, CONTAINS_VALUE>
 {	typedef mp_list<> type;
 };
 
-template<typename, typename>
+template<typename, typename, typename>
 struct convertToStdInitializerListImpl;
-template<typename LIST, std::size_t ...INDICES>
-struct convertToStdInitializerListImpl<LIST, std::index_sequence<INDICES...> >
-{	static constexpr const std::initializer_list<std::pair<std::size_t, std::size_t> > value =
+template<typename LIST, std::size_t ...INDICES, typename TYPE>
+struct convertToStdInitializerListImpl<LIST, std::index_sequence<INDICES...>, TYPE>
+{	static constexpr const std::initializer_list<std::pair<TYPE, TYPE> > value =
 	{	std::make_pair(
-			mp_first<mp_at_c<LIST, INDICES> >::value,
-			mp_second<mp_at_c<LIST, INDICES> >::value
+			TYPE(mp_first<mp_at_c<LIST, INDICES> >::value),
+			TYPE(mp_second<mp_at_c<LIST, INDICES> >::value)
 		)...
 	};
 };
-template<typename LIST, std::size_t ...INDICES>
-constexpr const std::initializer_list<std::pair<std::size_t, std::size_t> >
-convertToStdInitializerListImpl<LIST, std::index_sequence<INDICES...> >::value;
-template<typename LIST>
+template<typename LIST, std::size_t ...INDICES, typename TYPE>
+constexpr const std::initializer_list<std::pair<TYPE, TYPE> >
+convertToStdInitializerListImpl<LIST, std::index_sequence<INDICES...>, TYPE>::value;
+template<typename LIST, typename TYPE>
 struct convertToStdInitializerList
-{	typedef convertToStdInitializerListImpl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
+{	typedef convertToStdInitializerListImpl<LIST, std::make_index_sequence<mp_size<LIST>::value>, TYPE> type;
 };
-
-template<typename, typename>
+template<typename SIZE>
+struct getTypeFromSize
+{	typedef typename std::conditional<
+		(SIZE::value <= std::numeric_limits<unsigned int>::max()),
+		typename std::conditional<
+			(SIZE::value <= std::numeric_limits<unsigned short>::max()),
+			typename std::conditional<
+				(SIZE::value <= std::numeric_limits<unsigned char>::max()),
+				unsigned char,
+				unsigned short
+			>::type,
+			unsigned int
+		>::type,
+		std::size_t
+	>::type type;
+};
+template<typename, typename, typename>
 struct convertToStdArray3Impl;
-template<typename LIST, std::size_t ...INDICES>
-struct convertToStdArray3Impl<LIST, std::index_sequence<INDICES...> >
-{	static constexpr const std::array<
-		std::initializer_list<std::pair<std::size_t, std::size_t> >,
+template<typename LIST, std::size_t ...INDICES, typename SIZE>
+struct convertToStdArray3Impl<LIST, std::index_sequence<INDICES...>, SIZE>
+{	typedef typename getTypeFromSize<SIZE>::type TYPE;
+	static constexpr const std::array<
+		std::initializer_list<std::pair<TYPE, TYPE> >,
 		mp_size<LIST>::value
 	> value = {
-		convertToStdInitializerList<mp_at_c<LIST, INDICES> >::type::value...
+		convertToStdInitializerList<mp_at_c<LIST, INDICES>, TYPE>::type::value...
 	};
 };
-template<typename LIST, std::size_t ...INDICES>
+template<typename LIST, std::size_t ...INDICES, typename SIZE>
 constexpr const std::array<
-	std::initializer_list<std::pair<std::size_t, std::size_t> >,
+	std::initializer_list<std::pair<typename getTypeFromSize<SIZE>::type, typename getTypeFromSize<SIZE>::type> >,
 	mp_size<LIST>::value
 >
-convertToStdArray3Impl<LIST, std::index_sequence<INDICES...> >::value;
-template<typename LIST>
+convertToStdArray3Impl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
+template<typename LIST, typename SIZE>
 struct convertToStdArray3
-{	typedef convertToStdArray3Impl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
+{	typedef convertToStdArray3Impl<
+		LIST,
+		std::make_index_sequence<mp_size<LIST>::value>,
+		SIZE
+	> type;
 };
 	/// convert meta ARRAY into std::array
 template<typename, typename>
@@ -753,17 +773,18 @@ struct ctaylor
 		//TypeDisplayer<ACTUAL, CALCULATED> sCompare;
 #if 1
 		ctaylor<CALCULATED, MAX> s;
-		auto &r = convertToStdArray3<POSITIONS>::type::value;
+		auto &r = convertToStdArray3<POSITIONS, mp_max<mp_size<T>, mp_size<T1> > >::type::value;
+		typedef typename getTypeFromSize<mp_max<mp_size<T>, mp_size<T1> > >::type TYPE;
 		std::transform(
 			r.begin(),
 			r.end(),
 			s.m_s.begin(),
-			[&](const std::initializer_list<std::pair<std::size_t, std::size_t> >&_rIL)
+			[&](const std::initializer_list<std::pair<TYPE, TYPE> >&_rIL)
 			{	return std::accumulate(
 					_rIL.begin(),
 					_rIL.end(),
 					double(),
-					[&](const double _d, const std::pair<std::size_t, std::size_t> &_rP)
+					[&](const double _d, const std::pair<TYPE, TYPE> &_rP)
 					{	return _d + m_s[_rP.first]*_r.m_s[_rP.second];
 					}
 				);
