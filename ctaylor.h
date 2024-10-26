@@ -24,6 +24,8 @@ namespace taylor
 {
 namespace implementation
 {
+template<typename SIZE>
+struct getTypeFromSize;
 	/// meta function for merging different result types
 template<typename, typename>
 struct common_type;
@@ -211,30 +213,31 @@ struct listOfListsIsSorted<mp_list<T0, T1, REST...> >
 	> type;
 };
 #endif
-template<typename STATE, typename SOURCE_ELEMENT>
-using checkPosition = mp_list<
-	typename std::conditional<
-		(mp_first<STATE>::value == std::numeric_limits<std::size_t>::max()),
-		std::conditional<
-			std::is_same<
-				SOURCE_ELEMENT,
-				mp_third<STATE>
-			>::value,
-			mp_second<STATE>,
-			mp_first<STATE>
-		>,
-		mp_first<STATE>
-	>::type::type,
-	mp_size_t<mp_second<STATE>::value + 1>,
-	mp_third<STATE>
->;
 /// find positions of elements in SOURCE in TARET
-template<typename TARGET, typename SOURCE, bool CHECK=true>
+template<typename TARGET, typename SOURCE, typename SIZE, bool CHECK=true>
 struct findPositions
 {	static_assert(!CHECK || mp_size<TARGET>::value >= mp_size<SOURCE>::value, "size of target must be larger than size of source!");
 	static_assert(mp_is_set<TARGET>::value, "TARGET must be a set!");
 	static_assert(mp_is_set<SOURCE>::value, "SOURCE must be a set!");
 	static_assert(!CHECK || std::is_same<TARGET, mp_set_union<TARGET, SOURCE> >::value, "TARGET must contain all elements in SOURCE");
+	typedef typename getTypeFromSize<SIZE>::type TYPE;
+	template<typename STATE, typename SOURCE_ELEMENT>
+	using checkPosition = mp_list<
+		typename std::conditional<
+			(mp_first<STATE>::value == std::numeric_limits<TYPE>::max()),
+			std::conditional<
+				std::is_same<
+					SOURCE_ELEMENT,
+					mp_third<STATE>
+				>::value,
+				mp_second<STATE>,
+				mp_first<STATE>
+			>,
+			mp_first<STATE>
+		>::type::type,
+		mp_size_t<mp_second<STATE>::value + 1>,
+		mp_third<STATE>
+	>;
 
 	template<typename STATE, typename TARGET_ELEMENT>
 	using findPosition = mp_push_back<
@@ -245,7 +248,7 @@ struct findPositions
 				mp_fold<
 					SOURCE,
 					mp_list<
-						mp_size_t<std::numeric_limits<std::size_t>::max()>, // the result
+						mp_size_t<std::numeric_limits<TYPE>::max()>, // the result
 						mp_size_t<0>,	// the next position
 						TARGET_ELEMENT
 					>,
@@ -274,10 +277,11 @@ struct findPositions2
 	static_assert(mp_is_set<SOURCE0>::value, "SOURCE must be a set!");
 	static_assert(mp_is_set<SOURCE1>::value, "SOURCE must be a set!");
 	static_assert(std::is_same<TARGET, mp_set_union<TARGET, SOURCE0, SOURCE1> >::value, "TARGET must contain all elements in SOURCE");
+	typedef mp_plus<mp_max<mp_size<SOURCE0>, mp_size<SOURCE1> >, mp_size_t<1> > SIZE;
 	typedef mp_transform<
 		combine,
-		typename findPositions<TARGET, SOURCE0>::type,
-		typename findPositions<TARGET, SOURCE1>::type
+		typename findPositions<TARGET, SOURCE0, SIZE>::type,
+		typename findPositions<TARGET, SOURCE1, SIZE>::type
 	> type;
 };
 template<typename A, typename B>
@@ -412,43 +416,45 @@ struct convertToStdArray3
 	> type;
 };
 	/// convert meta ARRAY into std::array
-template<typename, typename>
+template<typename, typename, typename>
 struct convertToStdArrayImpl;
-template<typename LIST, std::size_t ...INDICES>
-struct convertToStdArrayImpl<LIST, std::index_sequence<INDICES...> >
-{	static constexpr const std::array<
-		std::pair<std::size_t, std::size_t>,
+template<typename LIST, std::size_t ...INDICES, typename SIZE>
+struct convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>
+{	typedef typename getTypeFromSize<SIZE>::type TYPE;
+	static constexpr const std::array<
+		std::pair<TYPE, TYPE>,
 		mp_size<LIST>::value
 	> value = {std::make_pair(mp_second<mp_at_c<LIST, INDICES> >::value, mp_third<mp_at_c<LIST, INDICES> >::value)...};
 };
-template<typename LIST, std::size_t ...INDICES>
+template<typename LIST, std::size_t ...INDICES, typename SIZE>
 const std::array<
-	std::pair<std::size_t, std::size_t>,
+	std::pair<typename getTypeFromSize<SIZE>::type, typename getTypeFromSize<SIZE>::type>,
 	mp_size<LIST>::value
-> convertToStdArrayImpl<LIST, std::index_sequence<INDICES...> >::value;
+> convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
 
-template<typename LIST>
+template<typename LIST, typename SIZE>
 struct convertToStdArray
-{	typedef convertToStdArrayImpl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
+{	typedef convertToStdArrayImpl<LIST, std::make_index_sequence<mp_size<LIST>::value>, SIZE> type;
 };
 
-template<typename, typename>
+template<typename, typename, typename>
 struct convertToStdArray2Impl;
-template<typename LIST, std::size_t ...INDICES>
-struct convertToStdArray2Impl<LIST, std::index_sequence<INDICES...> >
-{	static constexpr const std::array<
-		std::size_t,
+template<typename LIST, std::size_t ...INDICES, typename SIZE>
+struct convertToStdArray2Impl<LIST, std::index_sequence<INDICES...>, SIZE>
+{	typedef typename getTypeFromSize<SIZE>::type TYPE;
+	static constexpr const std::array<
+		TYPE,
 		mp_size<LIST>::value
 	> value = {mp_second<mp_at_c<LIST, INDICES> >::value...};
 };
-template<typename LIST, std::size_t ...INDICES>
+template<typename LIST, std::size_t ...INDICES, typename SIZE>
 constexpr const std::array<
-	std::size_t,
+	typename getTypeFromSize<SIZE>::type,
 	mp_size<LIST>::value
-> convertToStdArray2Impl<LIST, std::index_sequence<INDICES...> >::value;
-template<typename LIST>
+> convertToStdArray2Impl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
+template<typename LIST, typename SIZE>
 struct convertToStdArray2
-{	typedef convertToStdArray2Impl<LIST, std::make_index_sequence<mp_size<LIST>::value> > type;
+{	typedef convertToStdArray2Impl<LIST, std::make_index_sequence<mp_size<LIST>::value>, SIZE> type;
 };
 	/// for creating the type result of multiplying one element of a ctaylor array with another
 	/// second and third arguments are an element of the first template argument of ctaylor
@@ -616,15 +622,17 @@ struct ctaylor
 		/// used by copy constructor and assignment operator
 	template<typename T1, bool CHECK = true>
 	static ARRAY convert(const typename ctaylor<T1, MAX>::ARRAY&_r, const mp_bool<CHECK>& = mp_bool<CHECK>())
-	{	typedef typename findPositions<T, T1, CHECK>::type SOURCE_POSITIONS;
+	{	typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
+		typedef typename findPositions<T, T1, SIZE, CHECK>::type SOURCE_POSITIONS;
 		ARRAY s;
-		auto &rT = convertToStdArray2<SOURCE_POSITIONS>::type::value;
+		typedef typename getTypeFromSize<SIZE>::type TYPE;
+		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
 		std::transform(
 			rT.begin(),
 			rT.end(),
 			s.begin(),
 			[&](const std::size_t _i)
-			{	if (_i == std::numeric_limits<std::size_t>::max())
+			{	if (_i == std::numeric_limits<TYPE>::max())
 					return 0.0;
 				else
 					return _r[_i];
@@ -680,18 +688,29 @@ struct ctaylor
 	{	typedef typename merge<T, T1>::type TT;
 		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
 		ctaylor<TT, MAX> s;
-		auto &rT = convertToStdArray<SOURCE_POSITIONS>::type::value;
+		typedef mp_plus<
+			mp_max<
+				mp_size<T>,
+				mp_size<T1>
+			>,
+			mp_size_t<1>
+		> SIZE;
+		auto &rT = convertToStdArray<
+			SOURCE_POSITIONS,
+			SIZE
+		>::type::value;
+		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		std::transform(
 			rT.begin(),
 			rT.end(),
 			s.m_s.begin(),
-			[&](const std::pair<std::size_t, std::size_t>&_rI)
-			{	return _rI.first != std::numeric_limits<std::size_t>::max()
-				? (_rI.second != std::numeric_limits<std::size_t>::max()
+			[&](const std::pair<TYPE, TYPE>&_rI)
+			{	return _rI.first != std::numeric_limits<TYPE>::max()
+				? (_rI.second != std::numeric_limits<TYPE>::max()
 					? m_s[_rI.first] + _r.m_s[_rI.second]
 					: m_s[_rI.first]
 				)
-				: (_rI.second != std::numeric_limits<std::size_t>::max()
+				: (_rI.second != std::numeric_limits<TYPE>::max()
 					? _r.m_s[_rI.second]
 					: 0.0
 				);
@@ -704,18 +723,26 @@ struct ctaylor
 	{	typedef typename merge<T, T1>::type TT;
 		typedef typename findPositions2<TT, T, T1>::type SOURCE_POSITIONS;
 		ctaylor<TT, MAX> s;
-		auto &rT = convertToStdArray<SOURCE_POSITIONS>::type::value;
+		typedef mp_plus<
+			mp_max<
+				mp_size<T>,
+				mp_size<T1>
+			>,
+			mp_size_t<1>
+		> SIZE;
+		auto &rT = convertToStdArray<SOURCE_POSITIONS, SIZE>::type::value;
+		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		std::transform(
 			rT.begin(),
 			rT.end(),
 			s.m_s.begin(),
-			[&](const std::pair<std::size_t, std::size_t>&_rI)
-			{	return _rI.first != std::numeric_limits<std::size_t>::max()
-				? (_rI.second != std::numeric_limits<std::size_t>::max()
+			[&](const std::pair<TYPE, TYPE>&_rI)
+			{	return _rI.first != std::numeric_limits<TYPE>::max()
+				? (_rI.second != std::numeric_limits<TYPE>::max()
 					? m_s[_rI.first] - _r.m_s[_rI.second]
 					: m_s[_rI.first]
 				)
-				: (_rI.second != std::numeric_limits<std::size_t>::max()
+				: (_rI.second != std::numeric_limits<TYPE>::max()
 					? -_r.m_s[_rI.second]
 					: 0.0
 				);
