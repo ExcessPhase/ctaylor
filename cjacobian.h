@@ -41,17 +41,17 @@ struct getTypeFromSize
 		std::size_t
 	>::type type;
 };
-template<typename, typename>
+template<typename, typename, typename>
 struct createStdArrayImpl;
-template<typename VECTOR, std::size_t ...I>
-struct createStdArrayImpl<VECTOR, std::index_sequence<I...> >
-{	static constexpr const std::array<std::size_t, sizeof...(I)> value = {mp_at_c<VECTOR, I>::value...};
+template<typename VECTOR, std::size_t ...I, typename TYPE>
+struct createStdArrayImpl<VECTOR, std::index_sequence<I...>, TYPE>
+{	static constexpr const std::array<TYPE, sizeof...(I)> value = {TYPE(mp_at_c<VECTOR, I>::value)...};
 };
-template<typename VECTOR, std::size_t ...I>
-constexpr const std::array<std::size_t, sizeof...(I)> createStdArrayImpl<VECTOR, std::index_sequence<I...> >::value;
-template<typename VECTOR>
+template<typename VECTOR, std::size_t ...I, typename TYPE>
+constexpr const std::array<TYPE, sizeof...(I)> createStdArrayImpl<VECTOR, std::index_sequence<I...>, TYPE>::value;
+template<typename VECTOR, typename SIZE>
 struct createStdArray
-{	typedef createStdArrayImpl<VECTOR, std::make_index_sequence<mp_size<VECTOR>::value> > type;
+{	typedef createStdArrayImpl<VECTOR, std::make_index_sequence<mp_size<VECTOR>::value>, typename getTypeFromSize<SIZE>::type> type;
 };
 template<typename, typename, typename>
 struct createStdArrayImpl2;
@@ -167,7 +167,7 @@ struct cjacobian
 	static ARRAY convert(const typename cjacobian<T1>::ARRAY&_r)
 	{	ARRAY s;
 		typedef typename createIndicies<VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray<INDICIES>::type::value;
+		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
 		std::transform(
 			r.begin(),
 			r.end(),
