@@ -25,6 +25,22 @@ namespace implementation
 using namespace boost::mp11;
 
 
+template<typename SIZE>
+struct getTypeFromSize
+{	typedef typename std::conditional<
+		(SIZE::value <= std::numeric_limits<unsigned int>::max()),
+		typename std::conditional<
+			(SIZE::value <= std::numeric_limits<unsigned short>::max()),
+			typename std::conditional<
+				(SIZE::value <= std::numeric_limits<unsigned char>::max()),
+				unsigned char,
+				unsigned short
+			>::type,
+			unsigned int
+		>::type,
+		std::size_t
+	>::type type;
+};
 template<typename, typename>
 struct createStdArrayImpl;
 template<typename VECTOR, std::size_t ...I>
@@ -37,19 +53,23 @@ template<typename VECTOR>
 struct createStdArray
 {	typedef createStdArrayImpl<VECTOR, std::make_index_sequence<mp_size<VECTOR>::value> > type;
 };
-template<typename, typename>
+template<typename, typename, typename>
 struct createStdArrayImpl2;
-template<typename VECTOR, std::size_t ...I>
-struct createStdArrayImpl2<VECTOR, std::index_sequence<I...> >
-{	static constexpr const std::array<std::pair<std::size_t, std::size_t>, sizeof...(I)> value = {
-		std::make_pair(mp_first<mp_at_c<VECTOR, I> >::value, mp_second<mp_at_c<VECTOR, I> >::value)...
+template<typename VECTOR, std::size_t ...I, typename TYPE>
+struct createStdArrayImpl2<VECTOR, std::index_sequence<I...>, TYPE>
+{	static constexpr const std::array<std::pair<TYPE, TYPE>, sizeof...(I)> value = {
+		std::make_pair(TYPE(mp_first<mp_at_c<VECTOR, I> >::value), TYPE(mp_second<mp_at_c<VECTOR, I> >::value))...
 	};
 };
-template<typename VECTOR, std::size_t ...I>
-constexpr const std::array<std::pair<std::size_t, std::size_t>, sizeof...(I)> createStdArrayImpl2<VECTOR, std::index_sequence<I...> >::value;
-template<typename VECTOR>
+template<typename VECTOR, std::size_t ...I, typename TYPE>
+constexpr const std::array<std::pair<TYPE, TYPE>, sizeof...(I)> createStdArrayImpl2<VECTOR, std::index_sequence<I...>, TYPE>::value;
+template<typename VECTOR, typename SIZE>
 struct createStdArray2
-{	typedef createStdArrayImpl2<VECTOR, std::make_index_sequence<mp_size<VECTOR>::value> > type;
+{	typedef createStdArrayImpl2<
+		VECTOR,
+		std::make_index_sequence<mp_size<VECTOR>::value>,
+		typename getTypeFromSize<SIZE>::type
+	> type;
 };
 template<typename TARGET, typename SOURCE>
 struct createIndicies
@@ -180,7 +200,16 @@ struct cjacobian
 	auto operator*(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray2<INDICIES>::type::value;
+		auto &r = createStdArray2<
+			INDICIES,
+			mp_plus<
+				mp_max<
+					mp_size<VECTOR>,
+					mp_size<T1>
+				>,
+				mp_size_t<1>
+			>
+		>::type::value;
 		cjacobian<MERGED> s;
 		std::transform(
 			r.begin(),
@@ -203,7 +232,16 @@ struct cjacobian
 	auto operator/(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray2<INDICIES>::type::value;
+		auto &r = createStdArray2<
+			INDICIES,
+			mp_plus<
+				mp_max<
+					mp_size<VECTOR>,
+					mp_size<T1>
+				>,
+				mp_size_t<1>
+			>
+		>::type::value;
 		cjacobian<MERGED> s;
 		const auto dInv = 1.0/_r.m_s.back();
 		const auto dInv2 = dInv*dInv*m_s.back();
@@ -228,7 +266,16 @@ struct cjacobian
 	auto operator+(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray2<INDICIES>::type::value;
+		auto &r = createStdArray2<
+			INDICIES,
+			mp_plus<
+				mp_max<
+					mp_size<VECTOR>,
+					mp_size<T1>
+				>,
+				mp_size_t<1>
+			>
+		>::type::value;
 		cjacobian<MERGED> s;
 		std::transform(
 			r.begin(),
@@ -251,7 +298,16 @@ struct cjacobian
 	auto operator-(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray2<INDICIES>::type::value;
+		auto &r = createStdArray2<
+			INDICIES,
+			mp_plus<
+				mp_max<
+					mp_size<VECTOR>,
+					mp_size<T1>
+				>,
+				mp_size_t<1>
+			>
+		>::type::value;
 		cjacobian<MERGED> s;
 		std::transform(
 			r.begin(),
