@@ -1327,7 +1327,6 @@ struct ctaylor
 	friend auto atan2(const double _dY, const ctaylor&_rX)
 	{	return atan(_dY/_rX);
 	}
-	template<typename T1>
 	friend auto max(const ctaylor&_r0, const double _r1)
 	{	return if_(
 			_r0 > _r1,
@@ -1339,7 +1338,6 @@ struct ctaylor
 			}
 		);
 	}
-	template<typename T1>
 	friend auto max(const double _r0, const ctaylor&_r1)
 	{	return if_(
 			_r0 > _r1,
@@ -1364,7 +1362,6 @@ struct ctaylor
 			}
 		);
 	}
-	template<typename T1>
 	friend auto min(const ctaylor&_r0, const double _r1)
 	{	return if_(
 			_r0 < _r1,
@@ -1376,7 +1373,6 @@ struct ctaylor
 			}
 		);
 	}
-	template<typename T1>
 	friend auto min(const double _r0, const ctaylor&_r1)
 	{	return if_(
 			_r0 < _r1,

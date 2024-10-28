@@ -600,7 +600,6 @@ struct cjacobian
 	friend auto atan2(const double _dY, const cjacobian&_rX)
 	{	return atan(_dY/_rX);
 	}
-	template<typename T1>
 	friend auto max(const cjacobian&_r0, const double _r1)
 	{	return if_(
 			_r0 > _r1,
@@ -612,7 +611,6 @@ struct cjacobian
 			}
 		);
 	}
-	template<typename T1>
 	friend auto max(const double _r0, const cjacobian&_r1)
 	{	return if_(
 			_r0 > _r1,
@@ -637,7 +635,6 @@ struct cjacobian
 			}
 		);
 	}
-	template<typename T1>
 	friend auto min(const cjacobian&_r0, const double _r1)
 	{	return if_(
 			_r0 < _r1,
@@ -649,7 +646,6 @@ struct cjacobian
 			}
 		);
 	}
-	template<typename T1>
 	friend auto min(const double _r0, const cjacobian&_r1)
 	{	return if_(
 			_r0 < _r1,
