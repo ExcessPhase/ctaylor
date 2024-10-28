@@ -546,13 +546,12 @@ struct vbic
 		{	return std::make_tuple(0.0, 0.0, 0.0);
 		},
 		[&](void)
-		{
-			const auto Ith   =   Ibe  * Vbei + Ibc  * Vbci
-			+ ( Itzf - Itzr ) * ( Vbei - Vbci )
-			+ Ibep * Vbep + Ibcp * Vbcp + Iccp * ( Vbep - Vbcp )
-			+ Ircx * Vrcx + Irci * Vrci + Irbx * Vrbx
-			+ Irbi * Vrbi + Ire  * Vre  + Irbp * Vrbp
-			+ Irs  * Vrs  + Ibex * Vbex - Igc  * Vbci;
+		{	const auto Ith   =   max(Ibe  * Vbei, 0.0) + max(Ibc  * Vbci, 0.0)
+			+ max(( Itzf - Itzr ) * ( Vbei - Vbci ), 0.0)
+			+ max(Ibep * Vbep, 0.0) + max(Ibcp * Vbcp, 0.0) + max(Iccp * ( Vbep - Vbcp ), 0.0)
+			+ max(Ircx * Vrcx, 0.0) + max(Irci * Vrci, 0.0) + max(Irbx * Vrbx, 0.0)
+			+ max(Irbi * Vrbi, 0.0) + max(Ire  * Vre, 0.0)  + max(Irbp * Vrbp, 0.0)
+			+ max(Irs  * Vrs, 0.0)  + max(Ibex * Vbex, 0) + max(- Igc  * Vbci, 0.0);
 
 //		Simple linear thermal resistance and capacitance, could be
 //		made nonlinear if necessary
