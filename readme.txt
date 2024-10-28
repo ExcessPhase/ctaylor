@@ -7,34 +7,51 @@ Austin, TX, USA
 
 email:	peter_foelsche@outlook.com
 
-A sparse, dual number implementation for calculating not just the 1th order of derivatives (ctaylor.h).
+There are two classes:
+	1) taylor/ctaylor in ctaylor.h
+		Implements a dual number truncated taylor series class.
+		Max order of derivatives is a template parameter and should be larger than 1.
+		For MAX=1 use cjacobian.h
+	2) jacobian/cjacobian in cjacobian.h
+		Implements a dual number class for automatic derivation of max. order 1.
 
-Using this class to calculate derivative of max. 1th order, would constitute a waste,
-as a dual number implementation for 1th order derivative is much simpler and cheaper.
-Refer to ctaylor.cpp for a example usage.
+Both implementations are sparse. They carry & calculate only these derivatives, which are actually nonzero.
+This means, that variables cannot be reused at will because the types changes with either the involved independent variables (cjacobian.h)
+or even the order and cross derivatives involved (ctaylor.h).
+Also if there are multiple branches (if-statements).
+They have to be realized using the if_() function, which also works for tuples.
+See the vbic85 examples.
+That's why it is a good idea to use the auto keyword to let the compiler select the correct type.
+
 Compile time under Visual C++ 2022 tends to be much longer than using g++.
 Requires C++14.
 Requires boost::mp11 (boost_1_86_0).
 There is intentionally no double-cast operator in order to facilitate a compiler error if an unimplemented function is being used.
 
-A sparse, dual number implementation for calculating the 1th derivative (cjacobian.h).
+There are multiple testcases:
 
-There are three examples:
-
-1) 
-ctaylor.cpp
-ctaylor.exe
+1) ctaylor.cpp ctaylor.exe uses ctaylor.h
 Reads arguments from the commandline as otherwise the g++ compiler simply incorporates the at compile-time calculated results into the executable.
-2) 
-VBIC95.cpp -- simulates a single transistor using Newton's method.
-yields vbic95Taylor.exe and vbic95Jac.exe.
-The first one using ctaylor.h and calculating 1th order derivative
-(can be changed by setting MAX=2, which yields non-convergence as the delta-x limiting is interferring with Halley's method).
-The latter using cjacobian.h and calculating also only the 1th order derivative but yielding better runtime and compile time performance.
-Reads parameters from file named PARS.
-Yields the same results as the standard.
-The major weak point is the quick&dirty matrix package.
+2)
+cjacobian.cpp yields cjacobian.exe using cjacobian.h
+Reads arguments from the commandline.
+Very primitive.
 3)
+vbic95Jac.exe
+vbic95Taylor.exe
+uses
+	VBIC95/VBIC95.cpp
+or
+	VBIC95Jac/VBIC95Jac.cpp
+
+Implements a DC solver for a single transistor using VBIC95.
+Reads parameters from VBIC95/PARS which needs to be passed on the commandline.
+Either using cjacobian.h or ctaylor.h with MAX=1.
+vbic95Taylor.exe implements Halley's method which defaults to Newton's method in case of MAX=1 which causes the Hessian to be zero.
+It does not converge for certain bias points when using MAX=2 (Halley's method). Potentially the scaling of delta-x does screw up Halley's method.
+But even without scaling of delta-X it does not converge for Halley's method.
+
+4)
 BLACK_SCHOLES
 yields black_scholes.exe
 using ctaylor.h
@@ -42,25 +59,11 @@ Example code from the boost library. If it would be started in a loop without pr
 This example is extracting values from complicated expressions involving ctaylor variables.
 This constitutes unnecessary calculation of derivatives just to increase entropy of the universe.
 I don't know if the compiler is smart enough to avoid this.
-4)
-cjacobian.cpp yields cjacobian.exe using cjacobian.h
+I was unable to compile this testcase using Visual C++ 2022.
 
-The type of the dual numbers object depends on how many independent variables are involved and their cross-products and order.
-So it is a good idea to avoid declaring variables in a different way than letting the compiler decide the type by using auto.
-Reusing a variable for different purposes, is likely to fail (see the original bsim3 code).
-For joining two different types, I created the taylor::if_() function, which operates like an terniary operator -- with double and ctaylor and tuples of such.
-
-10/10/2024:
-implemented assignment operators and cbrt()
-The factorization algorithm in LUFAC does not attempt to achieve performance or perfect ordering.
-In fact, it is the reason why VBIC fails at higher currents.
-VBIC simulator can be changed to include self-heating by defining SELF_HEATING and excess-phase by defining EXCESS_PHASE
-Copy constructors and assignment operators between different types only compile, if the target type contains all the values of the source type.
-Means that it is impossible to forget by mistake derivatives.
-
-In order to access the value (0th derivative) use 
-friend double value(const ctaylor&).
-In order to access a particular derivative, use 
+Access to results:
+For accessing the 0th derivative (value) use the value(source) function which is implemented in both, ctaylor.h and cjacobian.h.
+In order to access a particular derivative, use
 
 template<typename LIST>
 double ctaylor::getDer(const LIST&) const;
@@ -68,48 +71,28 @@ double ctaylor::getDer(const LIST&) const;
 LIST being an argument containing the derivative to access, e.g.
 
 typedef mp_list<
-  mp_list<
-    mp_size_t<3>,
-    mp_size_t<2>
-  >
+	mp_list<
+		mp_size_t<3>,
+		mp_size_t<2>
+	>
 > EXAMPLE;
 
 for 2nd derivative of independent variable with enum 3.
 
 typedef mp_list<
-  mp_list<
-    mp_size_t<0>,
-    mp_size_t<1>
-  >,
-  mp_list<
-    mp_size_t<1>,
-    mp_size_t<1>
-  >
+	mp_list<
+		mp_size_t<0>,
+		mp_size_t<1>
+	>,
+	mp_list<
+		mp_size_t<1>,
+		mp_size_t<1>
+	>
 > EXAMPLE;
 
 for d2/dx0/dx1!
 
-10/10/2024
-avoided usage of template class for implementation of addition/subtraction/copy/assignment between different ctaylor types
-but usage of constexpr offset array instead.
-The motivation was to create less templete bloat but the compile time was not decreased.
-10/11/2024
-Made the VBIC testcase to complain about if there is no PARS file passed on the commandline or if it cannot be opened
+template<std::size_t I>
+double cjacobian::getDer(const mp_size_t<I>&) const
 
-10/14/2024
-It seems that clang++-15 is showing the best compile-time performance -- even better than g++-11.
-
-10/16/2024
-Adapted strategy of calculating norm and reducing delta-x from VBIC solver*.f.
-This makes everything converge fine but only with Newton's method, whereas before it converged faster with Halley's method
-
-10/17/2024
-VBIC does not seem to work well using Halley's method -- potentially due to the limiting of delta-X.
-Since the performance of ctaylor for a maximum order of derivative is low,
-I implemented cjacobian.h, which only calculates derivatives of first order but much faster.
-As ctaylor it is sparse!
-There are now two executables 
-vbic95Jac.exe
-vbic95Taylor.exe
-The latter compiled using ctaylor and the former using cjacobian.
-Both attempt to use Halley's method, but since the Hessian is zero (MAX=1) they default to Newton's method.
+Pass the integer identifying the independent variable as a type instance.
