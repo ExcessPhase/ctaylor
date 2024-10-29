@@ -365,10 +365,15 @@ struct vbic
 
 	const auto Itfp  = ISP * ( WSP * exp ( Vbep / ( NFP * Vtv ) )
 			+ ( 1.0 - WSP ) * exp ( Vbci / ( NFP * Vtv ) ) - 1.0 );
+	assert(isfinite(Itfp) && !isnan(Itfp));
 	const auto Itrp  = ISP * ( exp ( Vbcp / ( NFP * Vtv ) ) - 1.0 );
+	assert(isfinite(Itrp) && !isnan(Itrp));
 	const auto q2p   = Itfp * IIKP;				// only fwd part
+	assert(isfinite(q2p) && !isnan(q2p));
 	const auto qbp   = 0.5 * ( 1.0 + sqrt ( 1.0 + 4.0 * q2p ) );// no Early effect
+	assert(isfinite(qbp) && !isnan(qbp));
 	const auto Iccp  = ( Itfp - Itrp ) / qbp;			// parasitic transport I
+	assert(isfinite(Iccp) && !isnan(Iccp));
 
 //	Currents in resistors, with nodes collapsed for zero resistance
 //	Note that RBI, RCI and RBP are modulated
@@ -551,7 +556,7 @@ struct vbic
 			+ max(Ibep * Vbep, 0.0) + max(Ibcp * Vbcp, 0.0) + max(Iccp * ( Vbep - Vbcp ), 0.0)
 			+ max(Ircx * Vrcx, 0.0) + max(Irci * Vrci, 0.0) + max(Irbx * Vrbx, 0.0)
 			+ max(Irbi * Vrbi, 0.0) + max(Ire  * Vre, 0.0)  + max(Irbp * Vrbp, 0.0)
-			+ max(Irs  * Vrs, 0.0)  + max(Ibex * Vbex, 0) + max(- Igc  * Vbci, 0.0);
+			+ max(Irs  * Vrs, 0.0)  + max(Ibex * Vbex, 0.0) + max(- Igc  * Vbci, 0.0);
 
 //		Simple linear thermal resistance and capacitance, could be
 //		made nonlinear if necessary
@@ -824,77 +829,6 @@ constexpr enumCircuitNodes translateNodes(const enumNodes _e)
 #endif
 	}
 }
-lufac::index2Index2Double transpose(const lufac::index2Index2Double&_r)
-{	lufac::index2Index2Double s;
-	for (const auto &rR : _r)
-		for (const auto &rC : rR.second)
-			s[rC.first][rR.first] = rC.second;
-	return s;
-}
-lufac::index2Index2Double sqrT2(const lufac::index2Index2Double&_r)
-{	lufac::index2Index2Double sRet;
-	const auto sT = transpose(_r);
-	for (const auto &rR0 : _r)
-	{	auto &rS = sRet[rR0.first];
-		for (const auto &rC1 : sT)
-		{	auto &rT = rS[rC1.first];
-			for (auto p0 = rR0.second.begin(), p1 = rC1.second.begin(); p0 != rR0.second.end() && p1 != rC1.second.end();)
-				if (p0->first < p1->first)
-					++p0;
-				else
-				if (p0->first > p1->first)
-					++p1;
-				else
-					rT += p0++->second*p1++->second;
-			if (rT == 0.0)
-				rS.erase(rC1.first);
-			else
-				rT *= 2.0;
-		}
-	}
-	return sRet;
-}
-lufac::index2Index2Double FtF2(const lufac::index2Double&_rF, const lufac::index2Index2Index2Double&_rF2)
-{	lufac::index2Index2Double sRet;
-	for (const auto &r0 : _rF2)
-	{	auto &rT0 = sRet[r0.first];
-		for (const auto &r1 : r0.second)
-		{	auto &rT1 = rT0[r1.first];
-			for (const auto &r2 : r1.second)
-				rT1 += r2.second*_rF.at(r2.first);
-		}
-	}
-	return sRet;
-}
-lufac::index2Double twoFtF1(const lufac::index2Double&_rF, const lufac::index2Index2Double&_rF1)
-{	lufac::index2Double sRet;
-	for (const auto &rR : _rF1)
-	{	auto &rT = sRet[rR.first];
-		for (const auto &rC : rR.second)
-			rT += rC.second*_rF.at(rC.first);
-		rT *= 2.0;
-	}	
-	return sRet;
-}
-lufac::index2Double operator-(const lufac::index2Double&_r0, const lufac::index2Double&_r1)
-{	lufac::index2Double s;
-	for (auto pR0 = _r0.begin(), pR1 = _r1.begin(); pR0 != _r0.end() && pR1 != _r1.end(); )
-		if (pR0->first < pR1->first)
-		{	s[pR0->first] = pR0->second;
-			++pR0;
-		}
-		else
-		if (pR0->first > pR1->first)
-		{	s[pR1->first] = -pR1->second;
-			++pR1;
-		}
-		else
-		{	s[pR1->first] = pR0->second - pR1->second;
-			++pR0;
-			++pR1;
-		}
-	return s;
-}
 lufac::index2Double operator+(const lufac::index2Double&_r0, const lufac::index2Double&_r1)
 {	lufac::index2Double s;
 	lufac::index2Double::const_iterator pR0, pR1;
@@ -917,12 +851,6 @@ lufac::index2Double operator+(const lufac::index2Double&_r0, const lufac::index2
 		s[pR0->first] = pR0->second;
 	for (; pR1 != _r1.end(); ++pR1)
 		s[pR1->first] = pR1->second;
-	return s;
-}
-lufac::index2Double operator-(const lufac::index2Double&_r)
-{	lufac::index2Double s;
-	for (const auto &r : _r)
-		s[r.first] = -r.second;
 	return s;
 }
 lufac::index2Index2Double operator+(const lufac::index2Index2Double&_r0, const lufac::index2Index2Double&_r1)
@@ -948,6 +876,28 @@ lufac::index2Index2Double operator+(const lufac::index2Index2Double&_r0, const l
 	for (; pR1 != _r1.end(); ++pR1)
 		sRet[pR1->first] = pR1->second;
 	return sRet;
+}
+/// transposed(_rL)*_rR
+lufac::index2Double operator*(const double _d, const lufac::index2Double&_r)
+{	lufac::index2Double s;
+	for (const auto &r : _r)
+		s[r.first] = r.second*_d;
+	return s;
+}
+lufac::index2Index2Double operator*(const lufac::index2Index2Index2Double&_rL, const lufac::index2Double&_rR)
+{	lufac::index2Index2Double s;
+	for (const auto &r0 : _rL)
+	{	auto &rS0 = s[r0.first];
+		for (const auto &r1 : r0.second)
+		{	auto &rS1 = rS0[r1.first];
+			for (const auto &r2 : r1.second)
+			{	const auto pFind = _rR.find(r2.first);
+				if (pFind != _rR.end())
+					rS1 += r2.second*pFind->second;
+			}
+		}
+	}
+	return s;
 }
 }
 int main(int argc, char**argv)
@@ -1006,10 +956,21 @@ try
 				for (const auto &r : sValues)
 					if (!std::isfinite(r.second) || std::isnan(r.second))
 						throw std::logic_error("Calculate produces NAN!");
+#if 1
+/*
+x_{k+1} = x_k - [J(x_k) - (1/2) H(x_k) F(x_k)]^{-1} F(x_k)
+*/
+				if (sValues.size() != sJ.size())
+					throw std::logic_error("matrix size is not identical!");
+				const auto sJ1 = sJ + sH*(0.5*sValues);
+				const auto sFactored = factor(sJ1, sValues);
+				const auto sDelta = solve(sFactored, sValues);
+#else
 				const auto sM = sqrT2(sJ) + FtF2(sValues, sH);
 				auto sValues1 = twoFtF1(sValues, sJ);
 				const auto sFactored = factor(sM, sValues1);
 				const auto sDelta = solve(sFactored, sValues1);
+#endif
 				for (const auto &r : sDelta)
 					if (!std::isfinite(r.second) || std::isnan(r.second))
 						throw std::logic_error("solve produces NAN!");
@@ -1017,8 +978,8 @@ try
 					/// not divided by number to be identical to original solver.f
 				const auto dNormO = std::sqrt(
 					std::accumulate(
-						sValues1.begin(),
-						sValues1.end(),
+						sValues.begin(),
+						sValues.end(),
 						0.0,
 						[](const double _dSum, const index2Double::value_type&_r)
 						{	return _dSum + _r.second*_r.second;
