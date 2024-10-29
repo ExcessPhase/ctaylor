@@ -935,7 +935,7 @@ try
 		//print vc,vb,ve,vs
 				/// terminal currents
 			std::array<double, 4> sTC;
-			for (std::size_t i = 0; i < 200; ++i)
+			for (std::size_t i = 0; i < 1000; ++i)
 			{	index2Index2Index2Double sH;
 				index2Index2Double sJ;
 				index2Double sValues;
@@ -956,7 +956,6 @@ try
 				for (const auto &r : sValues)
 					if (!std::isfinite(r.second) || std::isnan(r.second))
 						throw std::logic_error("Calculate produces NAN!");
-#if 1
 /*
 x_{k+1} = x_k - [J(x_k) - (1/2) H(x_k) F(x_k)]^{-1} F(x_k)
 */
@@ -965,12 +964,6 @@ x_{k+1} = x_k - [J(x_k) - (1/2) H(x_k) F(x_k)]^{-1} F(x_k)
 				const auto sJ1 = sJ + sH*(0.5*sValues);
 				const auto sFactored = factor(sJ1, sValues);
 				const auto sDelta = solve(sFactored, sValues);
-#else
-				const auto sM = sqrT2(sJ) + FtF2(sValues, sH);
-				auto sValues1 = twoFtF1(sValues, sJ);
-				const auto sFactored = factor(sM, sValues1);
-				const auto sDelta = solve(sFactored, sValues1);
-#endif
 				for (const auto &r : sDelta)
 					if (!std::isfinite(r.second) || std::isnan(r.second))
 						throw std::logic_error("solve produces NAN!");
@@ -986,15 +979,20 @@ x_{k+1} = x_k - [J(x_k) - (1/2) H(x_k) F(x_k)]^{-1} F(x_k)
 						}
 					)
 				);
-				double vscale = 1.0;
-#if 1
-				const auto dvmax = 0.2;
-				for (const auto &r : sDelta)
+#if 0
+				const double vscale = 1.0;
+#else
+				const auto vscale = [&](void)
+				{	double vscale = 1.0;
+					const auto dvmax = 0.05;
+					for (const auto &r : sDelta)
 #ifdef SELF_HEATING
-					if (r.first != std::size_t(enumCircuitNodes::dt))
+						if (r.first != std::size_t(enumCircuitNodes::dt))
 #endif
-					if (std::abs(r.second)/dvmax*vscale > 1.0)
-						vscale = std::abs(dvmax/r.second);
+						if (std::abs(r.second)/dvmax*vscale > 1.0)
+							vscale = std::abs(dvmax/r.second);
+					return vscale;
+				}();
 #endif
 					/// calculating the norm of the resulting delta
 					/// not divided by number to be identical to original solver.f
