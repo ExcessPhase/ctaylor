@@ -2,25 +2,26 @@ published under MIT license
 
 Author: Peter Foelsche
 
-October-1th 2024
+October 2024
 Austin, TX, USA
 
 email:	peter_foelsche@outlook.com
 
 There are two classes:
-	1) taylor/ctaylor in ctaylor.h
+	1) taylor::ctaylor in ctaylor.h
 		Implements a dual number truncated taylor series class.
 		Max order of derivatives is a template parameter and should be larger than 1.
 		For MAX=1 use cjacobian.h
-	2) jacobian/cjacobian in cjacobian.h
+	2) jacobian::cjacobian in cjacobian.h
 		Implements a dual number class for automatic derivation of max. order 1.
+		Much simpler than ctaylor
 
 Both implementations are sparse. They carry & calculate only these derivatives, which are actually nonzero.
 This means, that variables cannot be reused at will because the types changes with either the involved independent variables (cjacobian.h)
 or even the order and cross derivatives involved (ctaylor.h).
-Also if there are multiple branches (if-statements).
-They have to be realized using the if_() function, which also works for tuples.
-See the vbic85 examples.
+Also if there are multiple branches (if-statements) the results of both arms might differ in type.
+If-statements have to be realized using the if_() function, which also works for tuples.
+See the vbic95 examples.
 That's why it is a good idea to use the auto keyword to let the compiler select the correct type.
 
 Compile time under Visual C++ 2022 tends to be much longer than using g++.
@@ -30,7 +31,7 @@ There is intentionally no double-cast operator in order to facilitate a compiler
 
 There are multiple testcases:
 
-1) ctaylor.cpp ctaylor.exe uses ctaylor.h
+1) ctaylor.cpp yields ctaylor.exe uses ctaylor.h
 Reads arguments from the commandline as otherwise the g++ compiler simply incorporates the at compile-time calculated results into the executable.
 2)
 cjacobian.cpp yields cjacobian.exe using cjacobian.h
@@ -49,14 +50,15 @@ Reads parameters from VBIC95/PARS which needs to be passed on the commandline.
 Either using cjacobian.h or ctaylor.h with MAX=1.
 vbic95Taylor.exe implements Halley's method which defaults to Newton's method in case of MAX=1 which causes the Hessian to be zero.
 It does not converge for certain bias points when using MAX=2 (Halley's method). Potentially the scaling of delta-x does screw up Halley's method.
-But even without scaling of delta-X it does not converge for Halley's method.
+But even without scaling of delta-X it does not converge for Halley's method (for certain bias points).
+There are as many versions of Halley's method in the internet as there are publications about it!
 
 4)
 BLACK_SCHOLES
 yields black_scholes.exe
 using ctaylor.h
 Example code from the boost library. If it would be started in a loop without printouts, it would show a dramatic performance improvement compared to boost::autodiff.
-This example is extracting values from complicated expressions involving ctaylor variables.
+Some expressions in this example are using ctaylor variables in non-trivial expressions and at the end only the value is being used by enclosing the entire expression in a call to value().
 This constitutes unnecessary calculation of derivatives just to increase entropy of the universe.
 I don't know if the compiler is smart enough to avoid this.
 I was unable to compile this testcase using Visual C++ 2022.
