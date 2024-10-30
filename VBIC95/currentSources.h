@@ -1,9 +1,3 @@
-#ifdef __DIODE__
-	__create__(ID0, a0, NumberOfNodes) __COMMA__
-	__create__(IR0, a0, b0) __COMMA__
-	__create__(ID1, a1, NumberOfNodes) __COMMA__
-	__create__(IR1, a1, b1)
-#else
 #ifdef SELF_HEATING
 #ifdef EXCESS_PHASE
 	__create__(Itxf, ci, ei) __COMMA__ //	Vrxf,delT	// forward   transport current
@@ -63,7 +57,6 @@
 						// for this element and so is
 						// not dependent on any branch
 						// voltages
-#endif
 #endif
 #undef __create__
 #undef __COMMA__

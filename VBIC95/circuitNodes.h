@@ -1,11 +1,3 @@
-#ifdef __DIODE__
-__create__(a0) __COMMA__
-__create__(b0) __COMMA__
-__create__(IVB0) __COMMA__
-__create__(a1) __COMMA__
-__create__(b1) __COMMA__
-__create__(IVB1) __COMMA__
-#else
 __create2__(c, -2) __COMMA__
 __create2__(b, -1) __COMMA__
 //__create__(e) __COMMA__
@@ -24,11 +16,6 @@ __create__(dt) __COMMA__
 #ifdef EXCESS_PHASE
 __create__(xf1) __COMMA__
 __create__(xf2) __COMMA__
-#endif
-__create__(IVC) __COMMA__
-__create__(IVB) __COMMA__
-//__create__(IVE) __COMMA__
-//__create__(IVS) __COMMA__
 #endif
 __create__(NumberOfNodes)
 #undef __create__
