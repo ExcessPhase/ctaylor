@@ -935,7 +935,7 @@ try
 		//print vc,vb,ve,vs
 				/// terminal currents
 			std::array<double, 4> sTC;
-			for (std::size_t i = 0; i < 1000; ++i)
+			for (std::size_t i = 0; i < 200; ++i)
 			{	index2Index2Index2Double sH;
 				index2Index2Double sJ;
 				index2Double sValues;
@@ -984,7 +984,7 @@ x_{k+1} = x_k - [J(x_k) - (1/2) H(x_k) F(x_k)]^{-1} F(x_k)
 #else
 				const auto vscale = [&](void)
 				{	double vscale = 1.0;
-					const auto dvmax = 0.05;
+					const auto dvmax = 0.2;
 					for (const auto &r : sDelta)
 #ifdef SELF_HEATING
 						if (r.first != std::size_t(enumCircuitNodes::dt))
