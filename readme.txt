@@ -98,3 +98,8 @@ template<std::size_t I>
 double cjacobian::getDer(const mp_size_t<I>&) const
 
 Pass the integer identifying the independent variable as a type instance.
+
+There might be one area in which if_() is not sufficient to create types, able to carry all assigned derivatives: loops
+
+In this case one might have a look at the implementation of if_() and use this method by hand.
+I implemented not std::common_type<> but taylor::common_type<>/jacobian::common_type as I wanted to merge std::tuple<> as well. Of course only std::tuple<> which contain a taylor::ctaylor<>/jacobian::cjacobian<>. Potentially I'm going to change this to use std::common_type<>.
