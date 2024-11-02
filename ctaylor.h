@@ -1203,7 +1203,7 @@ struct ctaylor
 	template<typename T1>
 	auto operator/(const ctaylor<T1, MAX>&_r) const
 	{	return *this*dropValue(_r).apply(
-			taylor::inverse<MAX + 1>(_r.m_s[0]),
+			inverse<MAX + 1>(_r.m_s[0]),
 			mp_size_t<MAX + 1>()
 		);
 	}
@@ -1212,7 +1212,7 @@ struct ctaylor
 	}
 	friend auto operator/(const double _d, const ctaylor&_r)
 	{	return _d*dropValue(_r).apply(
-			taylor::inverse<MAX + 1>(_r.m_s[0]),
+			inverse<MAX + 1>(_r.m_s[0]),
 			mp_size_t<MAX + 1>()
 		);
 	}
@@ -1226,7 +1226,7 @@ struct ctaylor
 	>\
 	friend auto sin(const ctaylor&_r)\
 	{	return dropValue(_r).apply(\
-			taylor::sin<MAX + 1>(_r.m_s[0]),\
+			sin<MAX + 1>(_r.m_s[0]),\
 			mp_size_t<MAX + 1>()\
 		);\
 	}
