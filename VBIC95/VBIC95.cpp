@@ -249,7 +249,7 @@ struct vbic
 	}
 		/// access of the input voltage of a transistor node
 	template<enumNodes _e>
-	static double getInputVoltage(
+	inline static double getInputVoltage(
 			/// fixed voltages for certain nodes not part of the circuit matrix
 		const std::array<double, 2>&_rN,
 			/// the node voltages part of the circuit matrix
@@ -273,7 +273,7 @@ struct vbic
 	}
 		/// the same for node pairs
 	template<enumNodes _e0, enumNodes _e1>
-	static double getInputVoltage(
+	inline static double getInputVoltage(
 		const std::array<double, 2>&_rN,
 		const std::array<double, std::ptrdiff_t(enumCircuitNodes::NumberOfNodes)>& _rP,
 		const std::array<std::ptrdiff_t, std::size_t(1) + std::size_t(enumNodes::NumberOfNodes)> & _pT
