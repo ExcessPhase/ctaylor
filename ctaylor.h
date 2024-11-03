@@ -424,7 +424,7 @@ struct convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>
 	static constexpr const std::array<
 		std::pair<TYPE, TYPE>,
 		mp_size<LIST>::value
-	> value = {std::make_pair(mp_second<mp_at_c<LIST, INDICES> >::value, mp_third<mp_at_c<LIST, INDICES> >::value)...};
+	> value = {std::make_pair(TYPE(mp_second<mp_at_c<LIST, INDICES> >::value), TYPE(mp_third<mp_at_c<LIST, INDICES> >::value))...};
 };
 template<typename LIST, std::size_t ...INDICES, typename SIZE>
 const std::array<
@@ -445,7 +445,7 @@ struct convertToStdArray2Impl<LIST, std::index_sequence<INDICES...>, SIZE>
 	static constexpr const std::array<
 		TYPE,
 		mp_size<LIST>::value
-	> value = {mp_second<mp_at_c<LIST, INDICES> >::value...};
+	> value = {TYPE(mp_second<mp_at_c<LIST, INDICES> >::value)...};
 };
 template<typename LIST, std::size_t ...INDICES, typename SIZE>
 constexpr const std::array<
