@@ -903,8 +903,9 @@ struct ctaylor
 	{	std::array<double, MAX + 1> s;
 		const auto d = 1.0/_r0.m_s[0];
 		s[0] = std::pow(_r0.m_s[0], _d1);	//x^n
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s[i - 1]*d*(_d1 - (i - 1))/i;//n*x^(n - 1)
+			s[i] = s[i - 1]*d*(_d1 - (i - 1))*r[i - 1];//n*x^(n - 1)
 		return dropValue(_r0).apply(s, mp_size_t<MAX + 1>());
 	}
 #endif
@@ -951,10 +952,11 @@ struct ctaylor
 	friend auto erfc(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto d0 = std::erfc(_r.m_s[0]);
 		const auto s1 = -dTwoOverSqrtPi*exp(-sqr(ctaylor<makeIndependent<1>, MAX - 1>(value(_r), true)));
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -993,10 +995,11 @@ struct ctaylor
 	friend auto erf(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto d0 = std::erf(_r.m_s[0]);
 		const auto s1 = dTwoOverSqrtPi*exp(-sqr(ctaylor<makeIndependent<1>, MAX - 1>(value(_r), true)));
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1056,10 +1059,11 @@ struct ctaylor
 	friend auto tan(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto sTan = tan(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true));
 		const auto s1 = 1.0 + sqr(sTan);
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = sTan.m_s[0];
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1098,10 +1102,11 @@ struct ctaylor
 	friend auto tanh(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto sTanh = tanh(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true));
 		const auto s1 = 1.0 - sqr(sTanh);
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = sTanh.m_s[0];
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1114,10 +1119,11 @@ struct ctaylor
 	friend auto asin(const ctaylor&_r)
 	{	const auto d0 = std::asin(_r.m_s[0]);
 		const auto s1 = 1.0/sqrt(1.0 - sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1130,10 +1136,11 @@ struct ctaylor
 	friend auto acos(const ctaylor&_r)
 	{	const auto d0 = std::acos(_r.m_s[0]);
 		const auto s1 = -1.0/sqrt(1.0 - sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1146,10 +1153,11 @@ struct ctaylor
 	friend auto atan(const ctaylor&_r)
 	{	const auto d0 = std::atan(_r.m_s[0]);
 		const auto s1 = 1.0/(1.0 + sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1162,10 +1170,11 @@ struct ctaylor
 	friend auto asinh(const ctaylor&_r)
 	{	const auto d0 = std::asinh(_r.m_s[0]);
 		const auto s1 = 1.0/sqrt(1.0 + sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1178,10 +1187,11 @@ struct ctaylor
 	friend auto acosh(const ctaylor&_r)
 	{	const auto d0 = std::acosh(_r.m_s[0]);
 		const auto s1 = 1.0/sqrt(sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)) - 1.0);
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<
@@ -1194,10 +1204,11 @@ struct ctaylor
 	friend auto atanh(const ctaylor&_r)
 	{	const auto d0 = std::atanh(_r.m_s[0]);
 		const auto s1 = 1.0/(1.0 - sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
 		for (std::size_t i = 1; i < MAX + 1; ++i)
-			s[i] = s1.m_s[i - 1]/i;
+			s[i] = s1.m_s[i - 1]*r[i - 1];
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	template<typename T1>
@@ -1530,6 +1541,7 @@ struct check
 		"problem"
 	);
 };
+#if 0
 template<
 	typename T,	/// LHS template argument
 	std::size_t MAX,	/// common MAX order
@@ -1590,6 +1602,7 @@ struct multiply<T, MAX, 0, T1>
 	{	return ctaylor<mp_list<>, MAX>();
 	}
 };
+#endif
 template<typename, typename>
 struct common_type;
 template<typename T, std::size_t MAX>
