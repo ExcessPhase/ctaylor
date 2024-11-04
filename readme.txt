@@ -12,11 +12,13 @@ There are two classes:
 		Implements a dual number truncated taylor series class.
 		Max order of derivatives is a template parameter and should be larger than 1.
 		For MAX=1 use cjacobian.h
+		Don't attempt to mix instances of ctaylor with different MAX parameter.
+		This class implements basically a calculation with polynomial coefficients.
 	2) jacobian::cjacobian in cjacobian.h
 		Implements a dual number class for automatic derivation of max. order 1.
 		Much simpler than ctaylor
 
-Both implementations are sparse. They carry & calculate only these derivatives, which are actually nonzero.
+Both implementations are sparse. They carry & calculate only these derivatives, which could potentially be nonzero.
 This means, that variables cannot be reused at will because the types changes with either the involved independent variables (cjacobian.h)
 or even the order and cross derivatives involved (ctaylor.h).
 Also if there are multiple branches (if-statements) the results of both arms might differ in type.
