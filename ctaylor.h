@@ -935,7 +935,7 @@ struct ctaylor
 		>::type = 0
 	>
 	friend auto erfc(const ctaylor&_r, const mp_size_t<MAXM>&)
-	{	const auto d0 = std::erfc(_r.m_s[0]);
+	{	const auto d0 = std::erfc(value(_r));
 		const auto d1 = -dTwoOverSqrtPi*std::exp(-value(_r)*value(_r));
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -950,8 +950,8 @@ struct ctaylor
 		>::type = 0
 	>	
 	friend auto erfc(const ctaylor&_r, const mp_size_t<MAXM>&)
-	{	const auto d0 = std::erfc(_r.m_s[0]);
-		const auto s1 = -dTwoOverSqrtPi*exp(-sqr(ctaylor<makeIndependent<1>, MAX - 1>(value(_r), true)));
+	{	const auto d0 = std::erfc(value(_r));
+		const auto s1 = -dTwoOverSqrtPi*exp(-sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)));
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -978,7 +978,7 @@ struct ctaylor
 		>::type = 0
 	>	
 	friend auto erf(const ctaylor&_r, const mp_size_t<MAXM>&)
-	{	const auto d0 = std::erf(_r.m_s[0]);
+	{	const auto d0 = std::erf(value(_r));
 		const auto d1 = dTwoOverSqrtPi*std::exp(-value(_r)*value(_r));
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -993,8 +993,8 @@ struct ctaylor
 		>::type = 0
 	>	
 	friend auto erf(const ctaylor&_r, const mp_size_t<MAXM>&)
-	{	const auto d0 = std::erf(_r.m_s[0]);
-		const auto s1 = dTwoOverSqrtPi*exp(-sqr(ctaylor<makeIndependent<1>, MAX - 1>(value(_r), true)));
+	{	const auto d0 = std::erf(value(_r));
+		const auto s1 = dTwoOverSqrtPi*exp(-sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)));
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -1041,7 +1041,7 @@ struct ctaylor
 		>::type = 0
 	>	
 	friend auto tan(const ctaylor&_r, const mp_size_t<MAXM>&)
-	{	const auto sTan = std::tan(_r.m_s[0]);
+	{	const auto sTan = std::tan(value(_r));
 		const auto s1 = 1.0 + sTan*sTan;
 		std::array<double, MAX + 1> s;
 		s[0] = sTan;
@@ -1057,7 +1057,7 @@ struct ctaylor
 		>::type = 0
 	>	
 	friend auto tan(const ctaylor&_r, const mp_size_t<MAXM>&)
-	{	const auto sTan = tan(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true));
+	{	const auto sTan = tan(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true));
 		const auto s1 = 1.0 + sqr(sTan);
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
@@ -1084,7 +1084,7 @@ struct ctaylor
 		>::type = 0
 	>	
 	friend auto tanh(const ctaylor&_r, const mp_size_t<MAXM>&)
-	{	const auto sTanh = std::tanh(_r.m_s[0]);
+	{	const auto sTanh = std::tanh(value(_r));
 		const auto s1 = 1.0 - sTanh*sTanh;
 		std::array<double, MAX + 1> s;
 		s[0] = sTanh;
@@ -1100,7 +1100,7 @@ struct ctaylor
 		>::type = 0
 	>	
 	friend auto tanh(const ctaylor&_r, const mp_size_t<MAXM>&)
-	{	const auto sTanh = tanh(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true));
+	{	const auto sTanh = tanh(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true));
 		const auto s1 = 1.0 - sqr(sTanh);
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
@@ -1117,8 +1117,8 @@ struct ctaylor
 		>::type = 0
 	>
 	friend auto asin(const ctaylor&_r)
-	{	const auto d0 = std::asin(_r.m_s[0]);
-		const auto s1 = 1.0/sqrt(1.0 - sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+	{	const auto d0 = std::asin(value(_r));
+		const auto s1 = 1.0/sqrt(1.0 - sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)));
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -1134,8 +1134,8 @@ struct ctaylor
 		>::type = 0
 	>
 	friend auto acos(const ctaylor&_r)
-	{	const auto d0 = std::acos(_r.m_s[0]);
-		const auto s1 = -1.0/sqrt(1.0 - sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+	{	const auto d0 = std::acos(value(_r));
+		const auto s1 = -1.0/sqrt(1.0 - sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)));
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -1151,8 +1151,8 @@ struct ctaylor
 		>::type = 0
 	>
 	friend auto atan(const ctaylor&_r)
-	{	const auto d0 = std::atan(_r.m_s[0]);
-		const auto s1 = 1.0/(1.0 + sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+	{	const auto d0 = std::atan(value(_r));
+		const auto s1 = 1.0/(1.0 + sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)));
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -1168,8 +1168,8 @@ struct ctaylor
 		>::type = 0
 	>
 	friend auto asinh(const ctaylor&_r)
-	{	const auto d0 = std::asinh(_r.m_s[0]);
-		const auto s1 = 1.0/sqrt(1.0 + sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+	{	const auto d0 = std::asinh(value(_r));
+		const auto s1 = 1.0/sqrt(1.0 + sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)));
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -1185,8 +1185,8 @@ struct ctaylor
 		>::type = 0
 	>
 	friend auto acosh(const ctaylor&_r)
-	{	const auto d0 = std::acosh(_r.m_s[0]);
-		const auto s1 = 1.0/sqrt(sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)) - 1.0);
+	{	const auto d0 = std::acosh(value(_r));
+		const auto s1 = 1.0/sqrt(sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)) - 1.0);
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -1202,8 +1202,8 @@ struct ctaylor
 		>::type = 0
 	>
 	friend auto atanh(const ctaylor&_r)
-	{	const auto d0 = std::atanh(_r.m_s[0]);
-		const auto s1 = 1.0/(1.0 - sqr(ctaylor<makeIndependent<0>, MAX - 1>(_r.m_s[0], true)));
+	{	const auto d0 = std::atanh(value(_r));
+		const auto s1 = 1.0/(1.0 - sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)));
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = d0;
@@ -1214,7 +1214,7 @@ struct ctaylor
 	template<typename T1>
 	auto operator/(const ctaylor<T1, MAX>&_r) const
 	{	return *this*dropValue(_r).apply(
-			inverse<MAX + 1>(_r.m_s[0]),
+			inverse<MAX + 1>(value(_r)),
 			mp_size_t<MAX + 1>()
 		);
 	}
@@ -1223,7 +1223,7 @@ struct ctaylor
 	}
 	friend auto operator/(const double _d, const ctaylor&_r)
 	{	return _d*dropValue(_r).apply(
-			inverse<MAX + 1>(_r.m_s[0]),
+			inverse<MAX + 1>(value(_r)),
 			mp_size_t<MAX + 1>()
 		);
 	}
@@ -1237,7 +1237,7 @@ struct ctaylor
 	>\
 	friend auto sin(const ctaylor&_r)\
 	{	return dropValue(_r).apply(\
-			sin<MAX + 1>(_r.m_s[0]),\
+			sin<MAX + 1>(value(_r)),\
 			mp_size_t<MAX + 1>()\
 		);\
 	}
