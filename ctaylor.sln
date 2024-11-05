@@ -11,6 +11,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BLACK_SCHOLES", "BLACK_SCHO
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VBIC95Jac", "VBIC95Jac\VBIC95Jac.vcxproj", "{21FB13C3-24F1-41C7-835C-8CEC96587131}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9EA42C09-5D2B-418D-ADCA-2E6B8C1D4DB6}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cjacobian", "cjacobian\cjacobian.vcxproj", "{10400D7F-D219-4AB2-B686-6C3CC570C3D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +58,14 @@ Global
 		{21FB13C3-24F1-41C7-835C-8CEC96587131}.Release|x64.Build.0 = Release|x64
 		{21FB13C3-24F1-41C7-835C-8CEC96587131}.Release|x86.ActiveCfg = Release|Win32
 		{21FB13C3-24F1-41C7-835C-8CEC96587131}.Release|x86.Build.0 = Release|Win32
+		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Debug|x64.ActiveCfg = Debug|x64
+		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Debug|x64.Build.0 = Debug|x64
+		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Debug|x86.ActiveCfg = Debug|Win32
+		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Debug|x86.Build.0 = Debug|Win32
+		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Release|x64.ActiveCfg = Release|x64
+		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Release|x64.Build.0 = Release|x64
+		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Release|x86.ActiveCfg = Release|Win32
+		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
