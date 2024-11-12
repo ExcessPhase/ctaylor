@@ -57,8 +57,11 @@ There are as many versions of Halley's method in the internet as there are publi
 
 4)
 BLACK_SCHOLES
-yields black_scholes.exe
-using ctaylor.h
+yields black_scholes.exe and black_scholes_orig.exe
+using ctaylor.h or boost/autodiff for the latter.
+I added an optional loop executed by the presence of a commandline argument in order to measure performance.
+A suitable value for this argument is 0.02.
+Despite the ctaylor version of black_scholes calculates more derivatives, it is faster by factor of 8.
 Example code from the boost library. If it would be started in a loop without printouts, it would show a dramatic performance improvement compared to boost::autodiff.
 Some expressions in this example are using ctaylor variables in non-trivial expressions and at the end only the value is being used by enclosing the entire expression in a call to value().
 This constitutes unnecessary calculation of derivatives just to increase entropy of the universe.
