@@ -59,7 +59,46 @@ auto black_scholes_option_price_put(
       return exp(-r * tau) * K * Phi(-d2) - S * Phi(-d1);
 }
 
-int main() {
+int main(int argc, char**argv) {
+	double const K = 100.0;  // Strike price.
+	//auto const variables = make_ftuple<double, 3, 3, 1, 1>(105, 5, 30.0 / 365, 1.25 / 100);
+	constexpr std::size_t MAX = 3;
+	if (argc == 2)
+	{	decltype(
+			black_scholes_option_price_call(
+				K,
+				ctaylor<makeIndependent<0>, MAX>(1.0, true),
+				ctaylor<makeIndependent<1>, MAX>(1.1, true),
+				ctaylor<makeIndependent<2>, MAX>(1.2, true),
+				ctaylor<makeIndependent<3>, MAX>(1.3, true)
+			)
+		) sum = 0.0;
+
+		const double dStep = std::atof(argv[1]);
+		for (double S = 104.0; S < 106.0; S += dStep)
+			for (double sigma = 5.0; sigma < 6.0; sigma += 1.0*dStep)
+				for (double tau = 30.0/365.0; tau < 31.0/365.0; tau += 1.0/365.0*dStep)
+					for (double r = 1.25/100.0; r < 1.3/100.0; r += 0.05/100.0*dStep)
+					{
+						auto const variables = std::make_tuple(
+							ctaylor<makeIndependent<0>, MAX>(S, true),
+							ctaylor<makeIndependent<1>, MAX>(sigma, true),
+							ctaylor<makeIndependent<2>, MAX>(tau, true),
+							ctaylor<makeIndependent<3>, MAX>(r, true)
+						);
+						{
+							auto const& S = std::get<0>(variables);      // Stock price.
+							auto const& sigma = std::get<1>(variables);  // Volatility.
+							auto const& tau = std::get<2>(variables);    // Time to expiration in years. (30 days).
+							auto const& r = std::get<3>(variables);      // Interest rate.
+							auto const call_price = black_scholes_option_price_call(K, S, sigma, tau, r);
+							sum = sum + call_price;
+						}
+					}
+		std::cout << sum << "\n";
+	}
+	else
+{
   double const K = 100.0;  // Strike price.
   //auto const variables = make_ftuple<double, 3, 3, 1, 1>(105, 5, 30.0 / 365, 1.25 / 100);
 	constexpr std::size_t MAX = 3;
@@ -155,6 +194,7 @@ int main() {
             << "autodiff put  ultima = " << put_price.getDer(mp_list<mp_list<mp_size_t<1>, mp_size_t<3> > >()) << '\n'
             << "      formula ultima = " << formula_ultima << '\n';
   return 0;
+}
 }
 /*
 Output:
