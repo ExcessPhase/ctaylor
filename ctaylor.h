@@ -640,10 +640,82 @@ struct ctaylor
 		);
 		return s;
 	}
+	template<
+		typename U=T,
+		typename std::enable_if<
+			(mp_size<mp_first<U> >::value == 0),
+			int
+		>::type = 0
+	>
+	ctaylor &operator=(const double _d)
+	{	m_s[0] = _d;
+		std::fill(m_s.begin() + 1, m_s.end(), 0.0);
+		return *this;
+	}
 	template<typename T1>
 	ctaylor &operator=(const ctaylor<T1, MAX>&_r)
 	{	static_assert(ctaylor<T1, MAX>::SIZE < SIZE, "RHS size must be smaller!");
 		m_s = convert<T1, true>(_r.m_s);
+		return *this;
+	}
+	template<
+		typename U=T,
+		typename std::enable_if<
+			(mp_size<mp_first<U> >::value == 0),
+			int
+		>::type = 0
+	>
+	ctaylor &operator+=(const double _d)
+	{	m_s[0] += _d;
+		return *this;
+	}
+	template<
+		typename U=T,
+		typename std::enable_if<
+			(mp_size<mp_first<U> >::value == 0),
+			int
+		>::type = 0
+	>
+	ctaylor &operator-=(const double _d)
+	{	m_s[0] -= _d;
+		return *this;
+	}
+	ctaylor &operator+=(const ctaylor&_r)
+	{	for (std::size_t i = 0; i < SIZE; ++i)
+			m_s[i] += _r.m_s[i];
+		return *this;
+	}
+	ctaylor &operator-=(const ctaylor&_r)
+	{	for (std::size_t i = 0; i < SIZE; ++i)
+			m_s[i] -= _r.m_s[i];
+		return *this;
+	}
+	template<typename T1>
+	ctaylor &operator+=(const ctaylor<T1, MAX>&_r)
+	{	typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
+		typedef typename findPositions<T, T1, SIZE, true>::type SOURCE_POSITIONS;
+		ARRAY s;
+		typedef typename getTypeFromSize<SIZE>::type TYPE;
+		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
+		for (std::size_t i = 0; i < ctaylor::SIZE; ++i)
+		{	const auto iT = rT[i];
+			if (iT != std::numeric_limits<TYPE>::max())
+				m_s[i] += _r.m_s[iT];
+		}
+		return *this;
+	}
+	template<typename T1>
+	ctaylor &operator-=(const ctaylor<T1, MAX>&_r)
+	{	typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
+		typedef typename findPositions<T, T1, SIZE, true>::type SOURCE_POSITIONS;
+		ARRAY s;
+		typedef typename getTypeFromSize<SIZE>::type TYPE;
+		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
+		for (std::size_t i = 0; i < ctaylor::SIZE; ++i)
+		{	const auto iT = rT[i];
+			if (iT != std::numeric_limits<TYPE>::max())
+				m_s[i] -= _r.m_s[iT];
+		}
 		return *this;
 	}
 	template<

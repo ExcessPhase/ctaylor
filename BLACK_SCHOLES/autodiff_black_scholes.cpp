@@ -92,7 +92,7 @@ int main(int argc, char**argv) {
 							auto const& tau = std::get<2>(variables);    // Time to expiration in years. (30 days).
 							auto const& r = std::get<3>(variables);      // Interest rate.
 							auto const call_price = black_scholes_option_price_call(K, S, sigma, tau, r);
-							sum = sum + call_price;
+							sum += call_price;
 						}
 					}
 		std::cout << sum << "\n";

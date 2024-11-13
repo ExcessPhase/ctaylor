@@ -44,4 +44,7 @@ int main(int argc, char**argv)
 		>
 	> LIST_OF_PAIRS_2;
 	std::cout << "s5.getDer(LIST_OF_PAIRS_2())=" << s5.getDer(LIST_OF_PAIRS_2()) << "\n";
+	auto s6 = s5;
+	s6 += s0;
+	std::cout << s6 << "=" << s5 + s0 << "\n";
 }
