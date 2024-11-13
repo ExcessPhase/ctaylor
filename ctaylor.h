@@ -680,6 +680,17 @@ struct ctaylor
 	{	m_s[0] -= _d;
 		return *this;
 	}
+	ctaylor &operator*=(const double _d)
+	{	for (std::size_t i = 0; i < SIZE; ++i)
+			m_s[i] *= _d;
+		return *this;
+	}
+	ctaylor &operator/=(const double _d)
+	{	const auto d1 = 1.0/_d;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			m_s[i] *= d1;
+		return *this;
+	}
 	ctaylor &operator+=(const ctaylor&_r)
 	{	for (std::size_t i = 0; i < SIZE; ++i)
 			m_s[i] += _r.m_s[i];

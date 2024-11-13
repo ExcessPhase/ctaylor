@@ -230,6 +230,17 @@ struct cjacobian
 			m_s[i] -= _r.m_s[i];
 		return *this;
 	}
+	cjacobian&operator*=(const double _d)
+	{	for (std::size_t i = 0; i < SIZE; ++i)
+			m_s[i] *= _d;
+		return *this;
+	}
+	cjacobian&operator/=(const double _d)
+	{	const auto d1 = 1.0/_d;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			m_s[i] *= d1;
+		return *this;
+	}
 	cjacobian&operator+=(const double _d)
 	{	m_s.back() += _d;
 		return *this;
