@@ -197,6 +197,48 @@ struct cjacobian
 		return *this;
 	}
 	template<typename T1>
+	cjacobian&operator+=(const cjacobian<T1>&_r)
+	{	typedef typename createIndicies<VECTOR, T1>::type INDICIES;
+		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
+		for (std::size_t i = 0; i < r.size(); ++i)
+		{	const auto iT = r[i];
+			if (iT != cjacobian<T1>::SIZE - 1)
+				m_s[i] += _r.m_s[iT];
+		}
+		m_s.back() += _r.m_s.back();
+		return *this;
+	}
+	template<typename T1>
+	cjacobian&operator-=(const cjacobian<T1>&_r)
+	{	typedef typename createIndicies<VECTOR, T1>::type INDICIES;
+		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
+		for (std::size_t i = 0; i < r.size(); ++i)
+		{	const auto iT = r[i];
+			if (iT != cjacobian<T1>::SIZE - 1)
+				m_s[i] -= _r.m_s[iT];
+		}
+		m_s.back() -= _r.m_s.back();
+		return *this;
+	}
+	cjacobian&operator+=(const cjacobian &_r)
+	{	for (std::size_t i = 0; i < SIZE; ++i)
+			m_s[i] += _r.m_s[i];
+		return *this;
+	}
+	cjacobian&operator-=(const cjacobian &_r)
+	{	for (std::size_t i = 0; i < SIZE; ++i)
+			m_s[i] -= _r.m_s[i];
+		return *this;
+	}
+	cjacobian&operator+=(const double _d)
+	{	m_s.back() += _d;
+		return *this;
+	}
+	cjacobian&operator-=(const double _d)
+	{	m_s.back() -= _d;
+		return *this;
+	}
+	template<typename T1>
 	auto operator*(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
