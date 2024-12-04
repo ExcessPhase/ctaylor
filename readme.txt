@@ -1,113 +1,83 @@
-published under MIT license
+# Dual Number Truncated Taylor Series and Automatic Differentiation Classes
 
-Author: Peter Foelsche
+**Author**: Peter Foelsche
+**Date**: October 2024
+**Location**: Austin, TX, USA
+**Email**: [peter_foelsche@outlook.com](mailto:peter_foelsche@outlook.com)
 
-October 2024
-Austin, TX, USA
+## Introduction
 
-email:	peter_foelsche@outlook.com
+This document describes the implementation and usage of two classes designed for automatic differentiation and dual number truncated Taylor series calculations. These classes are designed for high performance and accuracy, making use of sparse representations and template metaprogramming.
 
-There are two classes:
-	1) taylor::ctaylor in ctaylor.h
-		Implements a dual number truncated taylor series class.
-		Max order of derivatives is a template parameter and should be larger than 1.
-		For MAX=1 use cjacobian.h
-		Don't attempt to mix instances of ctaylor with different MAX parameter.
-		This class implements basically a calculation with polynomial coefficients.
-	2) jacobian::cjacobian in cjacobian.h
-		Implements a dual number class for automatic derivation of max. order 1.
-		Much simpler than ctaylor
+## Classes Overview
 
-Both implementations are sparse. They carry & calculate only these derivatives, which could potentially be nonzero.
-This means, that variables cannot be reused at will because the types changes with either the involved independent variables (cjacobian.h)
-or even the order and cross derivatives involved (ctaylor.h).
-Also if there are multiple branches (if-statements) the results of both arms might differ in type.
-If-statements have to be realized using the if_() function, which also works for tuples.
-See the vbic95 examples.
-That's why it is a good idea to use the auto keyword to let the compiler select the correct type.
+### **taylor::ctaylor**
+- **Header File**: `ctaylor.h`
+- **Description**: Implements a dual number truncated Taylor series class.
+- **Template Parameter**: Max order of derivatives, must be larger than 1. For MAX=1, use `cjacobian.h`.
+- **Mixing Instances**: Do not mix instances with different MAX parameters.
+- **Functionality**: This class implements calculations with polynomial coefficients.
 
-Compile time under Visual C++ 2022 tends to be much longer than using g++.
-Requires C++14.
-Requires boost::mp11 (boost_1_86_0).
-There is intentionally no double-cast operator in order to facilitate a compiler error if an unimplemented function is being used.
+### **jacobian::cjacobian**
+- **Header File**: `cjacobian.h`
+- **Description**: Implements a dual number class for automatic derivation of max order 1. Much simpler than `ctaylor`.
 
-There are multiple testcases:
+## Implementation Details
 
-1) ctaylor.cpp yields ctaylor.exe uses ctaylor.h
-Reads arguments from the commandline as otherwise the g++ compiler simply incorporates the at compile-time calculated results into the executable.
-2)
-cjacobian.cpp yields cjacobian.exe using cjacobian.h
-Reads arguments from the commandline.
-Very primitive.
-3)
-vbic95Jac.exe
-vbic95Taylor.exe
-uses
-	VBIC95/VBIC95.cpp
-or
-	VBIC95Jac/VBIC95Jac.cpp
+Both implementations are sparse, carrying and calculating only potentially nonzero derivatives. Variables cannot be reused arbitrarily due to type changes with independent variables or derivative orders. If-statements must be implemented using the `if_()` function, which supports tuples. The `auto` keyword should be used to allow the compiler to determine the correct type.
 
-Implements a DC solver for a single transistor using VBIC95.
-Reads parameters from VBIC95/PARS which needs to be passed on the commandline.
-Either using cjacobian.h or ctaylor.h with MAX=1.
-vbic95Taylor.exe implements Halley's method which defaults to Newton's method in case of MAX=1 which causes the Hessian to be zero.
-It does not converge for certain bias points when using MAX=2 (Halley's method). Potentially the scaling of delta-x does screw up Halley's method.
-But even without scaling of delta-X it does not converge for Halley's method (for certain bias points).
-There are as many versions of Halley's method in the internet as there are publications about it!
+## Compile Time and Requirements
 
-4)
-BLACK_SCHOLES
-yields black_scholes.exe and black_scholes_orig.exe
-using ctaylor.h or boost/autodiff for the latter.
-I added an optional loop executed by the presence of a commandline argument in order to measure performance.
-A suitable value for this argument is 0.02.
-The way boost::autodiff can be parametrized is unusable when more than one independent variables come into play because of the following:
-If in ctaylor.h one sets MAX=1 for 2 variables, the number of polynomial coefficients calculated is 3.
-In case of autodiff the number of polynomial coefficients is higher, as the order of cross derivatives included will reach 2 and thus the number of coefficients is 4.
-This differences gets astronomical for higher orders and higher number of variables.
-Example code from the boost library. If it would be started in a loop without printouts, it would show a dramatic performance improvement compared to boost::autodiff.
-Some expressions in this example are using ctaylor variables in non-trivial expressions and at the end only the value is being used by enclosing the entire expression in a call to value().
-This constitutes unnecessary calculation of derivatives just to increase entropy of the universe.
-I don't know if the compiler is smart enough to avoid this.
-I was unable to compile this testcase using Visual C++ 2022.
+- **Compile Time**: Longer under Visual C++ 2022 compared to g++.
+- **C++ Standard**: Requires C++14.
+- **Dependencies**: Requires `boost::mp11` (boost_1_86_0).
+- **Note**: No double-cast operator to facilitate compiler errors for unimplemented functions.
 
-Access to results:
-For accessing the 0th derivative (value) use the value(source) function which is implemented in both, ctaylor.h and cjacobian.h.
-In order to access a particular derivative, use
+## Test Cases
 
-template<typename LIST>
-double ctaylor::getDer(const LIST&) const;
+1. **ctaylor.cpp**
+   - **Output**: `ctaylor.exe`
+   - **Header**: `ctaylor.h`
+   - **Description**: Reads arguments from the command line to prevent g++ from incorporating compile-time results into the executable.
 
-LIST being an argument containing the derivative to access, e.g.
+2. **cjacobian.cpp**
+   - **Output**: `cjacobian.exe`
+   - **Header**: `cjacobian.h`
+   - **Description**: Reads arguments from the command line. A very primitive implementation.
 
-typedef mp_list<
-	mp_list<
-		mp_size_t<3>,
-		mp_size_t<2>
-	>
-> EXAMPLE;
+3. **VBIC95Jac.exe and VBIC95Taylor.exe**
+   - **Headers**: `VBIC95/VBIC95.cpp` or `VBIC95Jac/VBIC95Jac.cpp`
+   - **Description**: Implements a DC solver for a single transistor using VBIC95. Parameters are read from `VBIC95/PARS`.
 
-for 2nd derivative of independent variable with enum 3.
+4. **BLACK_SCHOLES**
+   - **Outputs**: `black_scholes.exe` and `black_scholes_orig.exe`
+   - **Headers**: `ctaylor.h` or `boost/autodiff`
+   - **Description**: Implements performance measurement using an optional loop.
 
-typedef mp_list<
-	mp_list<
-		mp_size_t<0>,
-		mp_size_t<1>
-	>,
-	mp_list<
-		mp_size_t<1>,
-		mp_size_t<1>
-	>
-> EXAMPLE;
+## Accessing Results
 
-for d2/dx0/dx1!
+- **0th Derivative (Value)**: Use `value(source)` in both `ctaylor.h` and `cjacobian.h`.
+- **Specific Derivatives**:
+  - For `ctaylor`:
+    ```cpp
+    template<typename LIST>
+    double ctaylor::getDer(const LIST&) const;
+    ```
+    Example:
+    ```cpp
+    typedef mp_list<
+        mp_list<mp_size_t<3>, mp_size_t<2>>
+    > EXAMPLE; // 2nd derivative of independent variable with enum 3
+    ```
 
-template<std::size_t I>
-double cjacobian::getDer(const mp_size_t<I>&) const
+  - For `cjacobian`:
+    ```cpp
+    template<std::size_t I>
+    double cjacobian::getDer(const mp_size_t<I>&) const;
+    ```
 
-Pass the integer identifying the independent variable as a type instance.
+- **Handling Loops**: If `if_()` is insufficient for creating types in loops, refer to its implementation and use a similar approach manually. `taylor::common_type` and `jacobian::common_type` are used to merge `std::tuple` containing `taylor::ctaylor` or `jacobian::cjacobian`.
 
-There might be one area in which if_() is not sufficient to create types, able to carry all assigned derivatives: loops
+## Conclusion
 
-In this case one might have a look at the implementation of if_() and use this method by hand.
-I implemented not std::common_type<> but taylor::common_type<>/jacobian::common_type as I wanted to merge std::tuple<> as well. Of course only std::tuple<> which contain a taylor::ctaylor<>/jacobian::cjacobian<>. Potentially I'm going to change this to use std::common_type<>.
+These classes provide efficient and flexible implementations for automatic differentiation and truncated Taylor series calculations. By leveraging sparse representations and template metaprogramming, they ensure high performance and accuracy. Proper usage and understanding of the types and dependencies are crucial for integrating these classes into your projects effectively.
