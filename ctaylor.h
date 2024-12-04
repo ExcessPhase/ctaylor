@@ -924,7 +924,7 @@ struct ctaylor
 			int
 		>::type = 0
 	>
-	ctaylor<typename merge<T, mp_list<mp_list<> > >::type, MAX> operator+(const double _d) const
+	auto operator+(const double _d) const
 	{	ctaylor<typename merge<T, mp_list<mp_list<> > >::type, MAX> s(*this);
 		s.m_s[0] += _d;
 		return s;
