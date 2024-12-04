@@ -871,7 +871,8 @@ std::ostream&operator<<(std::ostream&_rS, const LISTLIST&_r)
 }
 template<const LISTLIST&R>
 struct convertFromListList
-{	static constexpr std::size_t size(void)
+{	typedef std::false_type multiply;
+	static constexpr std::size_t size(void)
 	{	return R.size();
 	}
 	static constexpr PAIR getElement(const std::size_t _i0, const std::size_t _i1)
@@ -914,7 +915,8 @@ struct convertToListList
 };
 template<typename T0, typename T1>
 struct merge
-{	static constexpr std::size_t size(void)
+{	typedef std::integral_constant<bool, T0::multiply::value && T1::multiply::value> multiply;
+	static constexpr std::size_t size(void)
 	{	return sizeMerge(0, 0);
 	}
 	static constexpr std::size_t sizeMerge(const std::size_t _i0, const std::size_t _i1)
@@ -1007,7 +1009,9 @@ struct merge
 };
 template<typename T, std::size_t I>
 struct extractOne
-{	static_assert(I < T::size(), "I < T::size()");
+{	typedef std::integral_constant<std::size_t, i> element;
+	typedef std::false_type multiply;
+	static_assert(I < T::size(), "I < T::size()");
 	static constexpr std::size_t size(void)
 	{	return 1;
 	}
@@ -1028,7 +1032,14 @@ struct extractOne
 	}
 };
 struct empty
-{	static constexpr std::size_t size(void)
+{	typedef std::true_type multiply;
+	static constexpr std::size_t multiplySize(const std::size_t)
+	{	throw std::out_of_range("size");
+	}
+	static constexpr std::pair<std::size_t, std::size_t> multiplyElement(const std::size_t, const std::size_t)
+	{	throw std::out_of_range("size");
+	}
+	static constexpr std::size_t size(void)
 	{	return 0;
 	}
 	static const std::size_t size(const std::size_t _i)
@@ -1040,7 +1051,17 @@ struct empty
 };
 template<typename T0, typename T1>
 struct push_back
-{	static constexpr std::size_t size(void)
+{	typedef std::true_type multiply;
+	static constexpr std::size_t multiplySize(const std::size_t _i)
+	{	if (_i < T0::size())
+			return T0::multiplySize(_i);
+		else
+			return T1::multiplySize(_i - T0::size());
+	}
+	static constexpr std::pair<std::size_t, std::size_t> multiplyElement(const std::size_t _i, const std::size_t _iE)
+	{	
+	}
+	static constexpr std::size_t size(void)
 	{	return T0::size() + T1::size();
 	}
 	static constexpr std::size_t size(const std::size_t _i)
@@ -1079,6 +1100,8 @@ template<typename T0, typename T1>
 struct multiplyOneElement
 {	static_assert(T0::size() == 1, "T0::size() == 1");
 	static_assert(T1::size() == 1, "T1::size() == 1");
+	typedef std::true_type multiply;
+	
 	static constexpr std::size_t size(void)
 	{	return 1;
 	}
