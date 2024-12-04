@@ -610,6 +610,11 @@ struct TypeDisplayer
 typedef std::pair<std::size_t, std::size_t> PAIR;
 typedef std::initializer_list<PAIR> PAIRLIST;
 typedef std::initializer_list<PAIRLIST> LISTLIST;
+template<typename T>
+struct wrapper;
+template<typename T>
+std::ostream&operator<<(std::ostream&_rS, const wrapper<T>&);
+std::ostream&operator<<(std::ostream&_rS, const LISTLIST&_r);
 template<std::size_t ENUM>
 struct makeIndependent
 {	static constexpr const PAIRLIST s0 = {};
@@ -837,6 +842,33 @@ struct compare
 		);
 	}
 };
+template<typename T>
+struct wrapper
+{
+};
+template<typename T>
+std::ostream&operator<<(std::ostream&_rS, const wrapper<T>&)
+{	_rS << "{\ttype=" << typeid(T).name() << "\n";
+	for (std::size_t i = 0, iMax = T::size(); i < iMax; ++i)
+	{	_rS << "\t{\n";
+		for (std::size_t j = 0, jMax = T::size(i); j < jMax; ++j)
+		{	const auto s = T::getElement(i, j);
+			_rS << "\t\t" << s.first << "," << s.second << "\n";
+		}
+		_rS << "\t}\n";
+	}
+	return _rS << "}\n";
+}
+std::ostream&operator<<(std::ostream&_rS, const LISTLIST&_r)
+{	_rS << "{\t" << compare::isSorted2(_r) << "\n";
+	for (const auto &r0 : _r)
+	{	_rS << "\t{\n";
+		for (const auto &r1 : r0)
+			_rS << "\t\t" << r1.first << "," << r1.second << "\n";
+		_rS << "\t}\n";
+	}
+	return _rS << "}\n";
+}
 template<const LISTLIST&R>
 struct convertFromListList
 {	static constexpr std::size_t size(void)
@@ -922,16 +954,19 @@ struct merge
 						return T1::size(_i1);
 				else
 					if (_i)
-						return sizeMerge(_i0 + 1, _i1 + 1, _i);
+						return sizeMerge(_i0 + 1, _i1 + 1, _i - 1);
 					else
 						return T1::size(_i1);
 			else
-				return sizeMerge(_i0 + 1, _i1, _i);
+				return sizeMerge(_i0 + 1, _i1, _i - 1);
 		else
 			if (_i1 < T1::size())
-				return sizeMerge(_i0, _i1 + 1, _i);
+				if (_i)
+					return sizeMerge(_i0, _i1 + 1, _i - 1);
+				else
+					return T1::size(_i1);
 			else
-				return 0;
+				throw std::out_of_range(__func__);
 	}
 	static constexpr PAIR getElement(const std::size_t _i, const std::size_t _iE)
 	{	return getElementMerge(0, 0, _i, _iE);
@@ -1164,10 +1199,36 @@ template<typename T0, typename T1, std::size_t MAX>
 struct multiply
 {	typedef typename multiplyImpl<empty, T0, T1, MAX, T0::size()>::type type;
 };
+static constexpr std::size_t find(const LISTLIST&_rL, const PAIRLIST&_r)
+{	const auto p = std::lower_bound(
+		_rL.begin(),
+		_rL.end(),
+		_r,
+		compare::compareElement2
+	);
+	if (p == _rL.end() || compare::compareElement2(*p, _r) || compare::compareElement2(_r, *p))
+		return _rL.size();
+	else
+		return p - _rL.begin();
+}
+template<const LISTLIST&RESULT, const LISTLIST&T0, const LISTLIST&T1, const std::size_t I>
+struct createAddSubOne
+{	static constexpr const std::pair<std::size_t, std::size_t> value = std::make_pair(find(T0, RESULT.begin()[I]), find(T1, RESULT.begin()[I]));
+};
+template<const LISTLIST&RESULT, const LISTLIST&T0, const LISTLIST&T1, typename>
+struct createAddSubImpl;
+template<const LISTLIST&RESULT, const LISTLIST&T0, const LISTLIST&T1, std::size_t ...INDICES>
+struct createAddSubImpl<RESULT, T0, T1, std::index_sequence<INDICES...> >
+{	static constexpr const std::initializer_list<std::pair<std::size_t, std::size_t> > value = {createAddSubOne<RESULT, T0, T1, INDICES>::value...};
+};
+template<const LISTLIST&RESULT, const LISTLIST&T0, const LISTLIST&T1>
+struct createAddSub
+{	typedef createAddSubImpl<RESULT, T0, T1, std::make_index_sequence<RESULT.size()> > type;
+};
 template<const LISTLIST&R0, std::size_t MAX>
 struct ctaylor
 {	//typedef T SET;
-	static constexpr const auto &R = R0;
+	//static constexpr const auto &R = R0;
 	static constexpr std::size_t SIZE = R0.size();
 	static_assert(compare::isSorted2(R0), "must be a set!");
 	typedef std::array<double, SIZE> ARRAY;
@@ -1177,19 +1238,18 @@ struct ctaylor
 	ctaylor(const ctaylor&) = default;
 	ctaylor&operator=(const ctaylor&) = default;
 	ctaylor&operator=(ctaylor&&) = default;
-/*
+#ifdef __GNUC__
 	template<
-		const LISTLIST&R = R0,
 		typename std::enable_if<
-			(R.size() == 2	//{{}, {{enum, order}}}
-				&& R.begin()[0].size() == 0
-				&& R.begin()[1].size() == 1
-				&& R.begin()[1].begin()->second == 1
+			(R0.size() == 2	//{{}, {{enum, order}}}
+				&& R0.begin()[0].size() == 0
+				&& R0.begin()[1].size() == 1
+				&& R0.begin()[1].begin()->second == 1
 			),
 			int
 		>::type = 0
 	>
-*/
+#endif
 	ctaylor(const double _d, const bool)
 		:m_s({_d, 1.0})
 	{
@@ -1197,13 +1257,29 @@ struct ctaylor
 	template<const LISTLIST&R1>
 	auto operator+(const ctaylor<R1, MAX>&_r) const
 	{	typedef convertFromListList<R0> T0;
-		std::cerr << "T0::size()=" << T0::size() << "\n";
 		typedef convertFromListList<R1> T1;
-		std::cerr << "T1::size()=" << T1::size() << "\n";
 		typedef merge<T0, T1> T2;
-		std::cerr << "T2::size()=" << T2::size() << "\n";
-		typedef ctaylor<convertToListList<T2>::type::value, MAX> RET;
+		constexpr auto &R2 = convertToListList<T2>::type::value;
+		const auto &rT = createAddSub<R2, R0, R1>::type::value;
+		typedef ctaylor<R2, MAX> RET;
 		RET s;
+		std::transform(
+			rT.begin(),
+			rT.end(),
+			s.m_s.begin(),
+			[&](const std::pair<std::size_t, std::size_t>&_rP)
+			{	if (_rP.first != R0.size())
+					if (_rP.second != R1.size())
+						return m_s[_rP.first] + _r.m_s[_rP.second];
+					else
+						return m_s[_rP.first];
+				else
+					if (_rP.second != R1.size())
+						return _r.m_s[_rP.second];
+					else
+						return 0.0;
+			}
+		);
 		return s;
 	}
 	template<const LISTLIST&R1>
@@ -1211,17 +1287,12 @@ struct ctaylor
 	{	typedef convertFromListList<R0> T0;
 		typedef convertFromListList<R1> T1;
 		typedef typename multiply<T0, T1, MAX>::type T2;
-		for (std::size_t i = 0, iMax = T2::size(); i < iMax; ++i)
-		{	std::cerr << "T2=" << i << "=" << T2::size(i) << "\n";
-			for (std::size_t j = 0, jMax = T2::size(i); j < jMax; ++j)
-				std::cerr << T2::getElement(i, j).first << "," << T2::getElement(i, j).second << "\n";
-		}
-		//ctaylor<convertToListList<T2>::type::value, MAX> s;
-		//return s;
-		return _r;
+		constexpr auto &R2 = convertToListList<T2>::type::value;
+		ctaylor<R2, MAX> s;
+		return s;
 	}
 	friend std::ostream &operator<<(std::ostream&_rS, const ctaylor&_r)
-	{	for (const auto &r0 : R)
+	{	for (const auto &r0 : R0)
 		{	_rS << "size=" << r0.size() << "\n";
 			for (const auto &r1 : r0)
 				_rS << r1.first << "," << r1.second << "\n";

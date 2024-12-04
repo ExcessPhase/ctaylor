@@ -21,7 +21,7 @@ int main(int argc, char**argv)
 	const auto s2 = ctaylor<makeIndependent<2>::value, MAX>(std::atof(argv[3]), false);
 	const auto s3 = ctaylor<makeIndependent<3>::value, MAX>(std::atof(argv[4]), false);
 		/// some calculation
-	const auto s4 = s0 + s1;
+	const auto s4 = s0 + s1*s2;
 	std::cerr << s4 << "\n";
 #else
 	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
