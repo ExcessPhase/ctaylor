@@ -1252,7 +1252,10 @@ struct ctaylor
 #endif
 	ctaylor(const double _d, const bool)
 		:m_s({_d, 1.0})
-	{
+	{	static_assert(R0.size() == 2, "R0.size() == 2");
+		static_assert(R0.begin()[0].size() == 0, "R0.begin()[0].size() == 0");
+		static_assert(R0.begin()[1].size() == 1, "R0.begin()[1].size() == 1");
+		static_assert(R0.begin()[1].begin()->second == 1);
 	}
 	template<const LISTLIST&R1>
 	auto operator+(const ctaylor<R1, MAX>&_r) const
