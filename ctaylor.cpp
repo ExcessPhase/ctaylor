@@ -4,7 +4,7 @@
 int main(int argc, char**argv)
 {	using namespace taylor;
 	using namespace boost::mp11;
-
+#if 1
 		/// maximum order of derivatives
 		/// careful -- the number of coefficients explodes
 		/// and so does the compile time
@@ -15,12 +15,15 @@ int main(int argc, char**argv)
 		return 1;
 	}
 		/// create an independent variable for x0 (this is what the unused boolean is for)
-	const auto s0 = ctaylor<makeIndependent<0>, MAX>(std::atof(argv[1]), false);
+	const auto s0 = ctaylor<makeIndependent<0>::value, MAX>(std::atof(argv[1]), false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
-	const auto s1 = ctaylor<makeIndependent<1>, MAX>(std::atof(argv[2]), false);
-	const auto s2 = ctaylor<makeIndependent<2>, MAX>(std::atof(argv[3]), false);
-	const auto s3 = ctaylor<makeIndependent<3>, MAX>(std::atof(argv[4]), false);
+	const auto s1 = ctaylor<makeIndependent<1>::value, MAX>(std::atof(argv[2]), false);
+	const auto s2 = ctaylor<makeIndependent<2>::value, MAX>(std::atof(argv[3]), false);
+	const auto s3 = ctaylor<makeIndependent<3>::value, MAX>(std::atof(argv[4]), false);
 		/// some calculation
+	const auto s4 = s0 + s1;
+	std::cerr << s4 << "\n";
+#else
 	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
 	const auto s5 = fmod(s4*s4, 1.0 - s4*s4);
 		/// print the entire polynomial
@@ -47,4 +50,5 @@ int main(int argc, char**argv)
 	auto s6 = s5;
 	s6 += s0;
 	std::cout << s6 << "=" << s5 + s0 << "\n";
+#endif
 }
