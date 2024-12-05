@@ -204,7 +204,7 @@
     <ClInclude Include="taylor_series_expansions.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="readme.txt" />
+    <None Include="readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

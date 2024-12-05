@@ -1,4 +1,4 @@
-# Dual Number Truncated Taylor Series and Automatic Differentiation Classes
+# Two Classes for Automatic Differentiation
 
 **Author**: Peter Foelsche
 **Date**: October 2024
@@ -7,14 +7,14 @@
 
 ## Introduction
 
-This document describes the implementation and usage of two classes designed for automatic differentiation and dual number truncated Taylor series calculations. These classes are designed for high performance and accuracy, making use of sparse representations and template metaprogramming.
+This document describes the implementation and usage of two classes designed for automatic differentiation leveraging dual numbers. These classes are designed for high performance, making use of sparse representations and template metaprogramming.
 
 ## Classes Overview
 
 ### **taylor::ctaylor**
 - **Header File**: `ctaylor.h`
 - **Description**: Implements a dual number truncated Taylor series class.
-- **Template Parameter**: Max order of derivatives, must be larger than 1. For MAX=1, use `cjacobian.h`.
+- **Template Parameter**: Max order of derivatives, should be larger than 1. For MAX=1, use `cjacobian.h`.
 - **Mixing Instances**: Do not mix instances with different MAX parameters.
 - **Functionality**: This class implements calculations with polynomial coefficients.
 
@@ -24,11 +24,11 @@ This document describes the implementation and usage of two classes designed for
 
 ## Implementation Details
 
-Both implementations are sparse, carrying and calculating only potentially nonzero derivatives. Variables cannot be reused arbitrarily due to type changes with independent variables or derivative orders. If-statements must be implemented using the `if_()` function, which supports tuples. The `auto` keyword should be used to allow the compiler to determine the correct type.
+Both implementations are sparse, carrying and calculating only potentially nonzero derivatives. Variables cannot be reused arbitrarily due to the type changing when different independent variables or derivative orders are involved. If-statements must be implemented using the `if_()` function, which supports returning tuples. The `auto` keyword should be used to allow the compiler to determine the correct type.
 
 ## Compile Time and Requirements
 
-- **Compile Time**: Longer under Visual C++ 2022 compared to g++.
+- **Compile Time**: Under Visual C++ (compared to g++ or clang++), especially for ctaylor and MAX > 1, compile time tends to be much Longer or even not finishing. (https://developercommunity.visualstudio.com/t/Compile-time-for-project-using-boost::mp/10760473). This does not apply for cjacobian or ctaylor with MAX=1.
 - **C++ Standard**: Requires C++14.
 - **Dependencies**: Requires `boost::mp11` (boost_1_86_0).
 - **Note**: No double-cast operator to facilitate compiler errors for unimplemented functions.
@@ -38,12 +38,12 @@ Both implementations are sparse, carrying and calculating only potentially nonze
 1. **ctaylor.cpp**
    - **Output**: `ctaylor.exe`
    - **Header**: `ctaylor.h`
-   - **Description**: Reads arguments from the command line to prevent g++ from incorporating compile-time results into the executable.
+   - **Description**: Reads arguments from the command line to prevent g++ from incorporating compile-time results into the executable. Used for checking correctness together with maxima.txt. Consult this example to learn how to create independent variables.
 
 2. **cjacobian.cpp**
    - **Output**: `cjacobian.exe`
    - **Header**: `cjacobian.h`
-   - **Description**: Reads arguments from the command line. A very primitive implementation.
+   - **Description**: Reads arguments from the command line. A very primitive implementation. Used for checking correctness together with maxima.txt. Consult this example to learn how to create independent variables.
 
 3. **VBIC95Jac.exe and VBIC95Taylor.exe**
    - **Headers**: `VBIC95/VBIC95.cpp` or `VBIC95Jac/VBIC95Jac.cpp`
@@ -52,7 +52,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
 4. **BLACK_SCHOLES**
    - **Outputs**: `black_scholes.exe` and `black_scholes_orig.exe`
    - **Headers**: `ctaylor.h` or `boost/autodiff`
-   - **Description**: Implements performance measurement using an optional loop.
+   - **Description**: Implements performance measurement (using an optional loop) and test for correctness (comparison with boost::autodiff).
 
 ## Accessing Results
 
