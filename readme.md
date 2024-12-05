@@ -78,6 +78,12 @@ Both implementations are sparse, carrying and calculating only potentially nonze
 
 - **Handling Loops**: If `if_()` is insufficient for creating types in loops, refer to its implementation and use a similar approach manually. `taylor::common_type` and `jacobian::common_type` are used to merge `std::tuple` containing `taylor::ctaylor` or `jacobian::cjacobian`.
 
+## Careful!
+
+When using `ctaylor`, the maximum number of coefficients for a maximum order \( N \) with \( M \) independent variables is equal to \( \binom{N+M}{M} \), which expands to \( \frac{(N+M)!}{M!N!} \). Thus, one should be careful when increasing either the maximum order \( N \) or the number of independent variables \( M \), as the cost of storage, CPU-time, and compile-time increases quite dramatically.
+
+I'm aware of the compile-time problems when using `ctaylor`—especially when using Visual C++—and I'm thinking about ways to make this less of a problem. However, I believe the resulting unrivaled performance is worth the trouble.
+
 ## Conclusion
 
 These classes provide efficient and flexible implementations for automatic differentiation and truncated Taylor series calculations. By leveraging sparse representations and template metaprogramming, they ensure high performance and accuracy. Proper usage and understanding of the types and dependencies are crucial for integrating these classes into your projects effectively.
