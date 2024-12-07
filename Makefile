@@ -3,7 +3,7 @@ $(error BOOST_ROOT is not set)
 endif
 all: ctaylor.exe vbic95Jac.exe vbic95Taylor.exe black_scholes.exe cjacobian.exe black_scholes_orig.exe
 #CXX=g++
-CFLAGS=-std=c++14 -DNDEBUG -O3 -march=native -flto -isystem $(BOOST_ROOT)/include
+CFLAGS=-std=c++20 -DNDEBUG -g -march=native -flto -isystem $(BOOST_ROOT)/include -ftemplate-backtrace-limit=0
 %.o: %.cpp $(BOOST_ROOT)/include
 	$(CXX) -c $< -o $@ $(CFLAGS)
 

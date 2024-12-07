@@ -4,7 +4,6 @@
 int main(int argc, char**argv)
 {	using namespace taylor;
 	using namespace boost::mp11;
-#if 1
 		/// maximum order of derivatives
 		/// careful -- the number of coefficients explodes
 		/// and so does the compile time
@@ -21,11 +20,16 @@ int main(int argc, char**argv)
 	const auto s2 = ctaylor<makeIndependent<2>::value, MAX>(std::atof(argv[3]), false);
 	const auto s3 = ctaylor<makeIndependent<3>::value, MAX>(std::atof(argv[4]), false);
 		/// some calculation
-	const auto s4 = s0 + s1*s2;
-	std::cerr << s4 << "\n";
-#else
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
-	const auto s5 = fmod(s4*s4, 1.0 - s4*s4);
+	//const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	//std::cout << "s4=" << s4 << "\n";
+	//const auto s5 = fmod(s4*s4, 1.0 - s4*s4);
+	const auto s02 = s0*s0;
+	//const auto s04 = s02*s02;
+	std::cout << s02 << "\n";
+	//std::cout << s02*s0 << "\n";
+	//std::cout << s02*s02 << "\n";
+#if 0
+	const auto s5 = s4*s4;
 		/// print the entire polynomial
 	std::cout << "s5=" << s5 << "\n";
 	typedef mp_list<

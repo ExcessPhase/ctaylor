@@ -623,7 +623,7 @@ struct makeIndependent
 };
 template<typename T>
 struct inner_iterator
-{	typedef std::random_access_iterator_tag iterator_category;
+{	typedef std::input_iterator_tag iterator_category;
 	typedef PAIR value_type;
 	typedef PAIR reference;
 	//typedef const PAIR *pointer;
@@ -641,10 +641,11 @@ struct inner_iterator
 		m_iElement(_iElement)
 	{
 	}
+	inner_iterator(void) = delete;
 	constexpr inner_iterator(const inner_iterator&) = default;
 	constexpr inner_iterator(inner_iterator&&) = default;
-	constexpr inner_iterator &operator=(const inner_iterator&) = default;
-	constexpr inner_iterator &operator=(inner_iterator&&) = default;
+	constexpr inner_iterator&operator=(const inner_iterator&) = default;
+	constexpr inner_iterator&operator=(inner_iterator&&) = default;
 	constexpr inner_iterator &operator+=(const std::ptrdiff_t _i)
 	{	return *this = *this + _i;
 	}
@@ -686,22 +687,26 @@ struct inner_iterator
 };
 template<typename T>
 struct outer_iterator
-{	typedef std::random_access_iterator_tag iterator_category;
+{	typedef std::input_iterator_tag iterator_category;
 	typedef std::size_t value_type;
 	typedef const value_type reference;
 	//typedef const value_type *pointer;
 	typedef std::ptrdiff_t difference;
 	std::size_t m_iPos;
 	template<bool BSTART = true>
-	explicit outer_iterator(const std::integral_constant<bool, BSTART>&)
+	explicit constexpr outer_iterator(const std::integral_constant<bool, BSTART>&)
 		:m_iPos(BSTART ? 0 : T::size())
 	{
 	}
-	outer_iterator(const outer_iterator&) = default;
-	outer_iterator(outer_iterator&&) = default;
-	outer_iterator &operator=(const outer_iterator&) = default;
-	outer_iterator &operator=(outer_iterator&&) = default;
-	outer_iterator&operator++(void)
+	explicit constexpr outer_iterator(const std::size_t _i)
+		:m_iPos(_i)
+	{
+	}
+	constexpr outer_iterator(const outer_iterator&) = default;
+	constexpr outer_iterator(outer_iterator&&) = default;
+	constexpr outer_iterator &operator=(const outer_iterator&) = default;
+	constexpr outer_iterator &operator=(outer_iterator&&) = default;
+	constexpr outer_iterator&operator++(void)
 	{	if (m_iPos != T::size())
 			++m_iPos;
 		else
@@ -713,7 +718,7 @@ struct outer_iterator
 		++*this;
 		return s;
 	}
-	reference operator*(void) const
+	constexpr reference operator*(void) const
 	{	if (m_iPos == T::size())
 			throw std::out_of_range("outer_iterator");
 		else
@@ -727,73 +732,11 @@ struct outer_iterator
 			return &m_iPos;
 	}
 #endif
-	bool operator==(const outer_iterator&_r) const
+	constexpr bool operator==(const outer_iterator&_r) const
 	{	return m_iPos == _r.m_iPos;
 	}
-	bool operator!=(const outer_iterator&_r) const
+	constexpr bool operator!=(const outer_iterator&_r) const
 	{	return m_iPos != _r.m_iPos;
-	}
-};
-template<typename T>
-struct multiply_iterator
-{	typedef std::random_access_iterator_tag iterator_category;
-	typedef std::pair<std::size_t, std::size_t> value_type;
-	typedef value_type reference;
-	typedef std::ptrdiff_t difference;
-	std::size_t m_iPos;
-	std::size_t m_iElement;
-	template<bool BSTART = true>
-	explicit constexpr multiply_iterator(const std::size_t _iElement, const std::integral_constant<bool, BSTART>&)
-		:m_iPos(BSTART ? 0 : T::multiplySize(_iElement)),
-		m_iElement(_iElement)
-	{
-	}
-	explicit constexpr multiply_iterator(const std::size_t _iElement, const std::size_t _iPos)
-		:m_iPos(_iPos),
-		m_iElement(_iElement)
-	{
-	}
-	constexpr multiply_iterator(const multiply_iterator&) = default;
-	constexpr multiply_iterator(multiply_iterator&&) = default;
-	constexpr multiply_iterator &operator=(const multiply_iterator&) = default;
-	constexpr multiply_iterator &operator=(multiply_iterator&&) = default;
-	constexpr multiply_iterator &operator+=(const std::ptrdiff_t _i)
-	{	return *this = *this + _i;
-	}
-	constexpr multiply_iterator operator+(const std::ptrdiff_t _i) const
-	{	return multiply_iterator(m_iElement, m_iPos + _i);
-	}
-	constexpr multiply_iterator&operator++(void)
-	{	if (m_iPos != T::multiplySize(m_iElement))
-			++m_iPos;
-		else
-			throw std::out_of_range("multiply_iterator");
-		return *this;
-	}
-	multiply_iterator operator++(int)
-	{	auto s = *this;
-		++*this;
-		return s;
-	}
-	constexpr reference operator*(void) const
-	{	if (m_iPos == T::multiplySize(m_iElement))
-			throw std::out_of_range("multiply_iterator");
-		else
-			return T::multiplyElement(m_iElement, m_iPos);
-	}
-#if 0
-	pointer operator->(void) const
-	{	if (m_iPos == T::size(m_iElement))
-			throw std::out_of_range("multiply_iterator");
-		else
-			return &T::getElement(m_iElement, m_iPos);
-	}
-#endif
-	constexpr bool operator==(const multiply_iterator&_r) const
-	{	return m_iPos == _r.m_iPos && m_iElement == _r.m_iElement;
-	}
-	constexpr bool operator!=(const multiply_iterator&_r) const
-	{	return m_iPos != _r.m_iPos || m_iElement != _r.m_iElement;
 	}
 };
 struct compare
@@ -808,6 +751,19 @@ struct compare
 			}
 		);
 	}
+	template<typename T>
+	static constexpr std::size_t maxOrder(const T&, std::size_t _i = 0)
+	{	if (T::size() != 0)
+			if (_i < T::size())
+				return std::max(
+					order(T(), *outer_iterator<T>(_i)),
+					maxOrder(T(), _i + 1)
+				);
+			else
+				return 0;
+		else
+			return 0;
+	}
 	template<typename T0, typename T1>
 	static constexpr bool compareElementEnumOnly(const std::size_t _i0, const std::size_t _i1)
 	{	if (order(T0(), _i0) < order(T1(), _i1))
@@ -821,20 +777,10 @@ struct compare
 				inner_iterator<T0>(_i0, std::false_type()),
 				inner_iterator<T1>(_i1, std::true_type()),
 				inner_iterator<T1>(_i1, std::false_type()),
-				[](const PAIR&_r0, const PAIR&_r1)
+				[](const PAIR&_r0, const PAIR&_r1) constexpr
 				{	return _r0.first < _r1.first;
 				}
 			);
-	}
-	template<typename T0, typename T1>
-	static constexpr bool compareMultiplyElement(const std::size_t _i0, const std::size_t _i1)
-	{	return lexicographical_compare(
-			multiply_iterator<T0>(_i0, std::true_type()),
-			multiply_iterator<T0>(_i0, std::false_type()),
-			multiply_iterator<T1>(_i1, std::true_type()),
-			multiply_iterator<T1>(_i1, std::false_type()),
-			std::less<void>()
-		);
 	}
 	template<typename T0, typename T1, typename C>
 	static constexpr bool lexicographical_compare(
@@ -896,7 +842,7 @@ struct compare
 				_r0.end(),
 				_r1.begin(),
 				_r1.end(),
-				[](const PAIR&_r0, const PAIR&_r1)
+				[](const PAIR&_r0, const PAIR&_r1) constexpr
 				{	return _r0.first < _r1.first;
 				}
 			);
@@ -904,32 +850,44 @@ struct compare
 	template<typename T>
 	static constexpr bool isSorted(const T&, const std::size_t _i)
 	{	return std::is_sorted(
-			inner_iterator<T>::inner_iterator(_i, std::true_type()),
-			inner_iterator<T>::inner_iterator(_i, std::false_type()),
-			[](const PAIR&_r0, const PAIR&_r1)
+			inner_iterator<T>(_i, std::true_type()),
+			inner_iterator<T>(_i, std::false_type()),
+			[](const PAIR&_r0, const PAIR&_r1) constexpr
 			{	return _r0.first < _r1.first;
 			}
 		);
 	}
+#if 1
+	template<typename T>
+	static constexpr bool isSorted(const T&, const std::integral_constant<std::size_t, 0>&)
+	{	return true;
+	}
+	template<typename T, std::size_t IM>
+	static constexpr bool isSorted(const T&, const std::integral_constant<std::size_t, IM>& = std::integral_constant<std::size_t, IM>())
+	{	return isSorted(T(), T::size() - IM)
+			&& isSorted(T(), std::integral_constant<std::size_t, IM - 1>());
+	}
+#else
 	template<typename T>
 	static constexpr bool isSorted(const T&)
 	{	return std::all_of(
-			outer_iterator<T>::outer_iterator(std::true_type()),
-			outer_iterator<T>::outer_iterator(std::false_type()),
-			[](const std::size_t _i)
-			{	return isSorted(T(), _i);
+			outer_iterator<T>(std::true_type()),
+			outer_iterator<T>(std::false_type()),
+			[](const std::size_t _i) constexpr
+			{	return compare::isSorted(T(), _i);
 			}
 		) && std::is_sorted(
-			outer_iterator<T>::outer_iterator(std::true_type()),
-			outer_iterator<T>::outer_iterator(std::false_type()),
+			outer_iterator<T>(std::true_type()),
+			outer_iterator<T>(std::false_type()),
 			compareElementEnumOnly<T, T>
 		);
 	}
+#endif
 	static constexpr bool isSorted2(const PAIRLIST&_r)
 	{	return std::is_sorted(
 			_r.begin(),
 			_r.end(),
-			[](const PAIR&_r0, const PAIR&_r1)
+			[](const PAIR&_r0, const PAIR&_r1) constexpr
 			{	return _r0.first < _r1.first;
 			}
 		);
@@ -938,13 +896,13 @@ struct compare
 	{	return std::all_of(
 			_r.begin(),
 			_r.end(),
-			[](const PAIRLIST& _r)
-			{	return isSorted2(_r);
+			[](const PAIRLIST& _r) constexpr
+			{	return compare::isSorted2(_r);
 			}
 		) && std::is_sorted(
 			_r.begin(),
 			_r.end(),
-			compareElement2
+			compare::compareElement2
 		);
 	}
 };
@@ -989,7 +947,10 @@ struct convertFromListList
 		return R.begin()[_i0].begin()[_i1];
 	}
 	static constexpr std::size_t size(const std::size_t _i)
-	{	return R.begin()[_i].size();
+	{	if (_i >= R.size())
+			throw std::out_of_range(__func__);
+		else
+			return R.begin()[_i].size();
 	}
 };
 template<typename, std::size_t, typename>
@@ -1021,7 +982,9 @@ struct convertToListList
 };
 template<typename T0, typename T1>
 struct merge
-{	typedef typename std::conditional<
+{	static constexpr auto SIZE0 = T0::size();
+	static constexpr auto SIZE1 = T1::size();
+	typedef typename std::conditional<
 		T0::multiply::value && T1::multiply::value,
 		std::true_type,
 		std::false_type
@@ -1054,7 +1017,10 @@ struct merge
 					else
 						return T1::multiplySize(_i1);
 			else
-				return multiplySize(_i0 + 1, _i1, _iE - 1);
+				if (_iE)
+					return multiplySize(_i0 + 1, _i1, _iE - 1);
+				else
+					return T0::multiplySize(_i0);
 		else
 			if (_i1 < T1::size())
 				if (_iE)
@@ -1166,7 +1132,10 @@ struct merge
 					else
 						return T1::size(_i1);
 			else
-				return sizeMerge(_i0 + 1, _i1, _i - 1);
+				if (_i)
+					return sizeMerge(_i0 + 1, _i1, _i - 1);
+				else
+					return T0::size(_i0);
 		else
 			if (_i1 < T1::size())
 				if (_i)
@@ -1305,15 +1274,15 @@ struct push_back
 			return T1::getElement(_i - T0::size(), _iE);
 	}
 };
-template<typename T, std::size_t ORDER, std::size_t POSM>
-struct findLast
-{	static constexpr std::size_t value = compare::order(T(), T::size() - POSM) <= ORDER
-		? findLast<T, ORDER, POSM - 1>::value
-		: T::size() - POSM;
+template<typename T, std::size_t ORDER, std::size_t SIZE>
+struct findSize
+{	static constexpr std::size_t value = compare::order(T(), SIZE - 1) > ORDER
+		? findSize<T, ORDER, SIZE - 1>::value
+		: SIZE;
 };
 template<typename T, std::size_t ORDER>
-struct findLast<T, ORDER, 0>
-{	static constexpr std::size_t value = T::size();
+struct findSize<T, ORDER, 0>
+{	static constexpr std::size_t value = 0;
 };
 template<typename T0, typename T1>
 struct multiplyOneElement
@@ -1414,52 +1383,70 @@ struct multiplyOneElement
 				throw std::out_of_range(__func__);
 	}
 };
-template<typename STATE, typename T0, typename T1, std::size_t POSM>
+template<typename STATE, typename T0, typename T1, std::size_t POSM, std::size_t POSMI>
 struct multiplyOneImpl
-{	typedef multiplyOneElement<T0, extractOne<T1, T1::size() - POSM, true> > TMP;
+{	typedef multiplyOneElement<T0, extractOne<T1, POSMI - POSM, true> > TMP;
 	typedef push_back<STATE, TMP> NEW;
-	typedef typename multiplyOneImpl<NEW, T0, T1, POSM - 1>::type type;
+	typedef typename multiplyOneImpl<NEW, T0, T1, POSM - 1, POSMI>::type type;
 };
-template<typename STATE, typename T0, typename T1>
-struct multiplyOneImpl<STATE, T0, T1, 0>
+template<typename STATE, typename T0, typename T1, std::size_t POSMI>
+struct multiplyOneImpl<STATE, T0, T1, 0, POSMI>
 {	typedef STATE type;
 };
 template<typename T0, typename T1, std::size_t MAX>
 struct multiplyOne
-{	static_assert(T0::size() == 1, "size() must be one!");
+{	static_assert(T0::size() == 1, "T0::size() == 1");
+	static_assert(MAX >= compare::order(T0(), 0), "MAX >= compare::order(T0(), 0)");
 	static constexpr std::size_t ORDER = MAX - compare::order(T0(), 0);
-	static constexpr std::size_t SIZE = findLast<T1, ORDER, T1::size()>::value;
+	static constexpr std::size_t SIZE = findSize<T1, ORDER, T1::size()>::value;
 	typedef typename multiplyOneImpl<
 		empty,
 		T0,
 		T1,
+		SIZE,
 		SIZE
 	>::type type;
+	static constexpr auto SIZE2 = type::size();
 };
-template<typename STATE, typename T0, typename T1, std::size_t MAX, std::size_t INDEXM>
+template<typename STATE, typename T0, typename T1, std::size_t MAX, std::size_t INDEXM, std::size_t MAXI>
 struct multiplyImpl
-{	typedef merge<
-		STATE,
-		typename multiplyImpl<
-			typename multiplyOne<
-				extractOne<T0, T0::size() - INDEXM, false>,
-				T1,
-				MAX
-			>::type,
-			T0,
+{	typedef typename multiplyImpl<
+		typename multiplyOne<
+			extractOne<T0, MAXI - INDEXM, false>,
 			T1,
-			MAX,
-			INDEXM - 1
-		>::type
+			MAX
+		>::type,
+		T0,
+		T1,
+		MAX,
+		INDEXM - 1,
+		MAXI
+	>::type NEW;
+	typedef merge<
+		STATE,
+		NEW
 	> type;
+	static constexpr auto SIZE4 = NEW::size();
+	static constexpr auto SIZE3 = STATE::size();
+	static constexpr auto SIZE2 = type::size();
 };
-template<typename STATE, typename T0, typename T1, std::size_t MAX>
-struct multiplyImpl<STATE, T0, T1, MAX, 0>
+template<typename STATE, typename T0, typename T1, std::size_t MAX, std::size_t MAXI>
+struct multiplyImpl<STATE, T0, T1, MAX, 0, MAXI>
 {	typedef STATE type;
+	static constexpr auto SIZE2 = type::size();
 };
 template<typename T0, typename T1, std::size_t MAX>
 struct multiply
-{	typedef typename multiplyImpl<empty, T0, T1, MAX, T0::size()>::type type;
+{	static constexpr auto MAXI = findSize<T0, MAX, T0::size()>::value;
+	typedef typename multiplyImpl<
+		empty,
+		T0,
+		T1,
+		MAX,
+		MAXI,
+		MAXI
+	>::type type;
+	static constexpr auto SIZE2 = type::size();
 };
 static constexpr std::size_t find(const LISTLIST&_rL, const PAIRLIST&_r)
 {	const auto p = std::lower_bound(
@@ -1505,12 +1492,13 @@ struct convertMultiplyToListListImpl<T, std::index_sequence<INDICES...> >
 };
 template<typename T>
 struct convertMultiplyToListList
-{	typedef convertMultiplyToListListImpl<T, std::make_index_sequence<T::size()> > type;
+{	//static_assert(compare::isSorted(T()), "compare::isSorted(T())");
+	typedef convertMultiplyToListListImpl<T, std::make_index_sequence<T::size()> > type;
 };
 template<const LISTLIST&R0, std::size_t MAX>
 struct ctaylor
 {	//typedef T SET;
-	//static constexpr const auto &R = R0;
+	static constexpr const auto &R = R0;
 	static constexpr std::size_t SIZE = R0.size();
 	static_assert(compare::isSorted2(R0), "must be a set!");
 	typedef std::array<double, SIZE> ARRAY;
@@ -1569,13 +1557,45 @@ struct ctaylor
 		return s;
 	}
 	template<const LISTLIST&R1>
+	auto operator-(const ctaylor<R1, MAX>&_r) const
+	{	typedef convertFromListList<R0> T0;
+		typedef convertFromListList<R1> T1;
+		typedef merge<T0, T1> T2;
+		constexpr auto &R2 = convertToListList<T2>::type::value;
+		const auto &rT = createAddSub<R2, R0, R1>::type::value;
+		typedef ctaylor<R2, MAX> RET;
+		RET s;
+		std::transform(
+			rT.begin(),
+			rT.end(),
+			s.m_s.begin(),
+			[&](const std::pair<std::size_t, std::size_t>&_rP)
+			{	if (_rP.first != R0.size())
+					if (_rP.second != R1.size())
+						return m_s[_rP.first] - _r.m_s[_rP.second];
+					else
+						return m_s[_rP.first];
+				else
+					if (_rP.second != R1.size())
+						return -_r.m_s[_rP.second];
+					else
+						return 0.0;
+			}
+		);
+		return s;
+	}
+	template<const LISTLIST&R1>
 	auto operator*(const ctaylor<R1, MAX>&_r) const
 	{	typedef convertFromListList<R0> T0;
 		typedef convertFromListList<R1> T1;
 		typedef typename multiply<T0, T1, MAX>::type T2;
+		const auto iSize1 = T2::multiplySize(1);
+		const auto iSize2 = T2::multiplySize(2);
 		constexpr auto &R3 = convertMultiplyToListList<T2>::type::value;
+		std::cerr << "R3=" << R3 << std::endl;
 		constexpr auto &R2 = convertToListList<T2>::type::value;
 		ctaylor<R2, MAX> s;
+#if 1
 		std::transform(
 			R3.begin(),
 			R3.end(),
@@ -1591,13 +1611,88 @@ struct ctaylor
 				);
 			}
 		);
+#endif
 		return s;
 	}
 	friend std::ostream &operator<<(std::ostream&_rS, const ctaylor&_r)
-	{	for (std::size_t i = 0; i < SIZE; ++i)
-			_rS << _r.m_s[i] << ",";
-		_rS << "\n";
+	{	_rS << "ctaylor(";
+		for (std::size_t i = 0; i < SIZE; ++i)
+		{	if (i)
+				_rS << "+";
+			_rS << _r.m_s[i];
+			const auto &r = R0.begin()[i];
+			for (const auto &rP : r)
+			{	_rS << "*x" << rP.first;
+				if (rP.second > 1)
+					_rS << "^" << rP.second;
+			}
+		}
+		_rS << ")";
 		return _rS;
+	}
+	auto operator-(void) const
+	{	ctaylor s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = -m_s[i];
+		return s;
+	}
+	ctaylor operator+(const ctaylor&_r) const
+	{	ctaylor s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = m_s[i] + _r.m_s[i];
+		return s;
+	}
+	ctaylor operator-(const ctaylor&_r) const
+	{	ctaylor s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = m_s[i] - _r.m_s[i];
+		return s;
+	}
+	template<
+		const LISTLIST&U=R0,
+		typename std::enable_if<
+			(U.begin()[0].size() == 0),
+			int
+		>::type = 0
+	>
+	friend auto operator-(const double _d, const ctaylor&_r)
+	{	ctaylor s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			s.m_s[i] = -_r.m_s[i];
+		s.m_s[0] += _d;
+		return s;
+	}
+	template<
+		const LISTLIST&U=R0,
+		typename std::enable_if<
+			(U.begin()[0].size() == 0),
+			int
+		>::type = 0
+	>
+	ctaylor operator-(const double _d) const
+	{	ctaylor s(*this);
+		s.m_s[0] -= _d;
+		return s;
+	}
+	friend auto fmod(const ctaylor&_r0, const double _r1)
+	{	return _r0 - static_cast<int>(value(_r0)/_r1)*_r1;
+	}
+	friend auto fmod(const double _r0, const ctaylor&_r1)
+	{	return _r0 - static_cast<int>(_r0/value(_r1))*_r1;
+	}
+	template<const LISTLIST&T1>
+	friend auto fmod(const ctaylor&_r0, const ctaylor<T1, MAX>&_r1)
+	{	return _r0 - static_cast<int>(value(_r0)/value(_r1))*_r1;
+	}
+	template<
+		const LISTLIST&U=R0,
+		typename std::enable_if<
+			(U.begin()[0].size() == 0),
+			int
+		>::type = 0
+	>
+	friend auto value(const ctaylor&_r)
+	{	return _r.m_s[0];
 	}
 
 #if 0
@@ -1739,18 +1834,6 @@ struct ctaylor
 		:m_s(convert<T1, CHECK>(_r.m_s))
 	{	static_assert(!CHECK || ctaylor<T1, MAX>::SIZE < SIZE, "RHS size must be smaller!");
 	}
-	ctaylor operator+(const ctaylor&_r) const
-	{	ctaylor s;
-		for (std::size_t i = 0; i < SIZE; ++i)
-			s.m_s[i] = m_s[i] + _r.m_s[i];
-		return s;
-	}
-	ctaylor operator-(const ctaylor&_r) const
-	{	ctaylor s;
-		for (std::size_t i = 0; i < SIZE; ++i)
-			s.m_s[i] = m_s[i] - _r.m_s[i];
-		return s;
-	}
 	template<typename T1>
 	auto operator+(const ctaylor<T1, MAX>&_r) const
 	{	typedef typename merge<T, T1>::type TT;
@@ -1816,32 +1899,6 @@ struct ctaylor
 				);
 			}
 		);
-		return s;
-	}
-	auto operator-(void) const
-	{	ctaylor s;
-		for (std::size_t i = 0; i < SIZE; ++i)
-			s.m_s[i] = -m_s[i];
-		return s;
-	}
-	friend auto operator-(const double _d, const ctaylor&_r)
-	{	ctaylor s;
-		for (std::size_t i = 0; i < SIZE; ++i)
-			s.m_s[i] = -_r.m_s[i];
-		s.m_s[0] += _d;
-		return s;
-	}
-	template<
-		typename U=T,
-		typename std::enable_if<
-			(mp_size<mp_first<U> >::value == 0),
-			int
-		>::type = 0
-	>
-	ctaylor operator-(const double _d) const
-	{	static_assert(mp_size<mp_first<T> >::value == 0, "must have value!");
-		ctaylor s(*this);
-		s.m_s[0] -= _d;
 		return s;
 	}
 	ctaylor operator*(const double _d) const
@@ -2081,16 +2138,6 @@ struct ctaylor
 	{	return erf(_r, mp_size_t<MAX>());
 	}
 
-	template<
-		typename U=T,
-		typename std::enable_if<
-			(mp_size<mp_first<U> >::value == 0),
-			int
-		>::type = 0
-	>
-	friend auto value(const ctaylor&_r)
-	{	return _r.m_s[0];
-	}
 	template<
 		typename U=T,
 		typename std::enable_if<
@@ -2474,16 +2521,6 @@ struct ctaylor
 			}
 		);
 	}
-	friend auto fmod(const ctaylor&_r0, const double _r1)
-	{	return _r0 - static_cast<int>(value(_r0)/_r1)*_r1;
-	}
-	friend auto fmod(const double _r0, const ctaylor&_r1)
-	{	return _r0 - static_cast<int>(_r0/value(_r1))*_r1;
-	}
-	template<typename T1>
-	friend auto fmod(const ctaylor&_r0, const ctaylor<T1, MAX>&_r1)
-	{	return _r0 - static_cast<int>(value(_r0)/value(_r1))*_r1;
-	}
 		/// if this does not compile, check the order of ENUM-order pairs
 	template<typename LIST_OF_PAIRS>
 	auto getDer(const LIST_OF_PAIRS&) const
@@ -2719,6 +2756,7 @@ typename common_type<
 }
 using implementation::ctaylor;
 using implementation::makeIndependent;
+using implementation::operator<<;
 #if 0
 using implementation::if_;
 using namespace implementation;
