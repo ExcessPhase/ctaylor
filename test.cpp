@@ -47,19 +47,32 @@ int main(int, char**)
 	using namespace taylor;
 	using namespace taylor::implementation;
 	using namespace boost::mp11;
-	
+
 	typedef mp_list<
-		mp_size_t<0>,
-		mp_size_t<2>
+		mp_list<
+			mp_list<
+				mp_list<mp_size_t<10>, mp_size_t<1> >
+			>,
+			mp_list<
+				mp_list<mp_size_t<0>, mp_size_t<1> >
+			>
+		>
 	> T0;
 	typedef mp_list<
-		mp_size_t<1>,
-		mp_size_t<3>
+		mp_list<
+			mp_list<
+				mp_list<mp_size_t<10>, mp_size_t<1> >,
+				mp_list<mp_size_t<11>, mp_size_t<1> >
+			>,
+			mp_list<
+				mp_list<mp_size_t<1>, mp_size_t<0> >
+			>
+		>
 	> T1;
 	typedef merge_sorted_set_of_sets<
-		mp_less,
+		compareListOfPairs2,
 		mp_list<T0, T1>,
-		combineTwo
+		combineTwoPairs
 	> MERGE;
 	mp_for_each<MERGE::type>(output1(std::cerr));
 	std::cerr << "\n";

@@ -54,10 +54,14 @@ struct merge_sorted_set_of_sets
 	using not_empty = mp_not<mp_empty<T> >;
 	typedef mp_filter<not_empty, SETS_NOT_MIN_REMOVED> SETS_NOT_MIN_REMOVED_3;
 	template<typename A, typename B>
-	using merge=typename MERGE<A, mp_front<B> >::type;
+	using merge=typename mp_if<
+		std::is_same<A, mp_list<> >,
+		mp_identity<mp_front<B> >,
+		MERGE<A, mp_front<B> >
+	>::type;
 	typedef mp_fold<
 		SETS_NOT_MIN_REMOVED_3,
-		MIN,
+		mp_list<>,
 		merge
 	> MINC;
 	template<typename T>
