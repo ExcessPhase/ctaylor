@@ -36,9 +36,8 @@ struct merge_sorted_sets<F, mp_list<>, mp_list<Ts...>, MERGE>
 template<template<typename, typename> class F, typename T1, typename... Ts1, typename T2, typename... Ts2, template<typename, typename> class MERGE>
 struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 {
-#if 1
-	typedef typename std::conditional<
-		F<T1, T2>::type::value,
+	typedef mp_if<
+		typename F<T1, T2>::type,
 		mp_list<
 			merge_sorted_sets<
 				F,
@@ -48,8 +47,8 @@ struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 			>,
 			mp_identity<T1>
 		>,
-		typename std::conditional<
-			F<T2, T1>::type::value,
+		mp_if<
+			typename F<T2, T1>::type,
 			mp_list<
 				merge_sorted_sets<
 					F,
@@ -68,44 +67,12 @@ struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 				>,
 				MERGE<T2, T1>
 			>
-		>::type
-	>::type tmp;
+		>
+	> tmp;
 	typedef mp_push_front<
 		typename mp_first<tmp>::type,
 		typename mp_second<tmp>::type
 	> type;
-#else
-	typedef typename std::conditional<
-		F<T1, T2>::type::value,
-		mp_push_front<
-			typename merge_sorted_sets<
-				F,
-				mp_list<Ts1...>,
-				mp_list<T2, Ts2...>
-			>::type,
-			T1
-		>,
-		typename std::conditional<
-			F<T2, T1>::type::value,
-			mp_push_front<
-				typename merge_sorted_sets<
-					F,
-					mp_list<T1, Ts1...>,
-					mp_list<Ts2...>
-				>::type,
-				T2
-			>,
-			mp_push_front<
-				typename merge_sorted_sets<
-					F,
-					mp_list<Ts1...>,
-					mp_list<Ts2...>
-				>::type,
-				T2
-			>
-		>::type
-	>::type type;
-#endif
 };
 }
 using implementation::merge_sorted_sets;
