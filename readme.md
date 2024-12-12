@@ -80,7 +80,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
 
 ## Careful!
 
-When using `ctaylor`, the maximum number of coefficients for a maximum order \( N \) with \( M \) independent variables is equal to \( \binom{N+M}{M} \), which expands to \( \frac{(N+M)!}{M!N!} \). Thus, one should be careful when increasing either the maximum order \( N \) or the number of independent variables \( M \), as the cost of storage, CPU-time, and compile-time increases quite dramatically.
+When using `ctaylor`, the maximum number of coefficients for a maximum order $N$ with $M$ independent variables is equal to $\binom{N+M}{M}$, which expands to $\frac{(N+M)!}{M!N!}$. Thus, one should be careful when increasing either the maximum order $N$ or the number of independent variables $M$, as the cost of storage, CPU-time, and compile-time increases quite dramatically.
 
 I'm aware of the compile-time problems when using `ctaylor`—especially when using Visual C++—and I'm thinking about ways to make this less of a problem. However, I believe the resulting unrivaled performance is worth the trouble.
 
