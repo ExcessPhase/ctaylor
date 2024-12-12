@@ -36,9 +36,8 @@ struct merge_sorted_sets<F, mp_list<>, mp_list<Ts...>, MERGE>
 template<template<typename, typename> class F, typename T1, typename... Ts1, typename T2, typename... Ts2, template<typename, typename> class MERGE>
 struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 {
-	typedef mp_if<
-		typename F<T1, T2>::type,
-		mp_list<
+	struct defer_true
+	{	typedef mp_list<
 			merge_sorted_sets<
 				F,
 				mp_list<Ts1...>,
@@ -46,8 +45,10 @@ struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 				MERGE
 			>,
 			mp_identity<T1>
-		>,
-		mp_if<
+		> type;
+	};
+	struct defer_false
+	{	typedef mp_if<
 			typename F<T2, T1>::type,
 			mp_list<
 				merge_sorted_sets<
@@ -67,8 +68,13 @@ struct merge_sorted_sets<F, mp_list<T1, Ts1...>, mp_list<T2, Ts2...>, MERGE>
 				>,
 				MERGE<T2, T1>
 			>
-		>
-	> tmp;
+		> type;
+	};
+	typedef typename mp_if<
+		typename F<T1, T2>::type,
+		defer_true,
+		defer_false
+	>::type tmp;
 	typedef mp_push_front<
 		typename mp_first<tmp>::type,
 		typename mp_second<tmp>::type
