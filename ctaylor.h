@@ -159,32 +159,55 @@ struct lexicographical_compare<mp_list<>, mp_list<T...> >
 };
 template<typename ...R0, typename ...R1>
 struct lexicographical_compare<mp_list<R0...>, mp_list<R1...> >
+#if 0
+{	static_assert(mp_size<mp_list<R0...> >::value > 0, "size");
+	static_assert(mp_size<mp_list<R1...> >::value > 0, "size");
+	typedef typename std::conditional<
+		(mp_first<mp_front<mp_list<R0...> > >::value < mp_first<mp_front<mp_list<R1...> > >::value),
+		mp_identity<mp_true>,
+		typename std::conditional<
+			(mp_first<mp_front<mp_list<R0...> > >::value > mp_first<mp_front<mp_list<R1...> > >::value),
+			mp_identity<mp_false>,
+			typename std::conditional<
+				(mp_second<mp_front<mp_list<R0...> > >::value < mp_second<mp_front<mp_list<R1...> > >::value),
+				mp_identity<mp_true>,
+				typename std::conditional<
+					(mp_second<mp_front<mp_list<R0...> > >::value > mp_second<mp_front<mp_list<R1...> > >::value),
+					mp_identity<mp_false>,
+					lexicographical_compare<mp_pop_front<mp_list<R0...> >, mp_pop_front<mp_list<R1...> > >
+				>::type
+			>::type
+		>::type
+	>::type::type type;
+};
+#else
 {	typedef typename std::conditional<
 		(mp_first<mp_back<mp_list<R0...> > >::value < mp_first<mp_back<mp_list<R1...> > >::value),
-		mp_identity_t<mp_true>,
+		mp_identity<mp_true>,
 		typename std::conditional<
 			(mp_first<mp_back<mp_list<R0...> > >::value > mp_first<mp_back<mp_list<R1...> > >::value),
-			mp_identity_t<mp_false>,
+			mp_identity<mp_false>,
 			typename std::conditional<
 				(mp_second<mp_back<mp_list<R0...> > >::value < mp_second<mp_back<mp_list<R1...> > >::value),
-				mp_identity_t<mp_true>,
+				mp_identity<mp_true>,
 				typename std::conditional<
 					(mp_second<mp_back<mp_list<R0...> > >::value > mp_second<mp_back<mp_list<R1...> > >::value),
-					mp_identity_t<mp_false>,
+					mp_identity<mp_false>,
 					lexicographical_compare<mp_pop_back<mp_list<R0...> >, mp_pop_back<mp_list<R1...> > >
 				>::type
 			>::type
 		>::type
 	>::type::type type;
 };
+#endif
 template<typename T0, typename T1>
 struct compareListOfPairs
 {	typedef typename std::conditional<
 		(order<T0>::value < order<T1>::value),
-		mp_identity_t<mp_true>,
+		mp_identity<mp_true>,
 		typename std::conditional<
 			(order<T0>::value > order<T1>::value),
-			mp_identity_t<mp_false>,
+			mp_identity<mp_false>,
 			lexicographical_compare<T0, T1>
 		>::type
 	>::type::type type;
