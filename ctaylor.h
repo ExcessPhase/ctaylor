@@ -141,7 +141,7 @@ using add_second=std::integral_constant<
 	/// for determining the order
 template<typename LIST>
 struct order
-{	static const auto value = mp_fold<LIST, mp_size_t<0>, add_second>::value;
+{	static constexpr const auto value = mp_fold<LIST, mp_size_t<0>, add_second>::value;
 };
 template<typename T0, typename T1>
 struct lexicographical_compare;
