@@ -545,6 +545,22 @@ using multiply_1_1 = mp_list<
 template<typename STATE, typename T1E>
 using multiply_2_1 = mp_list<
 	mp_first<STATE>,//T0
+#if 1
+	mp_push_front<
+		mp_second<STATE>,
+		mp_first<
+			mp_fold<
+				mp_first<STATE>,	// T0
+				mp_list<
+					mp_list<>,
+					T1E,
+					mp_third<STATE>//MAX
+				>,
+				multiply_1_1
+			>
+		>
+	>,
+#else
 	typename merge<
 		mp_first<
 			mp_fold<
@@ -562,6 +578,7 @@ using multiply_2_1 = mp_list<
 		combineTwoPairs,
 		containsValue2
 	>::type,
+#endif
 	mp_third<STATE>//MAX
 >;
 // Transform function to pair each type with its index
@@ -573,17 +590,21 @@ using add_index = mp_transform<
 >;
 	/// multiplies two template arguments to ctaylor with each other
 template<typename T0, typename T1, std::size_t MAX>
-using multiply_2_2 = mp_second<
-	mp_fold<
-		add_index<T1>,
-		mp_list<
-			add_index<T0>,
-			mp_list<>,
-			mp_size_t<MAX>
-		>,
-		multiply_2_1
-	>
->;
+using multiply_2_2 = typename merge_sorted_set_of_sets<
+	compareListOfPairs2,
+	mp_second<
+		mp_fold<
+			add_index<T1>,
+			mp_list<
+				add_index<T0>,
+				mp_list<>,
+				mp_size_t<MAX>
+			>,
+			multiply_2_1
+		>
+	>,
+	combineTwoPairs
+>::type;
 template<typename T, std::size_t MAX, std::size_t LMPOS, typename T1>
 struct multiply;
 template<typename T0, typename T1>
