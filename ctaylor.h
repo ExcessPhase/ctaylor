@@ -141,7 +141,7 @@ using add_second=std::integral_constant<
 	/// for determining the order
 template<typename LIST>
 struct order
-{	static const auto value = mp_fold<LIST, mp_size_t<0>, add_second>::value;
+{	static constexpr const auto value = mp_fold<LIST, mp_size_t<0>, add_second>::value;
 };
 template<typename T0, typename T1>
 struct lexicographical_compare;
@@ -161,16 +161,16 @@ template<typename ...R0, typename ...R1>
 struct lexicographical_compare<mp_list<R0...>, mp_list<R1...> >
 {	typedef typename std::conditional<
 		(mp_first<mp_back<mp_list<R0...> > >::value < mp_first<mp_back<mp_list<R1...> > >::value),
-		mp_identity_t<mp_true>,
+		mp_identity<mp_true>,
 		typename std::conditional<
 			(mp_first<mp_back<mp_list<R0...> > >::value > mp_first<mp_back<mp_list<R1...> > >::value),
-			mp_identity_t<mp_false>,
+			mp_identity<mp_false>,
 			typename std::conditional<
 				(mp_second<mp_back<mp_list<R0...> > >::value < mp_second<mp_back<mp_list<R1...> > >::value),
-				mp_identity_t<mp_true>,
+				mp_identity<mp_true>,
 				typename std::conditional<
 					(mp_second<mp_back<mp_list<R0...> > >::value > mp_second<mp_back<mp_list<R1...> > >::value),
-					mp_identity_t<mp_false>,
+					mp_identity<mp_false>,
 					lexicographical_compare<mp_pop_back<mp_list<R0...> >, mp_pop_back<mp_list<R1...> > >
 				>::type
 			>::type
@@ -181,11 +181,11 @@ template<typename T0, typename T1>
 struct compareListOfPairs
 {	typedef typename std::conditional<
 		(order<T0>::value < order<T1>::value),
-		mp_identity_t<mp_true>,
+		mp_identity<mp_true>,
 		typename std::conditional<
 			(order<T0>::value > order<T1>::value),
-			mp_identity_t<mp_false>,
-			lexicographical_compare<T0, T1>
+			mp_identity<mp_false>,
+			lexicographical_compare<mp_reverse<T0>, mp_reverse<T1> >
 		>::type
 	>::type::type type;
 };
