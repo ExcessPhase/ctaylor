@@ -143,27 +143,23 @@ template<typename LIST>
 struct order
 {	static constexpr const auto value = mp_fold<LIST, mp_size_t<0>, add_second>::value;
 };
-template<typename T0, typename T1>
+template<typename T0, typename T1, bool>
 struct lexicographical_compare;
-template<>
-struct lexicographical_compare<mp_list<>, mp_list<> >
+template<bool BNEW>
+struct lexicographical_compare<mp_list<>, mp_list<>, BNEW >
 {	typedef mp_false type;
 };
-template<typename ...T>
-struct lexicographical_compare<mp_list<T...>, mp_list<> >
+template<bool BNEW, typename T0, typename ...T>
+struct lexicographical_compare<mp_list<T0, T...>, mp_list<>, BNEW>
 {	typedef mp_false type;
 };
-template<typename ...T>
-struct lexicographical_compare<mp_list<>, mp_list<T...> >
+template<bool BNEW, typename T0, typename ...T>
+struct lexicographical_compare<mp_list<>, mp_list<T0, T...>, BNEW>
 {	typedef mp_true type;
 };
-template<typename ...R0, typename ...R1>
-struct lexicographical_compare<mp_list<R0...>, mp_list<R1...> >
-#if 1
-{	static_assert(mp_size<mp_list<R0...> >::value > 0, "size");
-	static_assert(mp_size<mp_list<R1...> >::value > 0, "size");
-	typedef mp_front<mp_list<R0...> > T0;
-	typedef mp_front<mp_list<R1...> > T1;
+template<typename T0, typename T1, typename ...R0, typename ...R1>
+struct lexicographical_compare<mp_list<T0, R0...>, mp_list<T1, R1...>, true>
+{
 	typedef typename std::conditional<
 		(mp_first<T0>::value < mp_first<T1>::value),
 		mp_identity<mp_true>,
@@ -176,43 +172,51 @@ struct lexicographical_compare<mp_list<R0...>, mp_list<R1...> >
 				typename std::conditional<
 					(mp_second<T0>::value > mp_second<T1>::value),
 					mp_identity<mp_false>,
-					lexicographical_compare<mp_pop_front<mp_list<R0...> >, mp_pop_front<mp_list<R1...> > >
+					lexicographical_compare<mp_list<R0...>, mp_list<R1...>, true>
 				>::type
 			>::type
 		>::type
 	>::type::type type;
 };
-#else
+template<typename T0, typename T1, typename ...R0, typename ...R1>
+struct lexicographical_compare<mp_list<T0, R0...>, mp_list<T1, R1...>, false>
 {	typedef typename std::conditional<
-		(mp_first<mp_back<mp_list<R0...> > >::value < mp_first<mp_back<mp_list<R1...> > >::value),
+		(mp_first<mp_back<mp_list<T0, R0...> > >::value < mp_first<mp_back<mp_list<T1, R1...> > >::value),
 		mp_identity<mp_true>,
 		typename std::conditional<
-			(mp_first<mp_back<mp_list<R0...> > >::value > mp_first<mp_back<mp_list<R1...> > >::value),
+			(mp_first<mp_back<mp_list<T0, R0...> > >::value > mp_first<mp_back<mp_list<T1, R1...> > >::value),
 			mp_identity<mp_false>,
 			typename std::conditional<
-				(mp_second<mp_back<mp_list<R0...> > >::value < mp_second<mp_back<mp_list<R1...> > >::value),
+				(mp_second<mp_back<mp_list<T0, R0...> > >::value < mp_second<mp_back<mp_list<T1, R1...> > >::value),
 				mp_identity<mp_true>,
 				typename std::conditional<
-					(mp_second<mp_back<mp_list<R0...> > >::value > mp_second<mp_back<mp_list<R1...> > >::value),
+					(mp_second<mp_back<mp_list<T0, R0...> > >::value > mp_second<mp_back<mp_list<T1, R1...> > >::value),
 					mp_identity<mp_false>,
-					lexicographical_compare<mp_pop_back<mp_list<R0...> >, mp_pop_back<mp_list<R1...> > >
+					lexicographical_compare<mp_pop_back<mp_list<T0, R0...> >, mp_pop_back<mp_list<T1, R1...> >, false>
 				>::type
 			>::type
 		>::type
 	>::type::type type;
 };
-#endif
-template<typename T0, typename T1>
-struct compareListOfPairs
+template<typename T0, typename T1, bool BNEW = true>
+struct compareListOfPairsB
 {	typedef typename std::conditional<
 		(order<T0>::value < order<T1>::value),
 		mp_identity<mp_true>,
 		typename std::conditional<
 			(order<T0>::value > order<T1>::value),
 			mp_identity<mp_false>,
-			lexicographical_compare<mp_reverse<T0>, mp_reverse<T1> >
+			typename std::conditional<
+				BNEW,
+				lexicographical_compare<mp_reverse<T0>, mp_reverse<T1>, true>,
+				lexicographical_compare<T0, T1, false>
+			>::type
 		>::type
 	>::type::type type;
+};
+template<typename T0, typename T1>
+struct compareListOfPairs
+{	typedef typename compareListOfPairsB<T0, T1>::type type;
 };
 template<typename T0, typename T1>
 struct compareListOfPairs2
