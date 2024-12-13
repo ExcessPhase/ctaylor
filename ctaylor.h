@@ -157,6 +157,9 @@ template<typename ...T>
 struct lexicographical_compare<mp_list<>, mp_list<T...> >
 {	typedef mp_true type;
 };
+/// doing the comparison starting from the rear
+/// makes certain, that multiplying a taylor polynomial
+/// with an element of anothher polynomial yields an already sorted polynomial
 template<typename ...R0, typename ...R1>
 struct lexicographical_compare<mp_list<R0...>, mp_list<R1...> >
 {	typedef typename std::conditional<
