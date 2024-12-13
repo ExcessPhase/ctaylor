@@ -185,7 +185,7 @@ struct compareListOfPairs
 		typename std::conditional<
 			(order<T0>::value > order<T1>::value),
 			mp_identity<mp_false>,
-			lexicographical_compare<mp_reverse<T0>, mp_reverse<T1> >
+			lexicographical_compare<T0, T1>
 		>::type
 	>::type::type type;
 };
