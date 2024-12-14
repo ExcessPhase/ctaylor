@@ -145,6 +145,10 @@ struct order
 };
 template<typename T0, typename T1>
 struct lexicographical_compare;
+template<typename T>
+struct lexicographical_compare<T, T>
+{	typedef mp_false type;
+};
 template<>
 struct lexicographical_compare<mp_list<>, mp_list<> >
 {	typedef mp_false type;
@@ -191,6 +195,10 @@ struct compareListOfPairs
 			lexicographical_compare<T0, T1>
 		>::type
 	>::type::type type;
+};
+template<typename T>
+struct compareListOfPairs<T, T>
+{	typedef mp_false type;
 };
 template<typename T0, typename T1>
 struct compareListOfPairs2
@@ -348,6 +356,15 @@ template<
 struct merge<mp_list<>, T, COMPARE, MERGE, CONTAINS_VALUE>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
+};
+template<
+	typename T,
+	template<typename, typename> class COMPARE,
+	template<typename, typename> class MERGE,
+	template<typename> class CONTAINS_VALUE
+>
+struct merge<T, T, COMPARE, MERGE, CONTAINS_VALUE>
+{	typedef T type;
 };
 template<
 	template<typename, typename> class COMPARE,
