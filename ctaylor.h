@@ -734,7 +734,6 @@ struct ctaylor
 	ctaylor &operator+=(const ctaylor<T1, MAX>&_r)
 	{	typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
 		typedef typename findPositions<T, T1, SIZE, true>::type SOURCE_POSITIONS;
-		ARRAY s;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
 		for (std::size_t i = 0; i < ctaylor::SIZE; ++i)
@@ -748,7 +747,6 @@ struct ctaylor
 	ctaylor &operator-=(const ctaylor<T1, MAX>&_r)
 	{	typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
 		typedef typename findPositions<T, T1, SIZE, true>::type SOURCE_POSITIONS;
-		ARRAY s;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
 		for (std::size_t i = 0; i < ctaylor::SIZE; ++i)
