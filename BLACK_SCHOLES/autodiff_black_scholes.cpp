@@ -101,7 +101,7 @@ int main(int argc, char**argv) {
 {
   double const K = 100.0;  // Strike price.
   //auto const variables = make_ftuple<double, 3, 3, 1, 1>(105, 5, 30.0 / 365, 1.25 / 100);
-	constexpr std::size_t MAX = 3;
+	//constexpr std::size_t MAX = 3;
 	auto const variables = std::make_tuple(
 		ctaylor<makeIndependent<0>, MAX>(105, true),
 		ctaylor<makeIndependent<1>, MAX>(5, true),
