@@ -145,6 +145,10 @@ struct order
 };
 template<typename T0, typename T1>
 struct lexicographical_compare;
+template<typename T>
+struct lexicographical_compare<T, T>
+{	typedef mp_false type;
+};
 template<>
 struct lexicographical_compare<mp_list<>, mp_list<> >
 {	typedef mp_false type;
@@ -157,6 +161,9 @@ template<typename ...T>
 struct lexicographical_compare<mp_list<>, mp_list<T...> >
 {	typedef mp_true type;
 };
+/// doing the comparison starting from the rear
+/// makes certain, that multiplying a taylor polynomial
+/// with an element of anothher polynomial yields an already sorted polynomial
 template<typename ...R0, typename ...R1>
 struct lexicographical_compare<mp_list<R0...>, mp_list<R1...> >
 {	typedef typename std::conditional<
@@ -189,6 +196,10 @@ struct compareListOfPairs
 		>::type
 	>::type::type type;
 };
+template<typename T>
+struct compareListOfPairs<T, T>
+{	typedef mp_false type;
+};
 template<typename T0, typename T1>
 struct compareListOfPairs2
 {	typedef typename compareListOfPairs<mp_first<T0>, mp_first<T1> >::type type;
@@ -216,10 +227,13 @@ struct listOfListsIsSorted<mp_list<T0, T1, REST...> >
 /// find positions of elements in SOURCE in TARET
 template<typename TARGET, typename SOURCE, typename SIZE, bool CHECK=true>
 struct findPositions
-{	static_assert(!CHECK || mp_size<TARGET>::value >= mp_size<SOURCE>::value, "size of target must be larger than size of source!");
+{
+#ifndef NDEBUG
+	static_assert(!CHECK || mp_size<TARGET>::value >= mp_size<SOURCE>::value, "size of target must be larger than size of source!");
 	static_assert(mp_is_set<TARGET>::value, "TARGET must be a set!");
 	static_assert(mp_is_set<SOURCE>::value, "SOURCE must be a set!");
 	static_assert(!CHECK || std::is_same<TARGET, mp_set_union<TARGET, SOURCE> >::value, "TARGET must contain all elements in SOURCE");
+#endif
 	typedef typename getTypeFromSize<SIZE>::type TYPE;
 	template<typename STATE, typename SOURCE_ELEMENT>
 	using checkPosition = mp_list<
@@ -272,11 +286,14 @@ using combine = mp_list<
 /// find positions of elements in SOURCE in TARET
 template<typename TARGET, typename SOURCE0, typename SOURCE1>
 struct findPositions2
-{	static_assert((mp_size<TARGET>::value >= mp_size<SOURCE0>::value), "size of target must be larger than size of source!");
+{
+#ifndef NDEBUG
+	static_assert((mp_size<TARGET>::value >= mp_size<SOURCE0>::value), "size of target must be larger than size of source!");
 	static_assert(mp_is_set<TARGET>::value, "TARGET must be a set!");
 	static_assert(mp_is_set<SOURCE0>::value, "SOURCE must be a set!");
 	static_assert(mp_is_set<SOURCE1>::value, "SOURCE must be a set!");
 	static_assert(std::is_same<TARGET, mp_set_union<TARGET, SOURCE0, SOURCE1> >::value, "TARGET must contain all elements in SOURCE");
+#endif
 	typedef mp_plus<mp_max<mp_size<SOURCE0>, mp_size<SOURCE1> >, mp_size_t<1> > SIZE;
 	typedef mp_transform<
 		combine,
@@ -345,6 +362,15 @@ template<
 struct merge<mp_list<>, T, COMPARE, MERGE, CONTAINS_VALUE>
 {	static_assert(mp_is_set<T>::value, "must be a set!");
 	typedef T type;
+};
+template<
+	typename T,
+	template<typename, typename> class COMPARE,
+	template<typename, typename> class MERGE,
+	template<typename> class CONTAINS_VALUE
+>
+struct merge<T, T, COMPARE, MERGE, CONTAINS_VALUE>
+{	typedef T type;
 };
 template<
 	template<typename, typename> class COMPARE,
