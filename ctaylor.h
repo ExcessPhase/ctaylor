@@ -329,19 +329,24 @@ template<
 	template<typename> class CONTAINS_VALUE=containsValue
 >
 struct merge
-{	static_assert(mp_is_set<T0>::value, "must be a set!");
+{
+#ifndef NDEBUG
+	static_assert(mp_is_set<T0>::value, "must be a set!");
 	static_assert(mp_is_set<T1>::value, "must be a set!");
+#endif
 	typedef typename merge_sorted_sets<
 		COMPARE,
 		T0,
 		T1,
 		MERGE
 	>::type type;
+#ifndef NDEBUG
 	static_assert(
 		CONTAINS_VALUE<type>::type::value == mp_or<
 			typename CONTAINS_VALUE<T0>::type,
 			typename CONTAINS_VALUE<T1>::type
 		>::value, "value in merge result!");
+#endif
 };
 template<
 	typename T,
@@ -610,8 +615,6 @@ using multiply_2_2 = mp_second<
 		multiply_2_1
 	>
 >;
-template<typename T, std::size_t MAX, std::size_t LMPOS, typename T1>
-struct multiply;
 template<typename T0, typename T1>
 struct TypeDisplayer
 {	static_assert(
@@ -896,8 +899,16 @@ struct ctaylor
 	}
 	template<typename T1>
 	auto operator*(const ctaylor<T1, MAX>&_r) const
-	{	//typedef typename std::decay<decltype(multiply<T, MAX, SIZE, T1>(*this, _r)())>::type::SET ACTUAL;
-		typedef multiply_2_2<T, T1, MAX> CALCULATED_PAIRS;
+	{	typedef std::integral_constant<bool, (mp_size<T1>::value <= mp_size<T>::value)> BOOL;
+		return multiply(_r, BOOL());
+	}
+	template<typename T1>
+	auto multiply(const ctaylor<T1, MAX>&_r, const std::false_type&) const
+	{	return _r**this;
+	}
+	template<typename T1>
+	auto multiply(const ctaylor<T1, MAX>&_r, const std::true_type&) const
+	{	typedef multiply_2_2<T, T1, MAX> CALCULATED_PAIRS;
 		typedef mp_transform<
 			mp_first,
 			CALCULATED_PAIRS
@@ -906,8 +917,6 @@ struct ctaylor
 			mp_second,
 			CALCULATED_PAIRS
 		> POSITIONS;
-		//TypeDisplayer<ACTUAL, CALCULATED> sCompare;
-#if 1
 		ctaylor<CALCULATED, MAX> s;
 		auto &r = convertToStdArray3<POSITIONS, mp_max<mp_size<T>, mp_size<T1> > >::type::value;
 		typedef typename getTypeFromSize<mp_max<mp_size<T>, mp_size<T1> > >::type TYPE;
@@ -927,9 +936,6 @@ struct ctaylor
 			}
 		);
 		return s;
-#else
-		return multiply<T, MAX, SIZE, T1>(*this, _r)();
-#endif
 	}
 	template<
 		typename U=T,
@@ -1650,68 +1656,6 @@ struct check
 		"problem"
 	);
 };
-#if 0
-template<
-	typename T,	/// LHS template argument
-	std::size_t MAX,	/// common MAX order
-	std::size_t LMPOS,	/// mp_size<T> - LMPOS == current position LHS
-	typename T1	/// RHS template argument
->
-struct multiply
-{	const ctaylor<T, MAX> &m_rL;	/// LHS
-	const ctaylor<T1, MAX>&m_rR;	/// RHS
-	typedef mp_at_c<T, mp_size<T>::value - LMPOS> LHS_PAIR_LIST_AT_POS;
-		/// order at current LMPOS
-	static constexpr std::size_t ORDER = order<LHS_PAIR_LIST_AT_POS>::value;
-		/// the number of elements in the RHS which can be multiplied with the current element in the LHS
-		/// with the result order being smaller or equal than MAX
-	//static constexpr std::size_t SIZE = findOrderSize<T1, MAX - ORDER>::type::value;
-	multiply(
-		const ctaylor<T, MAX> &_rL,
-		const ctaylor<T1, MAX>&_rR
-	)
-		:m_rL(_rL),
-		m_rR(_rR)
-	{
-	}
-	multiply(void) = delete;
-	typedef multiply_2_2<
-		mp_list<LHS_PAIR_LIST_AT_POS>,
-		T1,
-		MAX
-	> NEW;
-	static check<NEW, T1, mp_list<LHS_PAIR_LIST_AT_POS> > sCheck;
-		/// entry point
-	auto operator()(void) const
-	{	return (*this)(NEW(), mp_size<NEW>());
-	}
-	template<typename NEW>
-	auto operator()(const NEW&, const mp_size_t<0>&) const
-	{	return multiply<T, MAX, LMPOS-1, T1>(m_rL, m_rR)();
-	}
-	template<typename NEW, typename NEW_SIZE>
-	auto operator()(const NEW&, const NEW_SIZE&) const
-	{	ctaylor<NEW, MAX> s;
-		const double d = m_rL.m_s[mp_size<T>::value - LMPOS];
-		for (std::size_t i = 0; i < ctaylor<NEW, MAX>::SIZE; ++i)
-			s.m_s[i] = d*m_rR.m_s[i];
-		return multiply<T, MAX, LMPOS-1, T1>(m_rL, m_rR)() + s;
-	}
-};
-template<typename T, std::size_t MAX, typename T1>
-struct multiply<T, MAX, 0, T1>
-{	multiply(
-		const ctaylor<T, MAX> &,
-		const ctaylor<T1, MAX>&
-	)
-	{
-	}
-	multiply(void) = delete;
-	auto operator()(void) const
-	{	return ctaylor<mp_list<>, MAX>();
-	}
-};
-#endif
 template<typename, typename>
 struct common_type;
 template<typename T, std::size_t MAX>
