@@ -609,8 +609,6 @@ using multiply_2_2 = mp_second<
 		multiply_2_1
 	>
 >;
-template<typename T, std::size_t MAX, std::size_t LMPOS, typename T1>
-struct multiply;
 template<typename T0, typename T1>
 struct TypeDisplayer
 {	static_assert(
@@ -895,8 +893,16 @@ struct ctaylor
 	}
 	template<typename T1>
 	auto operator*(const ctaylor<T1, MAX>&_r) const
-	{	//typedef typename std::decay<decltype(multiply<T, MAX, SIZE, T1>(*this, _r)())>::type::SET ACTUAL;
-		typedef multiply_2_2<T, T1, MAX> CALCULATED_PAIRS;
+	{	typedef std::integral_constant<bool, (mp_size<T1>::value <= mp_size<T>::value)> BOOL;
+		return multiply(_r, BOOL());
+	}
+	template<typename T1>
+	auto multiply(const ctaylor<T1, MAX>&_r, const std::false_type&) const
+	{	return _r**this;
+	}
+	template<typename T1>
+	auto multiply(const ctaylor<T1, MAX>&_r, const std::true_type&) const
+	{	typedef multiply_2_2<T, T1, MAX> CALCULATED_PAIRS;
 		typedef mp_transform<
 			mp_first,
 			CALCULATED_PAIRS
@@ -905,8 +911,6 @@ struct ctaylor
 			mp_second,
 			CALCULATED_PAIRS
 		> POSITIONS;
-		//TypeDisplayer<ACTUAL, CALCULATED> sCompare;
-#if 1
 		ctaylor<CALCULATED, MAX> s;
 		auto &r = convertToStdArray3<POSITIONS, mp_max<mp_size<T>, mp_size<T1> > >::type::value;
 		typedef typename getTypeFromSize<mp_max<mp_size<T>, mp_size<T1> > >::type TYPE;
@@ -926,9 +930,6 @@ struct ctaylor
 			}
 		);
 		return s;
-#else
-		return multiply<T, MAX, SIZE, T1>(*this, _r)();
-#endif
 	}
 	template<
 		typename U=T,
