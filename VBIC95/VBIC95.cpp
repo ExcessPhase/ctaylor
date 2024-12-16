@@ -664,7 +664,7 @@ struct vbic
 #ifndef __JACOBIAN__
 			/// second order same derivative
 		template<typename ENUM>
-		void operator()(const mp_list<mp_list<ENUM, mp_size_t<2> > >&) const
+		void operator()(const mp_list<std::pair<ENUM, mp_size_t<2> > >&) const
 		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM::value]);
 			typedef mp_list<mp_list<ENUM, mp_size_t<1> > > LIST;
 			constexpr std::size_t POS = mp_find<T, LIST>::value;
@@ -675,7 +675,7 @@ struct vbic
 		}
 			/// second order cross derivatives
 		template<typename ENUM0, typename ENUM1>
-		void operator()(const mp_list<mp_list<ENUM0, mp_size_t<1> >, mp_list<ENUM1, mp_size_t<1> > >&) const
+		void operator()(const mp_list<std::pair<ENUM0, mp_size_t<1> >, std::pair<ENUM1, mp_size_t<1> > >&) const
 		{	const auto sNodePair0 = translate(s_aInput2NodePair[ENUM0::value]);
 			const auto sNodePair1 = translate(s_aInput2NodePair[ENUM1::value]);
 			typedef mp_list<mp_list<ENUM0, mp_size_t<1> >, mp_list<ENUM1, mp_size_t<1> > > LIST;
@@ -693,7 +693,7 @@ struct vbic
 		}
 			/// first order
 		template<typename ENUM>
-		void operator()(const mp_list<mp_list<ENUM, mp_size_t<1> > >&) const
+		void operator()(const mp_list<std::pair<ENUM, mp_size_t<1> > >&) const
 		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM::value]);
 			typedef mp_list<mp_list<ENUM, mp_size_t<1> > > LIST;
 			constexpr std::size_t POS = mp_find<T, LIST>::value;

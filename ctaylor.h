@@ -97,7 +97,7 @@ struct accumulatedFactorial<mp_list<> >
 template<std::size_t ENUM, std::size_t ORDER>
 struct accumulatedFactorial<
 	mp_list<
-		mp_list<
+		std::pair<
 			mp_size_t<ENUM>,
 			mp_size_t<ORDER>
 		>
@@ -126,7 +126,7 @@ template<std::size_t ENUM>
 using makeIndependent = mp_list<
 	mp_list<>,
 	mp_list<
-		mp_list<
+		std::pair<
 			mp_size_t<ENUM>,
 			mp_size_t<1>	/// the order
 		>
@@ -136,7 +136,7 @@ using makeIndependent = mp_list<
 template<typename SUM, typename PAIR>
 using add_second=std::integral_constant<
 	std::size_t,
-	SUM::value + mp_second<PAIR>::value
+	SUM::value + PAIR::second_type::value
 >;
 	/// for determining the order
 template<typename LIST>
@@ -534,7 +534,7 @@ struct multiply_1_1_R<RESULT, mp_list<T0, R0...>, mp_list<T1, R1...> >
 			multiply_1_1_R<
 				mp_push_back<
 					RESULT,
-					mp_list<
+					std::pair<
 						mp_first<T0>,
 						mp_size_t<mp_second<T0>::value + mp_second<T1>::value>
 					>
@@ -1381,11 +1381,11 @@ struct ctaylor
 			m_rS << "\n";
 		}
 		template<std::size_t I, std::size_t O>
-		void operator()(const mp_list<mp_size_t<I>, mp_size_t<O> >&) const
+		void operator()(const std::pair<mp_size_t<I>, mp_size_t<O> >&) const
 		{	m_rS << "*x" << I << "^" << O;
 		}
 		template<std::size_t I>
-		void operator()(const mp_list<mp_size_t<I>, mp_size_t<1> >&) const
+		void operator()(const std::pair<mp_size_t<I>, mp_size_t<1> >&) const
 		{	m_rS << "*x" << I;
 		}
 	};
