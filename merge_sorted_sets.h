@@ -1,6 +1,7 @@
 #pragma once
 #include <boost/mp11.hpp>
 #include <type_traits>
+#include <utility>
 
 namespace taylor
 {
@@ -44,7 +45,7 @@ struct merge_sorted_sets<F, mp_list<Ts1...>, mp_list<Ts2...>, MERGE>
 	typedef mp_front<TS1> T1;
 	typedef mp_front<TS2> T2;
 	struct defer_true
-	{	typedef mp_list<
+	{	typedef std::pair<
 			merge_sorted_sets<
 				F,
 				mp_pop_front<TS1>,
@@ -57,7 +58,7 @@ struct merge_sorted_sets<F, mp_list<Ts1...>, mp_list<Ts2...>, MERGE>
 	struct defer_false
 	{	typedef mp_if<
 			typename F<T2, T1>::type,
-			mp_list<
+			std::pair<
 				merge_sorted_sets<
 					F,
 					TS1,
@@ -66,7 +67,7 @@ struct merge_sorted_sets<F, mp_list<Ts1...>, mp_list<Ts2...>, MERGE>
 				>,
 				mp_identity<T2>
 			>,
-			mp_list<
+			std::pair<
 				merge_sorted_sets<
 					F,
 					mp_pop_front<TS1>,
@@ -90,8 +91,8 @@ struct merge_sorted_sets<F, mp_list<Ts1...>, mp_list<Ts2...>, MERGE>
 		defer_false
 	>::type tmp;
 	using type = mp_push_front<
-		typename mp_first<tmp>::type,
-		typename mp_second<tmp>::type
+		typename tmp::first_type::type,
+		typename tmp::second_type::type
 	>;
 };
 }

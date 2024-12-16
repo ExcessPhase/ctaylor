@@ -202,7 +202,7 @@ struct compareListOfPairs<T, T>
 };
 template<typename T0, typename T1>
 struct compareListOfPairs2
-{	typedef typename compareListOfPairs<mp_first<T0>, mp_first<T1> >::type type;
+{	typedef typename compareListOfPairs<typename T0::first_type, typename T1::first_type>::type type;
 };
 #if 0
 template<typename LIST>
@@ -305,10 +305,10 @@ template<typename A, typename B>
 struct combineTwoPairs;
 template<typename A, typename ...B, typename ...C>
 struct combineTwoPairs<
-	mp_list<A, mp_list<B...> >,
-	mp_list<A, mp_list<C...> >
+	std::pair<A, mp_list<B...> >,
+	std::pair<A, mp_list<C...> >
 >
-{	typedef mp_list<
+{	typedef std::pair<
 		A,
 		mp_append<
 			mp_list<B...>,
@@ -518,14 +518,14 @@ struct multiply_1_1_R<RESULT, mp_list<>, mp_list<T, REST...> >
 template<typename RESULT, typename T0, typename ...R0, typename T1, typename ...R1>
 struct multiply_1_1_R<RESULT, mp_list<T0, R0...>, mp_list<T1, R1...> >
 {	typedef typename std::conditional<
-		(mp_first<T0>::value < mp_first<T1>::value),
+		(T0::first_type::value < T1::first_type::value),
 		multiply_1_1_R<
 			mp_push_back<RESULT, T0>,
 			mp_list<R0...>,
 			mp_list<T1, R1...>
 		>,
 		typename std::conditional<
-			(mp_first<T0>::value > mp_first<T1>::value),
+			(T0::first_type::value > T1::first_type::value),
 			multiply_1_1_R<
 				mp_push_back<RESULT, T1>,
 				mp_list<T0, R0...>,
@@ -535,8 +535,8 @@ struct multiply_1_1_R<RESULT, mp_list<T0, R0...>, mp_list<T1, R1...> >
 				mp_push_back<
 					RESULT,
 					std::pair<
-						mp_first<T0>,
-						mp_size_t<mp_second<T0>::value + mp_second<T1>::value>
+						typename T0::first_type,
+						mp_size_t<T0::second_type::value + T1::second_type::value>
 					>
 				>,
 				mp_list<R0...>,
@@ -553,7 +553,7 @@ using multiply_1_1 = mp_list<
 		(order<mp_first<T0E> >::value + order<mp_first<mp_second<STATE> > >::value <= mp_third<STATE>::value),
 		mp_push_back<
 			mp_first<STATE>,
-			mp_list<
+			std::pair<
 				typename multiply_1_1_R<
 					mp_list<>,
 					mp_first<T0E>,
@@ -595,10 +595,12 @@ using multiply_2_1 = mp_list<
 	>::type,
 	mp_third<STATE>//MAX
 >;
+template<typename A, typename B>
+using make_pair = std::pair<A, B>;
 // Transform function to pair each type with its index
 template<typename L>
 using add_index = mp_transform<
-	mp_list,
+	make_pair,
 	L,
 	mp_iota_c<mp_size<L>::value>
 >;
