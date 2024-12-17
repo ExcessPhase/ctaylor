@@ -666,7 +666,7 @@ struct vbic
 		template<typename ENUM>
 		void operator()(const mp_list<pair<ENUM, mp_size_t<2> > >&) const
 		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM::value]);
-			typedef mp_list<mp_list<ENUM, mp_size_t<1> > > LIST;
+			typedef mp_list<pair<ENUM, mp_size_t<1> > > LIST;
 			constexpr std::size_t POS = mp_find<T, LIST>::value;
 			(*this)(sNodePair.first, sNodePair.first, mp_size_t<POS>(), false, true);
 			(*this)(sNodePair.second, sNodePair.second, mp_size_t<POS>(), false, true);
@@ -678,7 +678,7 @@ struct vbic
 		void operator()(const mp_list<pair<ENUM0, mp_size_t<1> >, pair<ENUM1, mp_size_t<1> > >&) const
 		{	const auto sNodePair0 = translate(s_aInput2NodePair[ENUM0::value]);
 			const auto sNodePair1 = translate(s_aInput2NodePair[ENUM1::value]);
-			typedef mp_list<mp_list<ENUM0, mp_size_t<1> >, mp_list<ENUM1, mp_size_t<1> > > LIST;
+			typedef mp_list<pair<ENUM0, mp_size_t<1> >, pair<ENUM1, mp_size_t<1> > > LIST;
 			constexpr std::size_t POS = mp_find<T, LIST>::value;
 
 			(*this)(sNodePair0.first, sNodePair1.first, mp_size_t<POS>(), false);
@@ -695,7 +695,7 @@ struct vbic
 		template<typename ENUM>
 		void operator()(const mp_list<pair<ENUM, mp_size_t<1> > >&) const
 		{	const auto sNodePair = translate(s_aInput2NodePair[ENUM::value]);
-			typedef mp_list<mp_list<ENUM, mp_size_t<1> > > LIST;
+			typedef mp_list<pair<ENUM, mp_size_t<1> > > LIST;
 			constexpr std::size_t POS = mp_find<T, LIST>::value;
 			if (const double d = m_rV.m_s.at(POS))
 			{	if (sNodePair.first != enumCircuitNodes::NumberOfNodes)
