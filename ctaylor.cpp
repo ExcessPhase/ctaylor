@@ -26,7 +26,7 @@ int main(int argc, char**argv)
 		/// print the entire polynomial
 	std::cout << "s5=" << s5 << "\n";
 	typedef mp_list<
-		std::pair<
+		pair<
 			mp_size_t<0>,	// wrt x0
 			mp_size_t<MAX>	// to the order of MAX
 		>
@@ -34,11 +34,11 @@ int main(int argc, char**argv)
 	std::cout << "s5.getDer(LIST_OF_PAIRS())=" << s5.getDer(LIST_OF_PAIRS()) << "\n";
 	typedef mp_list<
 			/// elements must be sorted by variable-enum
-		std::pair<
+		pair<
 			mp_size_t<0>,	// wrt x0
 			mp_size_t<1>	// to the order of 1
 		>,
-		std::pair<
+		pair<
 			mp_size_t<1>,	// wrt x1
 			mp_size_t<1>	// to the order of 1
 		>

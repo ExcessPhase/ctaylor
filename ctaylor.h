@@ -97,7 +97,7 @@ struct accumulatedFactorial<mp_list<> >
 template<std::size_t ENUM, std::size_t ORDER>
 struct accumulatedFactorial<
 	mp_list<
-		std::pair<
+		pair<
 			mp_size_t<ENUM>,
 			mp_size_t<ORDER>
 		>
@@ -126,7 +126,7 @@ template<std::size_t ENUM>
 using makeIndependent = mp_list<
 	mp_list<>,
 	mp_list<
-		std::pair<
+		pair<
 			mp_size_t<ENUM>,
 			mp_size_t<1>	/// the order
 		>
@@ -305,10 +305,10 @@ template<typename A, typename B>
 struct combineTwoPairs;
 template<typename A, typename ...B, typename ...C>
 struct combineTwoPairs<
-	std::pair<A, mp_list<B...> >,
-	std::pair<A, mp_list<C...> >
+	pair<A, mp_list<B...> >,
+	pair<A, mp_list<C...> >
 >
-{	typedef std::pair<
+{	typedef pair<
 		A,
 		mp_append<
 			mp_list<B...>,
@@ -534,7 +534,7 @@ struct multiply_1_1_R<RESULT, mp_list<T0, R0...>, mp_list<T1, R1...> >
 			multiply_1_1_R<
 				mp_push_back<
 					RESULT,
-					std::pair<
+					pair<
 						typename T0::first_type,
 						mp_size_t<T0::second_type::value + T1::second_type::value>
 					>
@@ -553,7 +553,7 @@ using multiply_1_1 = mp_list<
 		(order<mp_first<T0E> >::value + order<mp_first<mp_second<STATE> > >::value <= mp_third<STATE>::value),
 		mp_push_back<
 			mp_first<STATE>,
-			std::pair<
+			pair<
 				typename multiply_1_1_R<
 					mp_list<>,
 					mp_first<T0E>,
@@ -596,7 +596,7 @@ using multiply_2_1 = mp_list<
 	mp_third<STATE>//MAX
 >;
 template<typename A, typename B>
-using make_pair = std::pair<A, B>;
+using make_pair = pair<A, B>;
 // Transform function to pair each type with its index
 template<typename L>
 using add_index = mp_transform<
@@ -1383,11 +1383,11 @@ struct ctaylor
 			m_rS << "\n";
 		}
 		template<std::size_t I, std::size_t O>
-		void operator()(const std::pair<mp_size_t<I>, mp_size_t<O> >&) const
+		void operator()(const pair<mp_size_t<I>, mp_size_t<O> >&) const
 		{	m_rS << "*x" << I << "^" << O;
 		}
 		template<std::size_t I>
-		void operator()(const std::pair<mp_size_t<I>, mp_size_t<1> >&) const
+		void operator()(const pair<mp_size_t<I>, mp_size_t<1> >&) const
 		{	m_rS << "*x" << I;
 		}
 	};

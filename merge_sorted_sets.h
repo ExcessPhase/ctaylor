@@ -10,6 +10,11 @@ namespace implementation
 //namespace mp = boost::mp11;
 using namespace boost::mp11;
 
+template<typename A, typename B>
+struct pair
+{	typedef A first_type;
+	typedef B second_type;
+};
 template<typename, typename>
 struct combineTwo;
 template<typename A>
@@ -45,7 +50,7 @@ struct merge_sorted_sets<F, mp_list<Ts1...>, mp_list<Ts2...>, MERGE>
 	typedef mp_front<TS1> T1;
 	typedef mp_front<TS2> T2;
 	struct defer_true
-	{	typedef std::pair<
+	{	typedef pair<
 			merge_sorted_sets<
 				F,
 				mp_pop_front<TS1>,
@@ -58,7 +63,7 @@ struct merge_sorted_sets<F, mp_list<Ts1...>, mp_list<Ts2...>, MERGE>
 	struct defer_false
 	{	typedef mp_if<
 			typename F<T2, T1>::type,
-			std::pair<
+			pair<
 				merge_sorted_sets<
 					F,
 					TS1,
@@ -67,7 +72,7 @@ struct merge_sorted_sets<F, mp_list<Ts1...>, mp_list<Ts2...>, MERGE>
 				>,
 				mp_identity<T2>
 			>,
-			std::pair<
+			pair<
 				merge_sorted_sets<
 					F,
 					mp_pop_front<TS1>,
@@ -97,4 +102,5 @@ struct merge_sorted_sets<F, mp_list<Ts1...>, mp_list<Ts2...>, MERGE>
 };
 }
 using implementation::merge_sorted_sets;
+using implementation::pair;
 }
