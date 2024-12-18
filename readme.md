@@ -17,7 +17,7 @@ I fixed some compilel time issue which prevented some projects using ctaylor.h t
 
 ### **taylor::ctaylor**
 - **Header File**: `ctaylor.h`
-- **Description**: Implements a dual number truncated Taylor series class.
+- **Description**: Implements a dual number truncated Taylor series class for calculation of higher order derivatives.
 - **Template Parameter**: Max order of derivatives, should be larger than 1. For MAX=1, use `cjacobian.h`.
 - **Mixing Instances**: Do not mix instances with different MAX parameters.
 - **Functionality**: This class implements calculations with polynomial coefficients.
