@@ -247,7 +247,7 @@ struct findPositions
 				mp_second<STATE>,
 				mp_first<STATE>
 			>,
-			mp_first<STATE>
+			mp_identity<mp_first<STATE> >
 		>::type::type,
 		mp_size_t<mp_second<STATE>::value + 1>,
 		mp_third<STATE>
