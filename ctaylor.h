@@ -545,30 +545,35 @@ struct multiply_1_1_R<RESULT, mp_list<T0, R0...>, mp_list<T1, R1...> >
 		>::type
 	>::type::type type;
 };
+	/// type is only accessed in case of it is needed
+template<typename STATE, typename T0E>
+struct multiply_1_1_E
+{	typedef mp_push_back<
+		mp_first<STATE>,
+		pair<
+			typename multiply_1_1_R<
+				mp_list<>,
+				mp_first<T0E>,
+				mp_first<mp_second<STATE> >// T1E
+			>::type,
+			mp_list<
+				mp_list<
+					mp_second<T0E>,
+					mp_second<mp_second<STATE> >
+				>
+			>
+		>
+	> type;
+};
 	/// invokes multiply_1_1_R
 	/// only if the resuling order would be smaller or equal MAX
 template<typename STATE, typename T0E>
 using multiply_1_1 = mp_list<
 	typename std::conditional<
 		(order<mp_first<T0E> >::value + order<mp_first<mp_second<STATE> > >::value <= mp_third<STATE>::value),
-		mp_push_back<
-			mp_first<STATE>,
-			pair<
-				typename multiply_1_1_R<
-					mp_list<>,
-					mp_first<T0E>,
-					mp_first<mp_second<STATE> >// T1E
-				>::type,
-				mp_list<
-					mp_list<
-						mp_second<T0E>,
-						mp_second<mp_second<STATE> >
-					>
-				>
-			>
-		>,
-		mp_first<STATE>
-	>::type,
+		multiply_1_1_E<STATE, T0E>,
+		mp_identity<mp_first<STATE> >
+	>::type::type,
 	mp_second<STATE>,//T1E
 	mp_third<STATE>//MAX
 >;

@@ -147,7 +147,7 @@ index2Double solve(const index2Index2Double&_rM, const index2Double&_rY)
 				s[iDestRow] -= dInvPivot*pFind->second*rRow;
 		}
 	}
-	for (std::ptrdiff_t iRow = iDim - 1; iRow >= 0; --iRow)
+	for (std::size_t iRow = iDim - 1; iRow + 1 > 0; --iRow)
 	{	const auto &rRow = _rM.at(iRow);
 		auto &rY = s[iRow];
 		for (auto p = rRow.rbegin(); p != rRow.rend() && p->first > iRow; ++p)
