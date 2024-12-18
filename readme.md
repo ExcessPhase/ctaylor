@@ -9,6 +9,10 @@
 
 This document describes the implementation and usage of two classes designed for automatic differentiation leveraging dual numbers. These classes are designed for high performance, making use of sparse representations and template metaprogramming.
 
+## News
+
+I fixed some compilel time issue which prevented some projects using ctaylor.h to finish on Visual C++.
+
 ## Classes Overview
 
 ### **taylor::ctaylor**
@@ -39,25 +43,24 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **Output**: `ctaylor.exe`
    - **Header**: `ctaylor.h`
    - **Description**: Reads arguments from the command line to prevent g++ from incorporating compile-time results into the executable. Used for checking correctness together with maxima.txt. Consult this example to learn how to create independent variables.
-   - builds on Visual C++
+   - **Visual C++**: ok
 
 2. **cjacobian.cpp**
    - **Output**: `cjacobian.exe`
    - **Header**: `cjacobian.h`
    - **Description**: Reads arguments from the command line. A very primitive implementation. Used for checking correctness together with maxima.txt. Consult this example to learn how to create independent variables.
-   - builds on Visual C++
+   - **Visual C++**: ok
 
 3. **VBIC95Jac.exe and VBIC95Taylor.exe**
    - **Headers**: `VBIC95/VBIC95.cpp` or `VBIC95Jac/VBIC95Jac.cpp`
    - **Description**: Implements a DC solver for a single transistor using VBIC95. Parameters are read from `VBIC95/PARS`.
-   - builds on Visual C++
-   - When attempting to use Halley's method in `VBIC95Taylor.exe` (increase `MAX` to 2 in `VBIC95/VBIC95.cpp`) Visual C++ hangs (filed a bug).
+   - **Visual C++**: ok. When attempting to use Halley's method in `VBIC95Taylor.exe` (increase `MAX` to 2 in `VBIC95/VBIC95.cpp`) Visual C++ takes a long time.
 
 4. **BLACK_SCHOLES**
    - **Outputs**: `black_scholes.exe` and `black_scholes_orig.exe`
    - **Headers**: `ctaylor.h` or `boost/autodiff`
    - **Description**: Implements performance measurement (using an optional loop) and test for correctness (comparison with boost::autodiff).
-   - Visual C++ Compiler hangs when trying to build (filed a bug).
+   - **Visual C++**: `black_scholes.exe` takes quite some time.
 
 ## Accessing Results
 
