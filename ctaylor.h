@@ -167,16 +167,16 @@ struct lexicographical_compare<mp_list<>, mp_list<T...> >
 template<typename ...R0, typename ...R1>
 struct lexicographical_compare<mp_list<R0...>, mp_list<R1...> >
 {	typedef typename std::conditional<
-		(mp_first<mp_back<mp_list<R0...> > >::value < mp_first<mp_back<mp_list<R1...> > >::value),
+		(mp_back<mp_list<R0...> >::first_type::value < mp_back<mp_list<R1...> >::first_type::value),
 		mp_identity<mp_true>,
 		typename std::conditional<
-			(mp_first<mp_back<mp_list<R0...> > >::value > mp_first<mp_back<mp_list<R1...> > >::value),
+			(mp_back<mp_list<R0...> >::first_type::value > mp_back<mp_list<R1...> >::first_type::value),
 			mp_identity<mp_false>,
 			typename std::conditional<
-				(mp_second<mp_back<mp_list<R0...> > >::value < mp_second<mp_back<mp_list<R1...> > >::value),
+				(mp_back<mp_list<R0...> >::second_type::value < mp_back<mp_list<R1...> >::second_type::value),
 				mp_identity<mp_true>,
 				typename std::conditional<
-					(mp_second<mp_back<mp_list<R0...> > >::value > mp_second<mp_back<mp_list<R1...> > >::value),
+					(mp_back<mp_list<R0...> >::second_type::value > mp_back<mp_list<R1...> >::second_type::value),
 					mp_identity<mp_false>,
 					lexicographical_compare<mp_pop_back<mp_list<R0...> >, mp_pop_back<mp_list<R1...> > >
 				>::type
