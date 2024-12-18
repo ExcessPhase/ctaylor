@@ -11,7 +11,7 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
-I fixed some compile time issue which prevented some projects using ctaylor.h to finish on Visual C++.
+I fixed some compile time issue which prevented some projects using ctaylor.h to finish compiling on Visual C++.
 
 ## Classes Overview
 
