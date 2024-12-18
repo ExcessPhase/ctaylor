@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cjacobian", "cjacobian\cjacobian.vcxproj", "{10400D7F-D219-4AB2-B686-6C3CC570C3D8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BLACK_SCHOLES_ORIG", "BLACK_SCHOLES_ORIG\BLACK_SCHOLES_ORIG.vcxproj", "{7A9049E8-B8D2-4831-8884-5CCAB849AB4A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -66,6 +68,14 @@ Global
 		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Release|x64.Build.0 = Release|x64
 		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Release|x86.ActiveCfg = Release|Win32
 		{10400D7F-D219-4AB2-B686-6C3CC570C3D8}.Release|x86.Build.0 = Release|Win32
+		{7A9049E8-B8D2-4831-8884-5CCAB849AB4A}.Debug|x64.ActiveCfg = Debug|x64
+		{7A9049E8-B8D2-4831-8884-5CCAB849AB4A}.Debug|x64.Build.0 = Debug|x64
+		{7A9049E8-B8D2-4831-8884-5CCAB849AB4A}.Debug|x86.ActiveCfg = Debug|Win32
+		{7A9049E8-B8D2-4831-8884-5CCAB849AB4A}.Debug|x86.Build.0 = Debug|Win32
+		{7A9049E8-B8D2-4831-8884-5CCAB849AB4A}.Release|x64.ActiveCfg = Release|x64
+		{7A9049E8-B8D2-4831-8884-5CCAB849AB4A}.Release|x64.Build.0 = Release|x64
+		{7A9049E8-B8D2-4831-8884-5CCAB849AB4A}.Release|x86.ActiveCfg = Release|Win32
+		{7A9049E8-B8D2-4831-8884-5CCAB849AB4A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
