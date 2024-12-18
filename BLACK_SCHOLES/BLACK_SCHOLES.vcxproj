@@ -24,6 +24,11 @@
   <ItemGroup>
     <None Include="..\readme.md" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\ctaylor.h" />
+    <ClInclude Include="..\merge_sorted_sets.h" />
+    <ClInclude Include="..\taylor_series_expansions.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

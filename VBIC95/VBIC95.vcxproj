@@ -199,6 +199,8 @@
   <ItemGroup>
     <ClInclude Include="..\ctaylor.h" />
     <ClInclude Include="..\LUFAC\lufac.h" />
+    <ClInclude Include="..\merge_sorted_sets.h" />
+    <ClInclude Include="..\taylor_series_expansions.h" />
     <ClInclude Include="inputs.h" />
     <ClInclude Include="members.h" />
     <ClInclude Include="nodes.h" />

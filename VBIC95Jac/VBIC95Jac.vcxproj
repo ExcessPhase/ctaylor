@@ -195,6 +195,7 @@
     <ClCompile Include="VBIC95Jac.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\cjacobian.h" />
     <ClInclude Include="..\LUFAC\lufac.h" />
   </ItemGroup>
   <ItemGroup>

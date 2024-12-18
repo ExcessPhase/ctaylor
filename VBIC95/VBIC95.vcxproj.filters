@@ -47,6 +47,12 @@
     <ClInclude Include="..\ctaylor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\merge_sorted_sets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\taylor_series_expansions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\readme.md" />

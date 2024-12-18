@@ -22,4 +22,15 @@
   <ItemGroup>
     <None Include="..\readme.md" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\ctaylor.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\merge_sorted_sets.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\taylor_series_expansions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

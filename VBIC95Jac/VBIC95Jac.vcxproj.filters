@@ -26,6 +26,9 @@
     <ClInclude Include="..\LUFAC\lufac.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\cjacobian.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\readme.md" />
