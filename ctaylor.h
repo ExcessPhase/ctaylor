@@ -235,6 +235,7 @@ struct findPositions
 	static_assert(!CHECK || std::is_same<TARGET, mp_set_union<TARGET, SOURCE> >::value, "TARGET must contain all elements in SOURCE");
 #endif
 	typedef typename getTypeFromSize<SIZE>::type TYPE;
+#if 0
 	template<typename STATE, typename SOURCE_ELEMENT>
 	using checkPosition = mp_list<
 		typename std::conditional<
@@ -276,6 +277,25 @@ struct findPositions
 		mp_list<>,
 		findPosition
 	> type;
+#else
+	template<typename RESULT, typename T>
+	using findElement = mp_push_back<
+		RESULT,
+		mp_list<
+			mp_size<RESULT>,
+			typename std::conditional<
+				(mp_find<SOURCE, T>::value == mp_size<SOURCE>::value),
+				mp_size_t<std::numeric_limits<TYPE>::max()>,
+				mp_find<SOURCE, T>
+			>::type
+		>
+	>;
+	typedef mp_fold<
+		TARGET,
+		mp_list<>,
+		findElement
+	> type;
+#endif
 };
 template<typename L0, typename L1>
 using combine = mp_list<
