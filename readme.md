@@ -51,16 +51,17 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **Description**: Reads arguments from the command line. A very primitive implementation. Used for checking correctness together with maxima.txt. Consult this example to learn how to create independent variables.
    - **Visual C++**: ok
 
-3. **VBIC95Jac.exe and VBIC95Taylor.exe**
-   - **Headers**: `VBIC95/VBIC95.cpp` or `VBIC95Jac/VBIC95Jac.cpp`
+3. **VBIC95/VBIC95.cpp** and **VBIC95Jac/VBIC95Jac.cpp**
+   - **Outputs**: `VBIC95Jac.exe` and `VBIC95Taylor.exe`
+   - **Headers**: `cjacobian.h` or `ctaylor.h`
    - **Description**: Implements a DC solver for a single transistor using VBIC95. Parameters are read from `VBIC95/PARS`.
-   - **Visual C++**: ok. When attempting to use Halley's method in `VBIC95Taylor.exe` (increase `MAX` to 2 in `VBIC95/VBIC95.cpp`) Visual C++ takes a long time.
+   - **Visual C++**: ok. When attempting to use Halley's method in `VBIC95Taylor.exe` (increase `MAX` to 2 in `VBIC95/VBIC95.cpp`) Visual C++ takes a some time (4min:36s on my 12year old Dell M4700).
 
 4. **BLACK_SCHOLES**
    - **Outputs**: `black_scholes.exe` and `black_scholes_orig.exe`
    - **Headers**: `ctaylor.h` or `boost/autodiff`
    - **Description**: Implements performance measurement (using an optional loop) and test for correctness (comparison with boost::autodiff).
-   - **Visual C++**: `black_scholes.exe` takes quite some time.
+   - **Visual C++**: `black_scholes.exe` takes 9min:24 on my 12 year old Dell M4700.
 
 ## Accessing Results
 
@@ -84,7 +85,9 @@ Both implementations are sparse, carrying and calculating only potentially nonze
     double cjacobian::getDer(const mp_size_t<I>&) const;
     ```
 
-- **Handling Loops**: If `if_()` is insufficient for creating types in loops, refer to its implementation and use a similar approach manually. `taylor::common_type` and `jacobian::common_type` are used to merge `std::tuple` containing `taylor::ctaylor` or `jacobian::cjacobian`.
+## Handling Loops
+
+If `if_()` is insufficient for creating types in loops, refer to its implementation and use a similar approach manually. `taylor::common_type` and `jacobian::common_type` are used to merge `std::tuple` containing `taylor::ctaylor` or `jacobian::cjacobian`.
 
 ## Careful!
 
