@@ -32,7 +32,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
 
 ## Compile Time and Requirements
 
-- **Compile Time**: Under Visual C++ (compared to g++ or clang++), especially for ctaylor and MAX > 1, compile time tends to be much Longer or even not finishing. (https://developercommunity.visualstudio.com/t/Compile-time-for-project-using-boost::mp/10760473). This does not apply for cjacobian or ctaylor with MAX=1.
+- **Compile Time**: Under Visual C++ (compared to g++ or clang++), especially for ctaylor and MAX > 1, compile time tends to be much longer or even infinite. I filed a <a href="https://developercommunity.visualstudio.com/t/Compile-time-for-project-using-boost::mp/10760473">bug</a> regarding this problem. This does not apply for cjacobian or ctaylor with MAX=1 or any of the testcases provided here.
 - **C++ Standard**: Requires C++14.
 - **Dependencies**: Requires `boost::mp11` (boost_1_86_0).
 - **Note**: No double-cast operator to facilitate compiler errors for unimplemented functions.
@@ -42,7 +42,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
 1. **ctaylor.cpp**
    - **Output**: `ctaylor.exe`
    - **Header**: `ctaylor.h`
-   - **Description**: Reads arguments from the command line to prevent g++ from incorporating compile-time results into the executable. Used for checking correctness together with maxima.txt. Consult this example to learn how to create independent variables.
+   - **Description**: Reads arguments from the command line to prevent g++ from incorporating compile-time results into the executable. Used for checking correctness together with maxima.txt which represents an input file for <a href="https://maxima.sourceforge.io/">maxima</a>. Consult this example to learn how to create independent variables.
    - **Visual C++**: ok
 
 2. **cjacobian.cpp**
