@@ -19,7 +19,7 @@ I fixed some compile time issue which prevented some projects using ctaylor.h to
 - **Header File**: `ctaylor.h`
 - **Description**: Implements a dual number truncated Taylor series class for calculation of higher order derivatives.
 - **Template Parameter**: Max order of derivatives, should be larger than 1. For MAX=1, use `cjacobian.h`.
-- **Mixing Instances**: Do not mix instances with different MAX parameters.
+- **Mixing Instances**: Do not attempt to mix instances with different MAX parameters.
 - **Functionality**: This class implements calculations with polynomial coefficients.
 
 ### **jacobian::cjacobian**
@@ -28,13 +28,13 @@ I fixed some compile time issue which prevented some projects using ctaylor.h to
 
 ## Implementation Details
 
-Both implementations are sparse, carrying and calculating only potentially nonzero derivatives. Variables cannot be reused arbitrarily due to the type changing when different independent variables or derivative orders are involved. If-statements must be implemented using the `if_()` function, which supports returning tuples. The `auto` keyword should be used to allow the compiler to determine the correct type.
+Both implementations are sparse, carrying and calculating only potentially nonzero derivatives. Variables cannot be reused arbitrarily due to the type changing when different independent variables or derivative orders are involved. If-statements must be implemented using the `if_()` function, which supports returning tuples. The `auto` keyword should be used to allow the compiler to determine the correct type. Don't specify the the full `ctaylor`/`cjacobian` type by hand, but use `decltype()` or `jacobian::common_type` or `taylor::common_type` or best use `auto`.
 
 ## Compile Time and Requirements
 
 - **Compile Time**: Under Visual C++ (compared to g++ or clang++), especially for ctaylor and MAX > 1, compile time tends to be much longer or even infinite. I filed a <a href="https://developercommunity.visualstudio.com/t/Compile-time-for-project-using-boost::mp/10760473">bug</a> regarding this problem. This does not apply for cjacobian or ctaylor with MAX=1 or any of the testcases provided here.
 - **C++ Standard**: Requires C++14.
-- **Dependencies**: Requires `boost::mp11` (boost_1_86_0).
+- **Dependencies**: Requires `boost::mp11` (boost_1_86_0). Use the environment variable BOOST_ROOT to specify the location of the boost include files.
 - **Note**: No double-cast operator to facilitate compiler errors for unimplemented functions.
 
 ## Test Cases
