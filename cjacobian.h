@@ -603,7 +603,7 @@ struct cjacobian
 	{	return std::make_pair(std::acosh(_d), 1.0/std::sqrt(_d*_d - 1));
 	}
 	static doublePair atanh_(const double _d)
-	{	return std::make_pair(std::atan(_d), 1.0/(1.0 - _d*_d));
+	{	return std::make_pair(std::atanh(_d), 1.0/(1.0 - _d*_d));
 	}
 	static doublePair exp_(const double _d)
 	{	const auto d = std::exp(_d);
@@ -648,18 +648,37 @@ struct cjacobian
 			static_cast<bool(*)(double)>(&std::isfinite)
 		);
 	}
+	template<typename T0, typename T1>
+	static auto atan2_(const T0 &_rY, const T1&_rX) -> decltype(atan(_rY/_rX))
+	{	if (_rX > 0.0)
+			return atan(_rY/_rX);
+		else
+		if (_rX < 0.0 && _rY >= 0.0)
+			return atan(_rY/_rX) + M_PI;
+		else
+		if (_rX < 0.0 && _rY < 0.0)
+			return atan(_rY/_rX) - M_PI;
+		else
+		if (_rX == 0.0 && _rY > 0.0)
+			return M_PI/2.0;
+		else
+		if (_rX == 0.0 && _rY < 0.0)
+			return -M_PI/2.0;
+		else
+			return atan(_rY/_rX);
+	}
 	template<typename T1>
 	friend auto atan2(
 		const cjacobian&_rY,
 		const cjacobian<T1>&_rX
 	)
-	{	return atan(_rY/_rX);
+	{	return atan2_(_rY, _rX);
 	}
 	friend auto atan2(const cjacobian&_rY, const double _dX)
-	{	return atan(_rY/_dX);
+	{	return atan2_(_rY, _dX);
 	}
 	friend auto atan2(const double _dY, const cjacobian&_rX)
-	{	return atan(_dY/_rX);
+	{	return atan2_(_dY, _rX);
 	}
 	friend auto max(const cjacobian&_r0, const double _r1)
 	{	return if_(

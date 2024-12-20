@@ -1457,6 +1457,25 @@ struct ctaylor
 	friend auto hypot(const double _dX, const ctaylor&_rY)
 	{	return sqrt(sqr(_rY) + _dX*_dX);
 	}
+	template<typename T0, typename T1>
+	static auto atan2_(const T0 &_rY, const T1&_rX) -> decltype(atan(_rY/_rX))
+	{	if (_rX > 0.0)
+			return atan(_rY/_rX);
+		else
+		if (_rX < 0.0 && _rY >= 0.0)
+			return atan(_rY/_rX) + M_PI;
+		else
+		if (_rX < 0.0 && _rY < 0.0)
+			return atan(_rY/_rX) - M_PI;
+		else
+		if (_rX == 0.0 && _rY > 0.0)
+			return M_PI/2.0;
+		else
+		if (_rX == 0.0 && _rY < 0.0)
+			return -M_PI/2.0;
+		else
+			return atan(_rY/_rX);
+	}
 	template<
 		typename T1,
 		typename U=T,
@@ -1470,13 +1489,13 @@ struct ctaylor
 		const ctaylor&_rY,
 		const ctaylor<T1, MAX>&_rX
 	)
-	{	return atan(_rY/_rX);
+	{	return atan2_(_rY, _rX);
 	}
 	friend auto atan2(const ctaylor&_rY, const double _dX)
-	{	return atan(_rY/_dX);
+	{	return atan2_(_rY, _dX);
 	}
 	friend auto atan2(const double _dY, const ctaylor&_rX)
-	{	return atan(_dY/_rX);
+	{	return atan2_(_dY, _rX);
 	}
 	friend auto max(const ctaylor&_r0, const double _r1)
 	{	return if_(
