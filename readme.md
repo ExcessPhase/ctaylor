@@ -1,8 +1,8 @@
 # Two Classes for Automatic Differentiation
 
-**Author**: Peter Foelsche
-**Date**: October 2024
-**Location**: Austin, TX, USA
+**Author**: Peter Foelsche |
+**Date**: October 2024 |
+**Location**: Austin, TX, USA |
 **Email**: [peter_foelsche@outlook.com](mailto:peter_foelsche@outlook.com)
 
 ## Introduction
