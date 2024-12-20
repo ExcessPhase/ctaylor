@@ -25,6 +25,8 @@ namespace implementation
 using namespace boost::mp11;
 
 
+	/// returns a type which is sufficiently large to contain integer from 0...SIZE
+	/// SIZE itself is used as an invalid ID and thus must also be in the range
 template<typename SIZE>
 struct getTypeFromSize
 {	typedef typename std::conditional<
@@ -41,6 +43,7 @@ struct getTypeFromSize
 		std::size_t
 	>::type type;
 };
+	/// create an initialized constexpr std::array
 template<typename, typename, typename>
 struct createStdArrayImpl;
 template<typename VECTOR, std::size_t ...I, typename TYPE>
@@ -49,10 +52,12 @@ struct createStdArrayImpl<VECTOR, std::index_sequence<I...>, TYPE>
 };
 template<typename VECTOR, std::size_t ...I, typename TYPE>
 constexpr const std::array<TYPE, sizeof...(I)> createStdArrayImpl<VECTOR, std::index_sequence<I...>, TYPE>::value;
+	/// needed to create the index_sequence used by createStdArrayImpl
 template<typename VECTOR, typename SIZE>
 struct createStdArray
 {	typedef createStdArrayImpl<VECTOR, std::make_index_sequence<mp_size<VECTOR>::value>, typename getTypeFromSize<SIZE>::type> type;
 };
+	/// creates a constexpr initialized array of std::pair
 template<typename, typename, typename>
 struct createStdArrayImpl2;
 template<typename VECTOR, std::size_t ...I, typename TYPE>
@@ -63,6 +68,7 @@ struct createStdArrayImpl2<VECTOR, std::index_sequence<I...>, TYPE>
 };
 template<typename VECTOR, std::size_t ...I, typename TYPE>
 constexpr const std::array<std::pair<TYPE, TYPE>, sizeof...(I)> createStdArrayImpl2<VECTOR, std::index_sequence<I...>, TYPE>::value;
+	/// used to call createStdArrayImpl2 and create the index_sequence
 template<typename VECTOR, typename SIZE>
 struct createStdArray2
 {	typedef createStdArrayImpl2<
@@ -71,6 +77,8 @@ struct createStdArray2
 		typename getTypeFromSize<SIZE>::type
 	> type;
 };
+	/// create a vector for every entry in TARGET by attempting to find the corresponding entry in SOURCE
+	/// or size-of-SOURCE for if not found
 template<typename TARGET, typename SOURCE>
 struct createIndicies
 {	template<typename STATE, typename TARGET_VALUE>
@@ -87,6 +95,8 @@ struct createIndicies
 		findSourcePosition
 	> type;
 };
+	/// similar to createIndicies but with two sources
+	/// accordingly the created vector is a vector of pairs
 template<typename TARGET, typename SOURCE0, typename SOURCE1>
 struct createIndicies2
 {	template<typename STATE, typename TARGET_VALUE>
@@ -109,7 +119,7 @@ struct createIndicies2
 		findSourcePosition
 	> type;
 };
-/// for merging two meta vectors of IDs identifying independent variables
+	/// for merging two meta vectors of IDs identifying independent variables
 template<typename T0, typename T1>
 struct merge
 {	typedef typename taylor::merge_sorted_sets<
@@ -118,13 +128,13 @@ struct merge
 		T1
 	>::type type;
 };
-/// this is the dual number class
+	/// this is the dual number class
 template<typename VECTOR>
 struct cjacobian
 {		/// SIZE of the vector is number of independent variables + 1 (0th derivative)
 	static constexpr std::size_t SIZE = mp_size<VECTOR>::value + 1;
 	typedef std::array<double, SIZE> ARRAY;
-		/// here are all the derivatives stored. 0th derivative at the end
+		/// here are all the derivatives stored. 0th derivative (value) at the end
 	ARRAY m_s;
 	cjacobian(void) = default;
 	cjacobian(const cjacobian&) = default;
@@ -167,12 +177,14 @@ struct cjacobian
 	static ARRAY convert(const typename cjacobian<T1>::ARRAY&_r)
 	{	ARRAY s;
 		typedef typename createIndicies<VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
+		typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE_T;
+		auto &r = createStdArray<INDICIES, SIZE_T>::type::value;
+		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		std::transform(
 			r.begin(),
 			r.end(),
 			s.begin(),
-			[&](const std::size_t _i)
+			[&](const TYPE _i)
 			{	if (_i == cjacobian<T1>::SIZE - 1)
 					return 0.0;
 				else
@@ -220,11 +232,13 @@ struct cjacobian
 		m_s.back() -= _r.m_s.back();
 		return *this;
 	}
+		/// LHS and RHS are the same type
 	cjacobian&operator+=(const cjacobian &_r)
 	{	for (std::size_t i = 0; i < SIZE; ++i)
 			m_s[i] += _r.m_s[i];
 		return *this;
 	}
+		/// LHS and RHS are the same type
 	cjacobian&operator-=(const cjacobian &_r)
 	{	for (std::size_t i = 0; i < SIZE; ++i)
 			m_s[i] -= _r.m_s[i];
@@ -253,22 +267,21 @@ struct cjacobian
 	auto operator*(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray2<
-			INDICIES,
-			mp_plus<
-				mp_max<
-					mp_size<VECTOR>,
-					mp_size<T1>
-				>,
-				mp_size_t<1>
-			>
-		>::type::value;
+		typedef mp_plus<
+			mp_max<
+				mp_size<VECTOR>,
+				mp_size<T1>
+			>,
+			mp_size_t<1>
+		> SIZE_T;
+		auto &r = createStdArray2<INDICIES, SIZE_T>::type::value;
+		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		std::transform(
 			r.begin(),
 			r.end(),
 			s.m_s.begin(),
-			[&](const std::pair<std::size_t, std::size_t>&_rI)
+			[&](const std::pair<TYPE, TYPE>&_rI)
 			{	if (_rI.first == SIZE - 1)
 					return _r.m_s[_rI.second]*m_s.back();
 				else
@@ -285,16 +298,15 @@ struct cjacobian
 	auto operator/(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray2<
-			INDICIES,
-			mp_plus<
-				mp_max<
-					mp_size<VECTOR>,
-					mp_size<T1>
-				>,
-				mp_size_t<1>
-			>
-		>::type::value;
+		typedef mp_plus<
+			mp_max<
+				mp_size<VECTOR>,
+				mp_size<T1>
+			>,
+			mp_size_t<1>
+		> SIZE_T;
+		auto &r = createStdArray2<INDICIES, SIZE_T>::type::value;
+		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		const auto dInv = 1.0/_r.m_s.back();
 		const auto dInv2 = dInv*dInv*m_s.back();
@@ -302,7 +314,7 @@ struct cjacobian
 			r.begin(),
 			r.end(),
 			s.m_s.begin(),
-			[&](const std::pair<std::size_t, std::size_t>&_rI)
+			[&](const std::pair<TYPE, TYPE>&_rI)
 			{	if (_rI.first == SIZE - 1)
 					return -dInv2*_r.m_s[_rI.second];
 				else
@@ -319,22 +331,21 @@ struct cjacobian
 	auto operator+(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray2<
-			INDICIES,
-			mp_plus<
-				mp_max<
-					mp_size<VECTOR>,
-					mp_size<T1>
-				>,
-				mp_size_t<1>
-			>
-		>::type::value;
+		typedef mp_plus<
+			mp_max<
+				mp_size<VECTOR>,
+				mp_size<T1>
+			>,
+			mp_size_t<1>
+		> SIZE_T;
+		auto &r = createStdArray2<INDICIES, SIZE_T>::type::value;
+		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		std::transform(
 			r.begin(),
 			r.end(),
 			s.m_s.begin(),
-			[&](const std::pair<std::size_t, std::size_t>&_rI)
+			[&](const std::pair<TYPE, TYPE>&_rI)
 			{	if (_rI.first == SIZE - 1)
 					return _r.m_s[_rI.second];
 				else
@@ -351,22 +362,21 @@ struct cjacobian
 	auto operator-(const cjacobian<T1>&_r) const
 	{	typedef typename merge<VECTOR, T1>::type MERGED;
 		typedef typename createIndicies2<MERGED, VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray2<
-			INDICIES,
-			mp_plus<
-				mp_max<
-					mp_size<VECTOR>,
-					mp_size<T1>
-				>,
-				mp_size_t<1>
-			>
-		>::type::value;
+		typedef mp_plus<
+			mp_max<
+				mp_size<VECTOR>,
+				mp_size<T1>
+			>,
+			mp_size_t<1>
+		> SIZE_T;
+		auto &r = createStdArray2<INDICIES, SIZE_T>::type::value;
+		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		std::transform(
 			r.begin(),
 			r.end(),
 			s.m_s.begin(),
-			[&](const std::pair<std::size_t, std::size_t>&_rI)
+			[&](const std::pair<TYPE, TYPE>&_rI)
 			{	if (_rI.first == SIZE - 1)
 					return -_r.m_s[_rI.second];
 				else
@@ -557,51 +567,49 @@ struct cjacobian
 		s.m_s.back() = sPair.first;
 		return s;
 	}
-	static doublePair sin(const double _d)
+	static doublePair sin_(const double _d)
 	{	return std::make_pair(std::sin(_d), std::cos(_d));
 	}
-	static doublePair cos(const double _d)
+	static doublePair cos_(const double _d)
 	{	return std::make_pair(std::cos(_d), -std::sin(_d));
 	}
-	static doublePair tan(const double _d)
+	static doublePair tan_(const double _d)
 	{	const auto d = std::tan(_d);
 		return std::make_pair(d, 1.0 + d*d);
 	}
-	static doublePair asin(const double _d)
+	static doublePair asin_(const double _d)
 	{	return std::make_pair(std::asin(_d), 1.0/std::sqrt(1.0 - _d*_d));
 	}
-	static doublePair acos(const double _d)
+	static doublePair acos_(const double _d)
 	{	return std::make_pair(std::acos(_d), -1.0/std::sqrt(1.0 - _d*_d));
 	}
-	static doublePair atan(const double _d)
+	static doublePair atan_(const double _d)
 	{	return std::make_pair(std::atan(_d), 1.0/(1.0 + _d*_d));
 	}
-
-	static doublePair sinh(const double _d)
+	static doublePair sinh_(const double _d)
 	{	return std::make_pair(std::sinh(_d), std::cosh(_d));
 	}
-	static doublePair cosh(const double _d)
+	static doublePair cosh_(const double _d)
 	{	return std::make_pair(std::cosh(_d), std::sinh(_d));
 	}
-	static doublePair tanh(const double _d)
+	static doublePair tanh_(const double _d)
 	{	const auto d = std::tanh(_d);
 		return std::make_pair(d, 1.0 - d*d);
 	}
-	static doublePair asinh(const double _d)
+	static doublePair asinh_(const double _d)
 	{	return std::make_pair(std::asinh(_d), 1.0/std::sqrt(1.0 + _d*_d));
 	}
-	static doublePair acosh(const double _d)
+	static doublePair acosh_(const double _d)
 	{	return std::make_pair(std::acosh(_d), 1.0/std::sqrt(_d*_d - 1));
 	}
-	static doublePair atanh(const double _d)
+	static doublePair atanh_(const double _d)
 	{	return std::make_pair(std::atan(_d), 1.0/(1.0 - _d*_d));
 	}
-
-	static doublePair exp(const double _d)
+	static doublePair exp_(const double _d)
 	{	const auto d = std::exp(_d);
 		return std::make_pair(d, d);
 	}
-	static std::pair<double, double> log(const double _d)
+	static doublePair log_(const double _d)
 	{	return std::make_pair(std::log(_d), 1.0/_d);
 	}
 #if defined(__GNUC__) && !defined(__clang__)
@@ -609,14 +617,14 @@ struct cjacobian
 #else
 	static const double s_dLog10;
 #endif
-	static doublePair log10(const double _d)
+	static doublePair log10_(const double _d)
 	{	return std::make_pair(std::log10(_d), 1.0/(s_dLog10*_d));
 	}
-	static doublePair sqrt(const double _d)
+	static doublePair sqrt_(const double _d)
 	{	const auto d = std::sqrt(_d);
 		return std::make_pair(d, 0.5/d);
 	}
-	static doublePair cbrt(const double _d)
+	static doublePair cbrt_(const double _d)
 	{	const double d0 = std::cbrt(_d);
 		return std::make_pair(
 			d0,
@@ -733,26 +741,13 @@ struct cjacobian
 	friend auto fmod(const cjacobian&_r0, const cjacobian<T1>&_r1)
 	{	return _r0 - static_cast<int>(value(_r0)/value(_r1))*_r1;
 	}
-	template<typename T1>
-	friend auto hypot(
-		const cjacobian&_r0,
-		const cjacobian<T1>&_r1
-	)
-	{	return sqrt(sqr(_r0) + sqr(_r1));
-	}
-	friend auto hypot(const cjacobian&_rX, const double _dY)
-	{	return sqrt(sqr(_rX) + _dY*_dY);
-	}
-	friend auto hypot(const double _dX, const cjacobian&_rY)
-	{	return sqrt(sqr(_rY) + _dX*_dX);
-	}
-	static doublePair erf(const double _d)
+	static doublePair erf_(const double _d)
 	{	return std::make_pair(
 			std::erf(_d),
 			s_dTwoOverSqrtPi*std::exp(-_d*_d)
 		);
 	}
-	static doublePair erfc(const double _d)
+	static doublePair erfc_(const double _d)
 	{	return std::make_pair(
 			std::erfc(_d),
 			-s_dTwoOverSqrtPi*std::exp(-_d*_d)
@@ -760,7 +755,7 @@ struct cjacobian
 	}
 #define __create__(sin)\
 	friend cjacobian sin(const cjacobian&_r)\
-	{	return nonlinear<sin>(_r);\
+	{	return nonlinear<sin##_>(_r);\
 	}
 	__create__(cbrt)
 	__create__(erfc)
@@ -782,6 +777,19 @@ struct cjacobian
 	__create__(acosh)
 	__create__(atanh)
 #undef __create__
+	template<typename T1>
+	friend auto hypot(
+		const cjacobian&_r0,
+		const cjacobian<T1>&_r1
+	)
+	{	return sqrt(sqr(_r0) + sqr(_r1));
+	}
+	friend auto hypot(const cjacobian&_rX, const double _dY)
+	{	return sqrt(sqr(_rX) + _dY*_dY);
+	}
+	friend auto hypot(const double _dX, const cjacobian&_rY)
+	{	return sqrt(sqr(_rY) + _dX*_dX);
+	}
 #if defined(__GNUC__) && !defined(__clang__)
 	static constexpr double s_dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
 #else
