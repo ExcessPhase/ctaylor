@@ -11,6 +11,9 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
+jacobian::hypot() and potentially other nonlinear functions did not compile using g++ (why didn't anybody complain?!).
+To fix this, I renamed all the nonlinear helper functions returning a std::pair to use a trailing underscore in the name, so that they wouldn't collide with the ordinary nonlinear function expecting and returning a cjacobian.
+
 I fixed some compile time issue which prevented some projects using ctaylor.h to finish compiling on Visual C++.
 
 ## Classes Overview
