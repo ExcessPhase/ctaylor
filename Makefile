@@ -6,9 +6,9 @@ all: ctaylor.exe vbic95Jac.exe vbic95Taylor.exe black_scholes.exe cjacobian.exe 
 CXXFLAGS=-std=c++14 -DNDEBUG -O3 -march=native -flto=auto -isystem $(BOOST_ROOT)/include -MMD -MP
 OBJECTS=cjacobian.o ctaylor.o VBIC95Jac/VBIC95Jac.o LUFAC/lufac.o VBIC95/VBIC95.o \
 	BLACK_SCHOLES/autodiff_black_scholes.o BLACK_SCHOLES/autodiff_black_scholes_orig.o
-DEPS=$(OBJECTS:.o.d)
+DEPS=$(OBJECTS:.o=.d)
 %.o %.d: %.cpp $(BOOST_ROOT)/include
-	$(CXX) -c $< -o $@ $(CXXFLAGS)
+	$(CXX) -c $< -o $*.o $(CXXFLAGS)
 
 cjacobian.exe: cjacobian.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
