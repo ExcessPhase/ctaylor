@@ -55,10 +55,11 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **Visual C++**: ok
 
 3. **VBIC95/VBIC95.cpp** and **VBIC95Jac/VBIC95Jac.cpp**
-   - **Outputs**: `VBIC95Jac.exe` and `VBIC95Taylor.exe`
+   - **Outputs**: `vbic95Jac.exe` and `vbic95Taylor.exe`
    - **Headers**: `cjacobian.h` or `ctaylor.h`
    - **Description**: Implements a DC solver for a single transistor using VBIC95. Parameters are read from `VBIC95/PARS`.
-   - **Visual C++**: ok. When attempting to use Halley's method in `VBIC95Taylor.exe` (increase `MAX` to 2 in `VBIC95/VBIC95.cpp`) Visual C++ takes a some time (4min:36s on my 12year old Dell M4700).
+   - **Visual C++**: ok. When attempting to use Halley's method in `vbic95Taylor.exe` (increase `MAX` to 2 in `VBIC95/VBIC95.cpp`) Visual C++ takes a some time (4min:36s on my 12year old Dell M4700).
+   - **g++-13**: 0min:13s (vbic95Taylor.exe for MAX=2)
 
 4. **BLACK_SCHOLES**
    - **Outputs**: `black_scholes.exe` and `black_scholes_orig.exe`
