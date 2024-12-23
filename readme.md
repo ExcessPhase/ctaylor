@@ -64,7 +64,8 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **Outputs**: `black_scholes.exe` and `black_scholes_orig.exe`
    - **Headers**: `ctaylor.h` or `boost/autodiff`
    - **Description**: Implements performance measurement (using an optional loop) and test for correctness (comparison with boost::autodiff).
-   - **Visual C++**: `black_scholes.exe` takes 9min:24 on my 12 year old Dell M4700.
+   - **Visual C++**: `black_scholes.exe` takes 9min:24s on my 12 year old Dell M4700.
+   - **g++-13**: 0min:8s
 
 ## Accessing Results
 
