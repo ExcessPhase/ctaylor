@@ -11,7 +11,7 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
-I implemented and documented (in in cjacobian.cpp) a way to perform chain-rule optimization.
+I implemented and documented (in cjacobian.cpp) a way to perform chain-rule optimization.
 Not yet done for ctaylor.
 
 jacobian::hypot() and potentially other nonlinear functions did not compile using g++ (why didn't anybody complain?!).
