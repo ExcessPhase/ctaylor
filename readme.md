@@ -68,6 +68,13 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **Visual C++**: `black_scholes.exe` takes 9min:24s on my 12 year old Dell M4700.
    - **g++-13**: 0min:14s
 
+5. **logistic_regression**
+   - **Outputs**: `logistic_regression.exe`
+   - **Headers**: `cjacobian.h`
+   - **Description**: Supposed to prove that forward-mode AD is not necessarily slower than reverse-mode AD but quite the opposite when applying the chain rule properly. Compare to [reverse-mode AD](https://github.com/ExcessPhase/reverse_mode_automatic_differentiation).
+   - **Visual C++**: no problem
+   - **g++-13**: no problem
+
 ## Accessing Results
 
 - **0th Derivative (Value)**: Use `value(source)` in both `ctaylor.h` and `cjacobian.h`.
