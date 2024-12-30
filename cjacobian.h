@@ -208,6 +208,39 @@ struct cjacobian
 		m_s.back() = _r;
 		return *this;
 	}
+		/// create a new independent variable for chainrule to reduce the number of carried derivatives
+	template<std::size_t ENUM>
+	cjacobian<mp_list<mp_size_t<ENUM> > > convert2Independent(const mp_size_t<ENUM>&) const
+	{	return {value(*this), true};
+	}
+		/// substitutes one derivative by the ones passed in the first argument
+		/// might have to be called multiple times
+		/// the first argument must have been one on which convert2Independent() was called.
+		/// ENUM must be identical to the ENUM passed to convert2Independent()
+	template<typename T1, std::size_t ENUM>
+	auto chainRule(const cjacobian<T1>&_r, const mp_size_t<ENUM>&) const
+	{	return chainRule(_r, mp_size_t<ENUM>(), mp_set_contains<VECTOR, mp_size_t<ENUM> >());
+	}
+	template<typename T1, std::size_t ENUM>
+	auto chainRule(const cjacobian<T1>&, const mp_size_t<ENUM>&, const mp_false&) const
+	{	return *this;
+	}
+	template<typename T1, std::size_t ENUM>
+	auto chainRule(const cjacobian<T1>&_r, const mp_size_t<ENUM>&, const mp_true&) const
+	{	typedef mp_find<VECTOR, mp_size_t<ENUM> > START;
+		typedef mp_size_t<START::value + 1> END;
+		typedef mp_erase<VECTOR, START, END> REMOVED;
+		typedef cjacobian<REMOVED> REMOVEDJ;
+		REMOVEDJ s;
+		for (std::size_t i = 0; i < SIZE; ++i)
+			if (i == START::value)
+				break;
+			else
+				s.m_s[i] = m_s[i];
+		for (std::size_t i = START::value + 1; i < SIZE; ++i)
+			s.m_s[i - 1] = m_s[i];
+		return s + getDer(mp_size_t<ENUM>())*(_r - value(_r));
+	}
 	template<typename T1>
 	cjacobian&operator+=(const cjacobian<T1>&_r)
 	{	typedef typename createIndicies<VECTOR, T1>::type INDICIES;
