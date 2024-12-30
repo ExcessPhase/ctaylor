@@ -14,7 +14,16 @@ int main(int argc, char**argv)
 	const cjacobian<mp_list<mp_size_t<2> > > s2(std::atof(argv[3]), true);
 	const cjacobian<mp_list<mp_size_t<3> > > s3(std::atof(argv[4]), true);
 	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+		/// create a copy of s4 with only a single derivative with enum=4
+	const auto s41 = s4.convert2Independent(mp_size_t<4>());
 	const auto s5 = fmod(s4*s4, 1.0 - s4*s4);
+		/// do the same calculation like for s5 AND undo chain-rule optimization
+		/// until chainRule() is being called, only a single derivative is being carried and calculated
+		/// the last argument must be the same as passed above to convert2Independent()
+		/// and it must be different than any other used ENUM -- see s0..s3 above which are using 0..3
+	const auto s51 = fmod(s41*s41, 1.0 - s41*s41).chainRule(s4, mp_size_t<4>());;
 	std::cerr << "s4=" << s4 << "\n";
 	std::cerr << "s5=" << s5 << "\n";
+	std::cerr << "s41=" << s41 << "\n";
+	std::cerr << "s51=" << s51 << "\n";
 }

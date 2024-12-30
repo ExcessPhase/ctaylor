@@ -1,7 +1,7 @@
 # Two Classes for Automatic Differentiation
 
 **Author**: Peter Foelsche |
-**Date**: October 2024 |
+**Date**: October..December 2024 |
 **Location**: Austin, TX, USA |
 **Email**: [peter_foelsche@outlook.com](mailto:peter_foelsche@outlook.com)
 
@@ -10,6 +10,9 @@
 This document describes the implementation and usage of two classes designed for automatic differentiation leveraging dual numbers. These classes are designed for high performance, making use of sparse representations and template metaprogramming.
 
 ## News
+
+I implemented and documented (in in cjacobian.cpp) a way to perform chain-rule optimization.
+Not yet done for ctaylor.
 
 jacobian::hypot() and potentially other nonlinear functions did not compile using g++ (why didn't anybody complain?!).
 To fix this, I renamed all the nonlinear helper functions returning a std::pair to use a trailing underscore in the name, so that they wouldn't collide with the ordinary nonlinear function expecting and returning a cjacobian.
@@ -51,7 +54,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
 2. **cjacobian.cpp**
    - **Output**: `cjacobian.exe`
    - **Header**: `cjacobian.h`
-   - **Description**: Reads arguments from the command line. A very primitive implementation. Used for checking correctness together with maxima.txt. Consult this example to learn how to create independent variables.
+   - **Description**: Reads arguments from the command line. A very primitive implementation. Used for checking correctness together with maxima.txt. Consult this example to learn how to create independent variables. Consult this example to learn how to perform chain-rule optimization.
    - **Visual C++**: ok
 
 3. **VBIC95/VBIC95.cpp** and **VBIC95Jac/VBIC95Jac.cpp**
