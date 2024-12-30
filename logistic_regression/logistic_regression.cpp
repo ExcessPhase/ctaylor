@@ -55,30 +55,18 @@ int main()
 			s.push_back((i + 1) / 1000.0);
 		return s;
 	}();
-	const auto sBeta = [&](void)
-	{	std::vector<double> s;
-		s.reserve(SIZE);
-		for (std::size_t i = 0; i < SIZE; ++i)
-			s.push_back(1.0 + i / 100.0);
-		return s;
-	}();
 	const auto s = entropy(
 		0.5,
 		sX,
-		sBeta
+		[&](void)
+		{	std::vector<double> s;
+			s.reserve(SIZE);
+			for (std::size_t i = 0; i < SIZE; ++i)
+				s.push_back(1.0 + i / 100.0);
+			return s;
+		}()
 	);
 	std::cout << "value=" << s.first << "\n";
 	for (const auto d : sX)
 		std::cout << "der=" << d*s.second << "\n";
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
