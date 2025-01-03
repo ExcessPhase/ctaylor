@@ -1088,7 +1088,7 @@ struct ctaylor
 			(MAXM > 1),
 			int
 		>::type = 0
-	>	
+	>
 	friend auto erfc(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto d0 = std::erfc(value(_r));
 		const auto s1 = -dTwoOverSqrtPi*exp(-sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)));
@@ -1116,7 +1116,7 @@ struct ctaylor
 			(MAXM == 1),
 			int
 		>::type = 0
-	>	
+	>
 	friend auto erf(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto d0 = std::erf(value(_r));
 		const auto d1 = dTwoOverSqrtPi*std::exp(-value(_r)*value(_r));
@@ -1131,7 +1131,7 @@ struct ctaylor
 			(MAXM > 1),
 			int
 		>::type = 0
-	>	
+	>
 	friend auto erf(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto d0 = std::erf(value(_r));
 		const auto s1 = dTwoOverSqrtPi*exp(-sqr(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true)));
@@ -1179,7 +1179,7 @@ struct ctaylor
 			(MAXM == 1),
 			int
 		>::type = 0
-	>	
+	>
 	friend auto tan(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto sTan = std::tan(value(_r));
 		const auto s1 = 1.0 + sTan*sTan;
@@ -1187,7 +1187,6 @@ struct ctaylor
 		s[0] = sTan;
 		s[1] = s1;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
-		
 	}
 	template<
 		std::size_t MAXM=MAX,
@@ -1195,7 +1194,7 @@ struct ctaylor
 			(MAXM > 1),
 			int
 		>::type = 0
-	>	
+	>
 	friend auto tan(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto sTan = tan(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true));
 		const auto s1 = 1.0 + sqr(sTan);
@@ -1222,7 +1221,7 @@ struct ctaylor
 			(MAXM == 1),
 			int
 		>::type = 0
-	>	
+	>
 	friend auto tanh(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto sTanh = std::tanh(value(_r));
 		const auto s1 = 1.0 - sTanh*sTanh;
@@ -1230,7 +1229,6 @@ struct ctaylor
 		s[0] = sTanh;
 		s[1] = s1;
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
-		
 	}
 	template<
 		std::size_t MAXM=MAX,
@@ -1238,7 +1236,7 @@ struct ctaylor
 			(MAXM > 1),
 			int
 		>::type = 0
-	>	
+	>
 	friend auto tanh(const ctaylor&_r, const mp_size_t<MAXM>&)
 	{	const auto sTanh = tanh(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true));
 		const auto s1 = 1.0 - sqr(sTanh);
