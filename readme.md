@@ -11,8 +11,7 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
-I implemented and documented (in cjacobian.cpp) a way to perform chain-rule optimization.
-Not yet done for ctaylor.
+I implemented and documented (in cjacobian.cpp and ctaylor.cpp) a way to perform chain-rule optimization.
 
 jacobian::hypot() and potentially other nonlinear functions did not compile using g++ (why didn't anybody complain?!).
 To fix this, I renamed all the nonlinear helper functions returning a std::pair to use a trailing underscore in the name, so that they wouldn't collide with the ordinary nonlinear function expecting and returning a cjacobian.
@@ -48,7 +47,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
 1. **ctaylor.cpp**
    - **Output**: `ctaylor.exe`
    - **Header**: `ctaylor.h`
-   - **Description**: Reads arguments from the command line to prevent g++ from incorporating compile-time results into the executable. Used for checking correctness together with maxima.txt which represents an input file for <a href="https://maxima.sourceforge.io/">maxima</a>. Consult this example to learn how to create independent variables.
+   - **Description**: Reads arguments from the command line to prevent g++ from incorporating compile-time results into the executable. Used for checking correctness together with maxima.txt which represents an input file for <a href="https://maxima.sourceforge.io/">maxima</a>. Consult this example to learn how to create independent variables. Consult this example to learn how to perform chain-rule optimization.
    - **Visual C++**: ok
 
 2. **cjacobian.cpp**
@@ -99,6 +98,24 @@ Both implementations are sparse, carrying and calculating only potentially nonze
     template<std::size_t I>
     double cjacobian::getDer(const mp_size_t<I>&) const;
     ```
+
+## Chain-Rule optimization
+
+Imagine `f(g(x, y, z, t))`, with `x`, `y`, `z`, and `t` being independent variables. Let's also imagine that `f(g)` is non-trivial and would benefit from calculating only one derivative with respect to `g()`, instead of four derivatives with respect to `x`, `y`, `z`, and `t`.
+
+In this case, one could store the result of `g(x, y, z, t)` as a variable and create a new independent variable `gx`. Then, evaluate `f(gx)` and for this value restore the correct derivatives with respect to `x`, `y`, `z`, and `t`.
+
+When doing so, one should use a unique enumeration value that does not overlap with any other enumeration values in use. One can use the new independent variable instead of the old ones, and in the final result, the chain rule should be applied to go back to the original variables.
+```
+	/// original wasteful code
+const auto fx = f(g(x, y, z, t));
+```
+```
+	/// code leveraging chain-rule optimization
+const auto gx = g(x, y, z, t);
+const auto gx1 = gx.convert2Independent(mp_size_t<ENUM_G>());
+const auto fx = f(gx1).chainRule(gx, mp_size_t<ENUM_G>());
+```
 
 ## Handling Loops
 

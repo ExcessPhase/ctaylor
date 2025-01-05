@@ -24,6 +24,23 @@ namespace taylor
 {
 namespace implementation
 {
+template<std::size_t POS, typename ...ARGS>
+std::ostream& printTuple(std::ostream&_rS, const std::tuple<ARGS...>&_r, const std::integral_constant<std::size_t, POS>&);
+template<typename ...ARGS>
+std::ostream &operator<<(std::ostream&_rS,  const std::tuple<ARGS...>&_r)
+{	_rS << "(";
+	printTuple(_rS, _r, std::tuple_size<std::tuple<ARGS...> >());
+	return _rS << ")";
+}
+template<typename ...ARGS>
+std::ostream& printTuple(std::ostream&_rS, const std::tuple<ARGS...>&, const std::integral_constant<std::size_t, 0>&)
+{	return _rS;
+}
+template<std::size_t POSM1, typename ...ARGS>
+std::ostream& printTuple(std::ostream&_rS, const std::tuple<ARGS...>&_r, const std::integral_constant<std::size_t, POSM1>&)
+{	_rS << std::get<std::tuple_size<std::tuple<ARGS...> >::value - POSM1>(_r) << ",";
+	return printTuple(_rS, _r,  std::integral_constant<std::size_t, POSM1 - 1>());
+}
 template<typename SIZE>
 struct getTypeFromSize;
 	/// meta function for merging different result types
@@ -55,19 +72,26 @@ struct output
 	void operator()(const mp_list<>&) const
 	{	m_r << "(), ";
 	}
-	void operator()(const mp_list<>&, const mp_true&) const
-	{
+	template<typename FIRST, typename SECOND>
+	void operator()(const pair<FIRST, SECOND>&) const
+	{	m_r << "(";
+		(*this)(FIRST());
+		(*this)(SECOND());
+		m_r << ")";
+	}
+	template<typename FIRST, typename ...REST, typename POSM1>
+	void operator()(const mp_list<FIRST, REST...>&, const POSM1) const
+	{	(*this)(mp_at<mp_list<FIRST, REST...>, mp_size_t<mp_size<mp_list<FIRST, REST...> >::value - POSM1::value> >());
+		(*this)(mp_list<FIRST, REST...>(), mp_size_t<POSM1::value - 1>());
 	}
 	template<typename FIRST, typename ...REST>
-	void operator()(const mp_list<FIRST, REST...>&, const mp_true&) const
-	{	(*this)(FIRST());
-		(*this)(mp_list<REST...>(), mp_true());
+	void operator()(const mp_list<FIRST, REST...>&, const mp_size_t<0>&) const
+	{
 	}
 	template<typename FIRST, typename ...REST>
 	void operator()(const mp_list<FIRST, REST...>&) const
 	{	m_r << "(";
-		(*this)(FIRST());
-		(*this)(mp_list<REST...>(), mp_true());
+		(*this)(mp_list<FIRST, REST...>(), mp_size<mp_list<FIRST, REST...> >());
 		m_r << ")";
 	}
 };
@@ -652,6 +676,50 @@ struct TypeDisplayer
 		"types are not identical!"
 	);
 };
+	// Define a metafunction to check if the first element of a sub-list is mp_size_t<ENUM>
+template <typename ENUM, typename PAIR>
+using is_first_equal_to_enum = std::is_same<typename PAIR::first_type, ENUM>;
+
+// Define a metafunction to check if any sub-list meets the condition
+template <typename ENUM, typename List>
+using contains_pair_first = mp_any_of<
+	List,
+	mp_bind_front<
+		is_first_equal_to_enum,
+		ENUM
+	>::template fn
+>;
+	/// check if a sublist of List contains a PAIR with first equal to ENUM
+template <typename ENUM, typename List>
+using contains_list_pair_first = mp_any_of<
+	List,
+	mp_bind_front<
+		contains_pair_first,
+		ENUM
+	>::template fn
+>;
+	/// gets the maximum order for ENUM
+template<typename ENUM, typename LIST>
+using getMaxOrder = mp_max_element<
+	mp_push_front<
+		mp_transform<
+			second_of_pair,
+			mp_filter<
+				mp_bind_front<
+					is_first_equal_to_enum,
+					ENUM
+				>::template fn,
+				LIST
+			>
+		>,
+		mp_size_t<0>
+	>,
+	mp_less
+>;
+template<typename LIST, std::size_t MAX>
+struct getTuple;
+template<typename ENUM, typename TUPLE, typename T, std::size_t MAX>
+struct ChainRule;
 	/// the class
 	/// first template argument is a vector of a vector of pairs of independent variable enum and order
 	/// all vectors must be sorted
@@ -807,6 +875,70 @@ struct ctaylor
 	ctaylor(const ctaylor<T1, MAX>&_r, const mp_bool<CHECK>& = mp_bool<CHECK>())
 		:m_s(convert<T1, CHECK>(_r.m_s))
 	{	static_assert(!CHECK || ctaylor<T1, MAX>::SIZE < SIZE, "RHS size must be smaller!");
+	}
+			/// create a new independent variable for chainrule to reduce the number of carried derivatives
+	template<std::size_t ENUM>
+	auto convert2Independent(const mp_size_t<ENUM>&) const
+	{	static_assert(
+			mp_not<
+				contains_list_pair_first<
+					mp_size_t<ENUM>,
+					T
+				>
+			>::value,
+			"List contains a sublist with first element matching ENUM"
+		);
+		typedef ctaylor<makeIndependent<ENUM>, MAX> TYPE;
+		return TYPE(value(*this), true);
+	}
+		/// T does not contain ENUM
+	template<typename T1, std::size_t ENUM>
+	auto chainRule(const ctaylor<T1, MAX>&_r, const mp_size_t<ENUM>&_rE, const mp_false&) const
+	{	return *this;
+	}
+		/// T does contain ENUM
+	template<typename T1, std::size_t ENUM>
+	auto chainRule(const ctaylor<T1, MAX>&_r, const mp_size_t<ENUM>&_rE, const mp_true&) const
+	{	//typedef getMaxOrder<mp_size_t<ENUM>, T> MAX_ORDER;
+		typedef mp_transform<
+			mp_bind_front<
+				getMaxOrder,
+				mp_size_t<ENUM>
+			>::template fn,
+			T
+		> MAX_ELEMENTS;
+		typedef mp_max_element<
+			MAX_ELEMENTS,
+			mp_less
+		> MAX_ORDER;
+		const auto s = getTuple<T1, MAX>(dropValue(_r)).get(1.0, MAX_ORDER());
+		return ChainRule<
+			mp_size_t<ENUM>,
+			typename std::decay<decltype(s)>::type,
+			T,
+			MAX
+		>(*this, s)(mp_size<T>());
+	}
+		/// substitutes one derivative by the ones passed in the first argument
+		/// might have to be called multiple times
+		/// the first argument must have been one on which convert2Independent() was called.
+		/// ENUM must be identical to the ENUM passed to convert2Independent()
+	template<typename T1, std::size_t ENUM>
+	auto chainRule(const ctaylor<T1, MAX>&_r, const mp_size_t<ENUM>&_rE) const
+	{	static_assert(
+			mp_not<
+				contains_list_pair_first<
+					mp_size_t<ENUM>,
+					T1
+				>
+			>::value,
+			"List contains a sublist with first element matching ENUM"
+		);
+		typedef contains_list_pair_first<
+			mp_size_t<ENUM>,
+			T
+		> CONTAINS;
+		return chainRule(_r, _rE, CONTAINS());
 	}
 	ctaylor operator+(const ctaylor&_r) const
 	{	ctaylor s;
@@ -1666,6 +1798,75 @@ struct ctaylor
 template<typename T, std::size_t MAX>
 const double ctaylor<T, MAX>::dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
 #endif
+template<typename ENUM, typename TUPLE, typename T, std::size_t MAX>
+struct ChainRule
+{	const ctaylor<T, MAX>&m_r;
+	const TUPLE &m_rT;
+	ChainRule(
+		const ctaylor<T, MAX>&_r,
+		const TUPLE &_rT
+	)
+		:m_r(_r),
+		m_rT(_rT)
+	{
+	}
+	template<typename POSM>
+	auto operator()(const POSM&) const
+	{	typedef mp_size_t<mp_size<T>::value - POSM::value> POS;
+		typedef mp_at<T, POS> ELEMENT;
+		typedef contains_pair_first<ENUM, ELEMENT> BOOL;
+		return (*this)(POS(), BOOL()) + (*this)(mp_size_t<POSM::value - 1>());
+	}
+	auto operator()(const mp_size_t<1>&) const
+	{	typedef mp_size_t<mp_size<T>::value - 1> POS;
+		typedef mp_at<T, POS> ELEMENT;
+		typedef contains_pair_first<ENUM, ELEMENT> BOOL;
+		return (*this)(POS(), BOOL());
+	}
+	template<typename POS>
+	auto operator()(const POS&, const mp_true&) const
+	{	typedef mp_at<T, POS> ELEMENT;
+		typedef getMaxOrder<ENUM, ELEMENT> ORDER;
+		typedef mp_remove_if<
+			ELEMENT,
+			mp_bind_front<
+				is_first_equal_to_enum,
+				ENUM
+			>::template fn
+		> REMOVED;
+		ctaylor<mp_list<REMOVED>, MAX> s;
+		s.m_s[0] = m_r.m_s[POS::value];
+		return std::get<ORDER::value - 1>(m_rT)*s;
+	}
+	template<typename POS>
+	auto operator()(const POS&, const mp_false&) const
+	{	typedef mp_at<T, POS> ELEMENT;
+		ctaylor<mp_list<ELEMENT>, MAX> s;
+		s.m_s[0] = m_r.m_s[POS::value];
+		return s;
+	}
+};
+template<typename T, std::size_t MAX>
+struct getTuple
+{	const ctaylor<T, MAX> &m_r;
+	getTuple(const ctaylor<T, MAX>&_r)
+		:m_r(_r)
+	{
+	}
+	template<typename CURRENT, typename EXPM1>
+	auto get(const CURRENT&_r, const EXPM1&) const
+	{	const auto dCurrent = _r*m_r;
+		return std::tuple_cat(
+			std::make_tuple(dCurrent),
+			get(dCurrent, mp_size_t<EXPM1::value - 1>())
+		);
+	}
+	template<typename CURRENT>
+	auto get(const CURRENT&_r, const mp_size_t<0>&) const
+	{	return std::make_tuple();
+	}
+};
+
 template<typename T>
 struct containsValue2
 {	typedef mp_empty<

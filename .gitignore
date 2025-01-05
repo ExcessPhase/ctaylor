@@ -388,3 +388,5 @@ FodyWeavers.xsd
 /old.out
 /MySession.json
 /MySession1.json
+/ctaylor.d
+*.o

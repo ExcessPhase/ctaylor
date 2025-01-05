@@ -15,6 +15,10 @@ struct pair
 {	typedef A first_type;
 	typedef B second_type;
 };
+template<typename PAIR>
+using first_of_pair = typename PAIR::first_type;
+template<typename PAIR>
+using second_of_pair = typename PAIR::second_type;
 template<typename, typename>
 struct combineTwo;
 template<typename A>
