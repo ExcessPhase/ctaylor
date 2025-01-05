@@ -229,7 +229,7 @@ using createIndep = cjacobian<
 	/// !
 	/// here one needs to change to 2 in order to use Halley's method
 	/// which is incompatible with the delta-x scaling
-constexpr std::size_t MAX = 1;
+constexpr std::size_t MAX = 2;
 template<enumBranches E>
 using createIndep = ctaylor<makeIndependent<std::size_t(E)>, MAX>;
 #endif
