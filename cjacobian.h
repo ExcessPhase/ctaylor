@@ -854,8 +854,10 @@ const double cjacobian<T>::s_dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
 template<typename VECTOR>
 const double cjacobian<VECTOR>::s_dLog10 = std::log(10.0);
 #endif
-template<typename, typename>
-struct common_type;
+template<typename A, typename B>
+struct common_type
+{	typedef typename std::common_type<A, B>::type type;
+};
 template<typename T>
 struct common_type<cjacobian<T>, double>
 {	typedef cjacobian<T> type;

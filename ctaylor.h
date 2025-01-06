@@ -44,8 +44,10 @@ std::ostream& printTuple(std::ostream&_rS, const std::tuple<ARGS...>&_r, const s
 template<typename SIZE>
 struct getTypeFromSize;
 	/// meta function for merging different result types
-template<typename, typename>
-struct common_type;
+template<typename A, typename B>
+struct common_type
+{	typedef typename std::common_type<A, B>::type type;
+};
 	/// function for merginig different result tyoes
 template<typename T, typename F>
 typename common_type<
