@@ -69,6 +69,8 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **Description**: Implements performance measurement (using an optional loop) and test for correctness (comparison with boost::autodiff).
    - **Visual C++**: `black_scholes.exe` takes 9min:24s on my 12 year old Dell M4700.
    - **g++-13**: 0min:14s
+   - **performance test ctaylor**: `time black_scholes.exe 0.02` shows 18s
+   - **performance test autodiff**: `time ./black_scholes_orig.exe 0.02` shows 260s
 
 5. **logistic_regression**
    - **Outputs**: `logistic_regression.exe`
