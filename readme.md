@@ -70,7 +70,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **Visual C++**: `black_scholes.exe` takes 9min:24s on my 12 year old Dell M4700.
    - **g++-13**: 0min:14s
    - **performance test ctaylor**: `time black_scholes.exe 0.02` shows 18s
-   - **performance test autodiff**: `time ./black_scholes_orig.exe 0.02` shows 260s
+   - **performance test autodiff**: `time ./black_scholes_orig.exe 0.02` shows 260s. This slow performance can partly be explained by the fact that `boost::autodiff` calculates many more derivatives. It does not consider the sum of all derivative orders for a term. Instead, the order with respect to any independent variable can be set independently of the others. As a result, the maximum order using `boost::autodiff` is the sum of all maximum orders of each independent variable. The method used by `boost::autodiff` for setting orders separately for every independent variable makes it ineffective for any use case with more than a single independent variable and a maximum order larger than one.
 
 5. **logistic_regression**
    - **Outputs**: `logistic_regression.exe`
