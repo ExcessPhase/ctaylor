@@ -1901,15 +1901,19 @@ struct check
 		"problem"
 	);
 };
-template<typename, typename>
-struct common_type;
 template<typename T, std::size_t MAX>
 struct common_type<ctaylor<T, MAX>, double>
-{	typedef ctaylor<T, MAX> type;
+{	typedef ctaylor<
+		typename merge<
+			T,
+			mp_list<mp_list<> >
+		>::type,
+		MAX
+	> type;
 };
 template<typename T, std::size_t MAX>
 struct common_type<double, ctaylor<T, MAX> >
-{	typedef ctaylor<T, MAX> type;
+{	typedef typename common_type<ctaylor<T, MAX>, double>::type type;
 };
 template<typename T0, typename T1, std::size_t MAX>
 struct common_type<ctaylor<T0, MAX>, ctaylor<T1, MAX> >
