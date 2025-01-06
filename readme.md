@@ -1,7 +1,7 @@
 # Two Classes for Automatic Differentiation
 
 **Author**: Peter Foelsche |
-**Date**: October..December 2024 |
+**Date**: October 2024..January 2025 |
 **Location**: Austin, TX, USA |
 **Email**: [peter_foelsche@outlook.com](mailto:peter_foelsche@outlook.com)
 
@@ -10,6 +10,10 @@
 This document describes the implementation and usage of two classes designed for automatic differentiation leveraging dual numbers. These classes are designed for high performance, making use of sparse representations and template metaprogramming.
 
 ## News
+
+I changed the Makefile to enable the user to override `USER_CXXFLAGS=-march=native` with his own setting and I added a compiler flag `-fno-stack-protector` as this project is interested in performance but not in avoiding hacker attacks.
+
+There is another compiler flag of interest not currently used (`-ffast-math`) which causes some testcases to run dramatically faster and others to be slightly slower.
 
 I implemented and documented (in cjacobian.cpp and ctaylor.cpp) a way to perform chain-rule optimization.
 
