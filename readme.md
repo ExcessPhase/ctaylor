@@ -95,7 +95,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
     Example:
     ```cpp
     typedef mp_list<
-        mp_list<mp_size_t<3>, mp_size_t<2>>
+        pair<mp_size_t<3>, mp_size_t<2>>
     > EXAMPLE; // 2nd derivative of independent variable with enum 3
     ```
 
