@@ -29,6 +29,9 @@
     <ClInclude Include="ctaylor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="initializer_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.md" />

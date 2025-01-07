@@ -8,12 +8,14 @@
 /// Compile time under Visual C++ 2022 tends to be much longer than using g++
 /// Requires C++14
 #pragma once
+#include "initializer_list.h"
 #include <iostream>
 #include <type_traits>
 #include <array>
 #include <limits>
 #include <functional>
 #include <boost/mp11.hpp>
+#include <boost/iterator/permutation_iterator.hpp>
 #include <cstdlib>
 #include <algorithm>
 #include <numeric>
@@ -466,21 +468,44 @@ struct getTypeFromSize
 		std::size_t
 	>::type type;
 };
+template<typename LIST_OF_PAIRS, typename TYPE>
+struct createPair
+{	typedef foelsche::init_list::convertToPair<
+		mp_transform<
+			mp_first,
+			LIST_OF_PAIRS
+		>,
+		mp_transform<
+			mp_second,
+			LIST_OF_PAIRS
+		>,
+		TYPE
+	> type;
+};
 template<typename, typename, typename>
 struct convertToStdArray3Impl;
 template<typename LIST, std::size_t ...INDICES, typename SIZE>
 struct convertToStdArray3Impl<LIST, std::index_sequence<INDICES...>, SIZE>
 {	typedef typename getTypeFromSize<SIZE>::type TYPE;
+	typedef std::initializer_list<TYPE> IL;
+	typedef std::pair<IL, IL> PAIR;
 	static constexpr const std::array<
-		std::initializer_list<std::pair<TYPE, TYPE> >,
+		PAIR,
 		mp_size<LIST>::value
 	> value = {
-		convertToStdInitializerList<mp_at_c<LIST, INDICES>, TYPE>::type::value...
+		//convertToStdInitializerList<mp_at_c<LIST, INDICES>, TYPE>::type::value...
+		createPair<
+			mp_at_c<LIST, INDICES>,
+			TYPE
+		>::type::value...
 	};
 };
 template<typename LIST, std::size_t ...INDICES, typename SIZE>
 constexpr const std::array<
-	std::initializer_list<std::pair<typename getTypeFromSize<SIZE>::type, typename getTypeFromSize<SIZE>::type> >,
+	std::pair<
+		std::initializer_list<typename getTypeFromSize<SIZE>::type>,
+		std::initializer_list<typename getTypeFromSize<SIZE>::type>
+	>,
 	mp_size<LIST>::value
 >
 convertToStdArray3Impl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
@@ -1083,14 +1108,16 @@ struct ctaylor
 			r.begin(),
 			r.end(),
 			s.m_s.begin(),
-			[&](const std::initializer_list<std::pair<TYPE, TYPE> >&_rIL)
-			{	return std::accumulate(
-					_rIL.begin(),
-					_rIL.end(),
-					double(),
-					[&](const double _d, const std::pair<TYPE, TYPE> &_rP)
-					{	return _d + m_s[_rP.first]*_r.m_s[_rP.second];
-					}
+			[&](const std::pair<
+				std::initializer_list<TYPE>,
+				std::initializer_list<TYPE>
+			> &_rIL
+			)
+			{	return std::inner_product(
+					boost::make_permutation_iterator(m_s.cbegin(), _rIL.first.begin()),
+					boost::make_permutation_iterator(m_s.cbegin(), _rIL.first.end()),
+					boost::make_permutation_iterator(_r.m_s.cbegin(), _rIL.second.begin()),
+					double()
 				);
 			}
 		);
