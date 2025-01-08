@@ -11,6 +11,8 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
+I added some automatic regression test (ctaylor_test, Visual C++ only) which I'm going to extend further.
+
 I changed the Makefile to enable the user to override `USER_CXXFLAGS=-march=native` with his own setting and I added a compiler flag `-fno-stack-protector` as this project is interested in performance but not in avoiding hacker attacks.
 
 There is another compiler flag of interest not currently used (`-ffast-math`) which causes some testcases to run dramatically faster and others to be slightly slower.
