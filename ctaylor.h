@@ -434,24 +434,6 @@ struct merge<mp_list<>, mp_list<>, COMPARE, MERGE, CONTAINS_VALUE>
 {	typedef mp_list<> type;
 };
 
-template<typename, typename, typename>
-struct convertToStdInitializerListImpl;
-template<typename LIST, std::size_t ...INDICES, typename TYPE>
-struct convertToStdInitializerListImpl<LIST, std::index_sequence<INDICES...>, TYPE>
-{	static constexpr const std::initializer_list<std::pair<TYPE, TYPE> > value =
-	{	std::make_pair(
-			TYPE(mp_first<mp_at_c<LIST, INDICES> >::value),
-			TYPE(mp_second<mp_at_c<LIST, INDICES> >::value)
-		)...
-	};
-};
-template<typename LIST, std::size_t ...INDICES, typename TYPE>
-constexpr const std::initializer_list<std::pair<TYPE, TYPE> >
-convertToStdInitializerListImpl<LIST, std::index_sequence<INDICES...>, TYPE>::value;
-template<typename LIST, typename TYPE>
-struct convertToStdInitializerList
-{	typedef convertToStdInitializerListImpl<LIST, std::make_index_sequence<mp_size<LIST>::value>, TYPE> type;
-};
 template<typename SIZE>
 struct getTypeFromSize
 {	typedef typename std::conditional<
@@ -523,16 +505,15 @@ struct convertToStdArrayImpl;
 template<typename LIST, std::size_t ...INDICES, typename SIZE>
 struct convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>
 {	typedef typename getTypeFromSize<SIZE>::type TYPE;
-	static constexpr const std::array<
-		std::pair<TYPE, TYPE>,
-		mp_size<LIST>::value
-	> value = {std::make_pair(TYPE(mp_second<mp_at_c<LIST, INDICES> >::value), TYPE(mp_third<mp_at_c<LIST, INDICES> >::value))...};
+	typedef std::initializer_list<TYPE> IL;
+	typedef std::pair<IL, IL> PAIR;
+	static constexpr const PAIR value = std::make_pair(
+		IL({TYPE(mp_second<mp_at_c<LIST, INDICES> >::value)...}),
+		IL({TYPE(mp_third<mp_at_c<LIST, INDICES> >::value)...})
+	);
 };
 template<typename LIST, std::size_t ...INDICES, typename SIZE>
-const std::array<
-	std::pair<typename getTypeFromSize<SIZE>::type, typename getTypeFromSize<SIZE>::type>,
-	mp_size<LIST>::value
-> convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
+constexpr const typename convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>::PAIR convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
 
 template<typename LIST, typename SIZE>
 struct convertToStdArray
@@ -997,17 +978,18 @@ struct ctaylor
 		>::type::value;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		std::transform(
-			rT.begin(),
-			rT.end(),
+			rT.first.begin(),
+			rT.first.end(),
+			rT.second.begin(),
 			s.m_s.begin(),
-			[&](const std::pair<TYPE, TYPE>&_rI)
-			{	return _rI.first != std::numeric_limits<TYPE>::max()
-				? (_rI.second != std::numeric_limits<TYPE>::max()
-					? m_s[_rI.first] + _r.m_s[_rI.second]
-					: m_s[_rI.first]
+			[&](const TYPE _i0, const TYPE _i1)
+			{	return _i0 != std::numeric_limits<TYPE>::max()
+				? (_i1 != std::numeric_limits<TYPE>::max()
+					? m_s[_i0] + _r.m_s[_i1]
+					: m_s[_i0]
 				)
-				: (_rI.second != std::numeric_limits<TYPE>::max()
-					? _r.m_s[_rI.second]
+				: (_i1 != std::numeric_limits<TYPE>::max()
+					? _r.m_s[_i1]
 					: 0.0
 				);
 			}
@@ -1029,17 +1011,18 @@ struct ctaylor
 		auto &rT = convertToStdArray<SOURCE_POSITIONS, SIZE>::type::value;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		std::transform(
-			rT.begin(),
-			rT.end(),
+			rT.first.begin(),
+			rT.first.end(),
+			rT.second.begin(),
 			s.m_s.begin(),
-			[&](const std::pair<TYPE, TYPE>&_rI)
-			{	return _rI.first != std::numeric_limits<TYPE>::max()
-				? (_rI.second != std::numeric_limits<TYPE>::max()
-					? m_s[_rI.first] - _r.m_s[_rI.second]
-					: m_s[_rI.first]
+			[&](const TYPE _i0, const TYPE _i1)
+			{	return _i0 != std::numeric_limits<TYPE>::max()
+				? (_i1 != std::numeric_limits<TYPE>::max()
+					? m_s[_i0] - _r.m_s[_i1]
+					: m_s[_i0]
 				)
-				: (_rI.second != std::numeric_limits<TYPE>::max()
-					? -_r.m_s[_rI.second]
+				: (_i1 != std::numeric_limits<TYPE>::max()
+					? -_r.m_s[_i1]
 					: 0.0
 				);
 			}
