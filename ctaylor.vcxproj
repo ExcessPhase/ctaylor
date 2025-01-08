@@ -200,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ctaylor.h" />
+    <ClInclude Include="initializer_list.h" />
     <ClInclude Include="merge_sorted_sets.h" />
     <ClInclude Include="taylor_series_expansions.h" />
   </ItemGroup>
