@@ -499,25 +499,22 @@ struct convertToStdArray3
 		SIZE
 	> type;
 };
-	/// convert meta ARRAY into std::array
-template<typename, typename, typename>
-struct convertToStdArrayImpl;
-template<typename LIST, std::size_t ...INDICES, typename SIZE>
-struct convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>
+template<typename LIST, typename SIZE>
+struct convertToStdArray
 {	typedef typename getTypeFromSize<SIZE>::type TYPE;
 	typedef std::initializer_list<TYPE> IL;
 	typedef std::pair<IL, IL> PAIR;
-	static constexpr const PAIR value = std::make_pair(
-		IL({TYPE(mp_second<mp_at_c<LIST, INDICES> >::value)...}),
-		IL({TYPE(mp_third<mp_at_c<LIST, INDICES> >::value)...})
-	);
-};
-template<typename LIST, std::size_t ...INDICES, typename SIZE>
-constexpr const typename convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>::PAIR convertToStdArrayImpl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
-
-template<typename LIST, typename SIZE>
-struct convertToStdArray
-{	typedef convertToStdArrayImpl<LIST, std::make_index_sequence<mp_size<LIST>::value>, SIZE> type;
+	static constexpr const PAIR value = foelsche::init_list::convertToPair<
+		mp_transform<
+			mp_second,
+			LIST
+		>,
+		mp_transform<
+			mp_third,
+			LIST
+		>,
+		TYPE
+	>::value;
 };
 
 template<typename, typename, typename>
@@ -975,7 +972,7 @@ struct ctaylor
 		auto &rT = convertToStdArray<
 			SOURCE_POSITIONS,
 			SIZE
-		>::type::value;
+		>::value;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		std::transform(
 			rT.first.begin(),
@@ -1008,7 +1005,7 @@ struct ctaylor
 			>,
 			mp_size_t<1>
 		> SIZE;
-		auto &rT = convertToStdArray<SOURCE_POSITIONS, SIZE>::type::value;
+		auto &rT = convertToStdArray<SOURCE_POSITIONS, SIZE>::value;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		std::transform(
 			rT.first.begin(),
