@@ -390,3 +390,5 @@ FodyWeavers.xsd
 /MySession1.json
 /ctaylor.d
 *.o
+*.d
+*.exe
