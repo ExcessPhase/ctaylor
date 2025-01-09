@@ -471,24 +471,19 @@ struct convertToStdArray3Impl<LIST, std::index_sequence<INDICES...>, SIZE>
 {	typedef typename getTypeFromSize<SIZE>::type TYPE;
 	typedef std::initializer_list<TYPE> IL;
 	typedef std::pair<IL, IL> PAIR;
-	static constexpr const std::array<
-		PAIR,
-		mp_size<LIST>::value
-	> value = {
-		//convertToStdInitializerList<mp_at_c<LIST, INDICES>, TYPE>::type::value...
-		createPair<
+	static constexpr const std::initializer_list<PAIR> value =
+	{	createPair<
 			mp_at_c<LIST, INDICES>,
 			TYPE
 		>::type::value...
 	};
 };
 template<typename LIST, std::size_t ...INDICES, typename SIZE>
-constexpr const std::array<
+constexpr const std::initializer_list<
 	std::pair<
 		std::initializer_list<typename getTypeFromSize<SIZE>::type>,
 		std::initializer_list<typename getTypeFromSize<SIZE>::type>
-	>,
-	mp_size<LIST>::value
+	>
 >
 convertToStdArray3Impl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
 template<typename LIST, typename SIZE>
@@ -517,24 +512,13 @@ struct convertToStdArray
 	>::value;
 };
 
-template<typename, typename, typename>
-struct convertToStdArray2Impl;
-template<typename LIST, std::size_t ...INDICES, typename SIZE>
-struct convertToStdArray2Impl<LIST, std::index_sequence<INDICES...>, SIZE>
-{	typedef typename getTypeFromSize<SIZE>::type TYPE;
-	static constexpr const std::array<
-		TYPE,
-		mp_size<LIST>::value
-	> value = {TYPE(mp_second<mp_at_c<LIST, INDICES> >::value)...};
-};
-template<typename LIST, std::size_t ...INDICES, typename SIZE>
-constexpr const std::array<
-	typename getTypeFromSize<SIZE>::type,
-	mp_size<LIST>::value
-> convertToStdArray2Impl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
 template<typename LIST, typename SIZE>
 struct convertToStdArray2
-{	typedef convertToStdArray2Impl<LIST, std::make_index_sequence<mp_size<LIST>::value>, SIZE> type;
+{	//typedef convertToStdArray2Impl<LIST, std::make_index_sequence<mp_size<LIST>::value>, SIZE> type;
+	typedef typename foelsche::init_list::convertToStdInitializerList<
+		mp_transform<mp_second, LIST>,
+		typename getTypeFromSize<SIZE>::type
+	>::type type;
 };
 	/// for creating the type result of multiplying one element of a ctaylor array with another
 	/// second and third arguments are an element of the first template argument of ctaylor
@@ -837,7 +821,7 @@ struct ctaylor
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
 		for (std::size_t i = 0; i < ctaylor::SIZE; ++i)
-		{	const auto iT = rT[i];
+		{	const auto iT = rT.begin()[i];
 			if (iT != std::numeric_limits<TYPE>::max())
 				m_s[i] += _r.m_s[iT];
 		}
@@ -850,7 +834,7 @@ struct ctaylor
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
 		for (std::size_t i = 0; i < ctaylor::SIZE; ++i)
-		{	const auto iT = rT[i];
+		{	const auto iT = rT.begin()[i];
 			if (iT != std::numeric_limits<TYPE>::max())
 				m_s[i] -= _r.m_s[iT];
 		}
