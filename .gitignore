@@ -392,3 +392,7 @@ FodyWeavers.xsd
 *.o
 *.d
 *.exe
+/ctaylor.h.orig
+/ctaylor.h.rej
+/initializer_list.h.orig
+/initializer_list.h.rej

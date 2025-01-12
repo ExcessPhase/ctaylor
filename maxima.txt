@@ -1,19 +1,23 @@
-hypot(a, b):=sqrt(a*a + b*b)$
-pow(a, b):=a^b$
-display2d:false$
-ratprint:false$
-x4:-x0 + x1 - x2 + x1*x2 - x0*x1 + x2*x3$
+hypot(a, b) := sqrt(a*a + b*b)$
+pow(a, b) := a^b$
+display2d: false$
+ratprint: false$
+x4 : -x0 + x1 - x2 + x1*x2 - x0*x1 + x2*x3$
 gradef(truncate(x), 0)$
-float(
-	taylor(
-		x4*x4 - truncate(x4*x4/(1-x4*x4))*(1-x4*x4),
-		[x0, x1, x2, x3],
-		[1.2, 1.3, 1.4, 1.5],
-		2
-	)
+
+taylor_series : float(
+    taylor(
+        exp(-1.0/(x4*x4)),
+        [x0, x1, x2, x3],
+        [1.2, 1.3, 1.4, 1.5],
+        3
+    )
 )$
-subst(x0-1.2=X0, %)$
-subst(x1-1.3=X1, %)$
-subst(x2-1.4=X2, %)$
-subst(x3-1.5=X3, %)$
-expand(%);
+taylor_series_subst : subst(x0-1.2 = X0, subst(x1-1.3 = X1, subst(x2-1.4 = X2, subst(x3-1.5 = X3, taylor_series))))$
+expanded_series : expand(taylor_series_subst)$
+
+/* Extract coefficients */
+coefficients : listify(expanded_series)$
+
+/* Write coefficients to a file */
+with_stdout("coefficients.txt", for c in coefficients do print(c))$

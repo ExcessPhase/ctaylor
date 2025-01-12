@@ -7,6 +7,12 @@
 #ifndef PCH_H
 #define PCH_H
 #include "../ctaylor.h"
+#include <regex>
+#include <map>
+#include <fstream>
+#include <filesystem>
+#include <numeric>
+
 // add headers that you want to pre-compile here
 
 #endif //PCH_H
