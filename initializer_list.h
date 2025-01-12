@@ -29,25 +29,15 @@ struct getTypeFromSize
 };
 
 
-template<typename, typename, typename>
-struct convertToStdInitializerListImpl;
-
-
-template<typename LIST, std::size_t ...INDICES, typename TYPE>
-struct convertToStdInitializerListImpl<LIST, std::index_sequence<INDICES...>, TYPE>
-{	static constexpr const std::initializer_list<TYPE> value =
-	{	TYPE(mp_at_c<LIST, INDICES>::value)...
-	};
-};
-
-
 template<typename LIST, typename TYPE>
-struct convertToStdInitializerList
-{	typedef convertToStdInitializerListImpl<
-		LIST,
-		std::make_index_sequence<mp_size<LIST>::value>,
-		TYPE
-	> type;
+struct convertToStdInitializerList;
+
+
+template<typename ...ITEMS, typename TYPE>
+struct convertToStdInitializerList<mp_list<ITEMS...>, TYPE>
+{	static constexpr const std::initializer_list<TYPE> value =
+	{	ITEMS::value...
+	};
 };
 
 
@@ -56,8 +46,8 @@ struct convertToPair
 {	static_assert(mp_size<LIST_A>::value == mp_size<LIST_B>::value, "size must be identical!");
 	typedef std::initializer_list<TYPE> IL;
 	static constexpr const std::pair<IL, IL> value =
-	{	convertToStdInitializerList<LIST_A, TYPE>::type::value,
-		convertToStdInitializerList<LIST_B, TYPE>::type::value
+	{	convertToStdInitializerList<LIST_A, TYPE>::value,
+		convertToStdInitializerList<LIST_B, TYPE>::value
 	};
 };
 

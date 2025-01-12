@@ -518,7 +518,7 @@ struct convertToStdArray2
 	typedef typename foelsche::init_list::convertToStdInitializerList<
 		mp_transform<mp_second, LIST>,
 		typename getTypeFromSize<SIZE>::type
-	>::type type;
+	> type;
 };
 	/// for creating the type result of multiplying one element of a ctaylor array with another
 	/// second and third arguments are an element of the first template argument of ctaylor
