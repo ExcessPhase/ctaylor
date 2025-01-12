@@ -464,6 +464,7 @@ struct createPair
 		TYPE
 	> type;
 };
+#if 0
 template<typename, typename, typename>
 struct convertToStdArray3Impl;
 template<typename LIST, std::size_t ...INDICES, typename SIZE>
@@ -494,6 +495,19 @@ struct convertToStdArray3
 		SIZE
 	> type;
 };
+#else
+template<typename LIST, typename SIZE>
+struct convertToStdArray3;
+template<typename ...ELEMENTS, typename SIZE>
+struct convertToStdArray3<mp_list<ELEMENTS...>, SIZE>
+{	typedef typename getTypeFromSize<SIZE>::type TYPE;
+	typedef std::initializer_list<TYPE> IL;
+	typedef std::pair<IL, IL> PAIR;
+	static constexpr const std::initializer_list<PAIR> value =
+	{	createPair<ELEMENTS, TYPE>::type::value...
+	};
+};
+#endif
 template<typename LIST, typename SIZE>
 struct convertToStdArray
 {	typedef typename getTypeFromSize<SIZE>::type TYPE;
@@ -1066,7 +1080,7 @@ struct ctaylor
 			CALCULATED_PAIRS
 		> POSITIONS;
 		ctaylor<CALCULATED, MAX> s;
-		auto &r = convertToStdArray3<POSITIONS, mp_max<mp_size<T>, mp_size<T1> > >::type::value;
+		auto &r = convertToStdArray3<POSITIONS, mp_max<mp_size<T>, mp_size<T1> > >::value;
 		typedef typename getTypeFromSize<mp_max<mp_size<T>, mp_size<T1> > >::type TYPE;
 		std::transform(
 			r.begin(),
