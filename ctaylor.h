@@ -464,38 +464,6 @@ struct createPair
 		TYPE
 	> type;
 };
-#if 0
-template<typename, typename, typename>
-struct convertToStdArray3Impl;
-template<typename LIST, std::size_t ...INDICES, typename SIZE>
-struct convertToStdArray3Impl<LIST, std::index_sequence<INDICES...>, SIZE>
-{	typedef typename getTypeFromSize<SIZE>::type TYPE;
-	typedef std::initializer_list<TYPE> IL;
-	typedef std::pair<IL, IL> PAIR;
-	static constexpr const std::initializer_list<PAIR> value =
-	{	createPair<
-			mp_at_c<LIST, INDICES>,
-			TYPE
-		>::type::value...
-	};
-};
-template<typename LIST, std::size_t ...INDICES, typename SIZE>
-constexpr const std::initializer_list<
-	std::pair<
-		std::initializer_list<typename getTypeFromSize<SIZE>::type>,
-		std::initializer_list<typename getTypeFromSize<SIZE>::type>
-	>
->
-convertToStdArray3Impl<LIST, std::index_sequence<INDICES...>, SIZE>::value;
-template<typename LIST, typename SIZE>
-struct convertToStdArray3
-{	typedef convertToStdArray3Impl<
-		LIST,
-		std::make_index_sequence<mp_size<LIST>::value>,
-		SIZE
-	> type;
-};
-#else
 template<typename LIST, typename SIZE>
 struct convertToStdArray3;
 template<typename ...ELEMENTS, typename SIZE>
@@ -507,7 +475,6 @@ struct convertToStdArray3<mp_list<ELEMENTS...>, SIZE>
 	{	createPair<ELEMENTS, TYPE>::type::value...
 	};
 };
-#endif
 template<typename LIST, typename SIZE>
 struct convertToStdArray
 {	typedef typename getTypeFromSize<SIZE>::type TYPE;
@@ -528,8 +495,7 @@ struct convertToStdArray
 
 template<typename LIST, typename SIZE>
 struct convertToStdArray2
-{	//typedef convertToStdArray2Impl<LIST, std::make_index_sequence<mp_size<LIST>::value>, SIZE> type;
-	typedef typename foelsche::init_list::convertToStdInitializerList<
+{	typedef typename foelsche::init_list::convertToStdInitializerList<
 		mp_transform<mp_second, LIST>,
 		typename getTypeFromSize<SIZE>::type
 	> type;
