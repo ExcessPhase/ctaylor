@@ -44,6 +44,7 @@ struct getTypeFromSize
 	>::type type;
 };
 	/// create an initialized constexpr std::array
+#if 0
 template<typename, typename, typename>
 struct createStdArrayImpl;
 template<typename VECTOR, std::size_t ...I, typename TYPE>
@@ -52,11 +53,19 @@ struct createStdArrayImpl<VECTOR, std::index_sequence<I...>, TYPE>
 };
 template<typename VECTOR, std::size_t ...I, typename TYPE>
 constexpr const std::array<TYPE, sizeof...(I)> createStdArrayImpl<VECTOR, std::index_sequence<I...>, TYPE>::value;
+#endif
 	/// needed to create the index_sequence used by createStdArrayImpl
 template<typename VECTOR, typename SIZE>
-struct createStdArray
-{	typedef createStdArrayImpl<VECTOR, std::make_index_sequence<mp_size<VECTOR>::value>, typename getTypeFromSize<SIZE>::type> type;
+struct createStdArray;
+template<typename ...ELEMENTS, typename SIZE>
+struct createStdArray<mp_list<ELEMENTS...>, SIZE>
+{	//typedef createStdArrayImpl<VECTOR, std::make_index_sequence<mp_size<VECTOR>::value>, typename getTypeFromSize<SIZE>::type> type;
+	typedef typename getTypeFromSize<SIZE>::type TYPE;
+	static constexpr const std::array<TYPE, sizeof...(ELEMENTS)> value = {ELEMENTS::value...};
 };
+template<typename ...ELEMENTS, typename SIZE>
+constexpr const std::array<typename createStdArray<mp_list<ELEMENTS...>, SIZE>::TYPE, sizeof...(ELEMENTS)> createStdArray<mp_list<ELEMENTS...>, SIZE>::value;;
+#if 0
 	/// creates a constexpr initialized array of std::pair
 template<typename, typename, typename>
 struct createStdArrayImpl2;
@@ -68,15 +77,26 @@ struct createStdArrayImpl2<VECTOR, std::index_sequence<I...>, TYPE>
 };
 template<typename VECTOR, std::size_t ...I, typename TYPE>
 constexpr const std::array<std::pair<TYPE, TYPE>, sizeof...(I)> createStdArrayImpl2<VECTOR, std::index_sequence<I...>, TYPE>::value;
+#endif
 	/// used to call createStdArrayImpl2 and create the index_sequence
 template<typename VECTOR, typename SIZE>
-struct createStdArray2
-{	typedef createStdArrayImpl2<
+struct createStdArray2;
+template<typename ...ELEMENTS, typename SIZE>
+struct createStdArray2<mp_list<ELEMENTS...>, SIZE>
+{
+#if 0
+	typedef createStdArrayImpl2<
 		VECTOR,
 		std::make_index_sequence<mp_size<VECTOR>::value>,
 		typename getTypeFromSize<SIZE>::type
 	> type;
+#else
+	typedef typename getTypeFromSize<SIZE>::type TYPE;
+	static constexpr const std::array<std::pair<TYPE, TYPE>, sizeof...(ELEMENTS)> value = {std::make_pair(TYPE(mp_first<ELEMENTS>::value), TYPE(mp_second<ELEMENTS>::value))...};
+#endif
 };
+template<typename ...ELEMENTS, typename SIZE>
+constexpr const std::array<std::pair<typename createStdArray2<mp_list<ELEMENTS...>, SIZE>::TYPE, typename createStdArray2<mp_list<ELEMENTS...>, SIZE>::TYPE>, sizeof...(ELEMENTS)> createStdArray2<mp_list<ELEMENTS...>, SIZE>::value;
 	/// create a vector for every entry in TARGET by attempting to find the corresponding entry in SOURCE
 	/// or size-of-SOURCE for if not found
 template<typename TARGET, typename SOURCE>
@@ -178,7 +198,7 @@ struct cjacobian
 	{	ARRAY s;
 		typedef typename createIndicies<VECTOR, T1>::type INDICIES;
 		typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE_T;
-		auto &r = createStdArray<INDICIES, SIZE_T>::type::value;
+		auto &r = createStdArray<INDICIES, SIZE_T>::value;
 		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		std::transform(
 			r.begin(),
@@ -244,7 +264,7 @@ struct cjacobian
 	template<typename T1>
 	cjacobian&operator+=(const cjacobian<T1>&_r)
 	{	typedef typename createIndicies<VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
+		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::value;
 		for (std::size_t i = 0; i < r.size(); ++i)
 		{	const auto iT = r[i];
 			if (iT != cjacobian<T1>::SIZE - 1)
@@ -256,7 +276,7 @@ struct cjacobian
 	template<typename T1>
 	cjacobian&operator-=(const cjacobian<T1>&_r)
 	{	typedef typename createIndicies<VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
+		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::value;
 		for (std::size_t i = 0; i < r.size(); ++i)
 		{	const auto iT = r[i];
 			if (iT != cjacobian<T1>::SIZE - 1)
@@ -307,7 +327,7 @@ struct cjacobian
 			>,
 			mp_size_t<1>
 		> SIZE_T;
-		auto &r = createStdArray2<INDICIES, SIZE_T>::type::value;
+		auto &r = createStdArray2<INDICIES, SIZE_T>::value;
 		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		std::transform(
@@ -338,7 +358,7 @@ struct cjacobian
 			>,
 			mp_size_t<1>
 		> SIZE_T;
-		auto &r = createStdArray2<INDICIES, SIZE_T>::type::value;
+		auto &r = createStdArray2<INDICIES, SIZE_T>::value;
 		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		const auto dInv = 1.0/_r.m_s.back();
@@ -371,7 +391,7 @@ struct cjacobian
 			>,
 			mp_size_t<1>
 		> SIZE_T;
-		auto &r = createStdArray2<INDICIES, SIZE_T>::type::value;
+		auto &r = createStdArray2<INDICIES, SIZE_T>::value;
 		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		std::transform(
@@ -402,7 +422,7 @@ struct cjacobian
 			>,
 			mp_size_t<1>
 		> SIZE_T;
-		auto &r = createStdArray2<INDICIES, SIZE_T>::type::value;
+		auto &r = createStdArray2<INDICIES, SIZE_T>::value;
 		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		std::transform(
