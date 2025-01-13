@@ -39,7 +39,7 @@ struct compare
 	}
 };
 typedef std::map<ind2Expr, double, compare> taylorMap;
-static taylorMap read(const wchar_t *const _p, const bool _bOnlyFirstOrder = false)
+static taylorMap read(const char *const _p, const bool _bOnlyFirstOrder = false)
 {	taylorMap sMap;
 	std::ifstream sFile(_p);
 	std::string sLine;
@@ -79,7 +79,7 @@ static taylorMap read(const wchar_t *const _p, const bool _bOnlyFirstOrder = fal
 BOOST_AUTO_TEST_CASE(taylor_0)
 {	using namespace taylor;
 	using namespace boost::mp11;
-	const auto sMap = read(L"data0.txt");
+	const auto sMap = read("data0.txt");
 	constexpr const std::size_t MAX = 3;
 	const auto s0 = ctaylor<makeIndependent<0>, MAX>(1.2, false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(taylor_0)
 BOOST_AUTO_TEST_CASE(jacobian_0)
 {	using namespace jacobian;
 	using namespace boost::mp11;
-	const auto sMap = read(L"data0.txt", true);
+	const auto sMap = read("data0.txt", true);
 	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
 	const auto s1 = cjacobian<mp_list<mp_size_t<1> > >(1.3, false);
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(jacobian_0)
 BOOST_AUTO_TEST_CASE(taylor_1)
 {	using namespace taylor;
 	using namespace boost::mp11;
-	const auto sMap = read(L"data1.txt");
+	const auto sMap = read("data1.txt");
 	constexpr const std::size_t MAX = 3;
 	const auto s0 = ctaylor<makeIndependent<0>, MAX>(1.2, false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(taylor_1)
 BOOST_AUTO_TEST_CASE(jacobian_1)
 {	using namespace jacobian;
 	using namespace boost::mp11;
-	const auto sMap = read(L"data1.txt", true);
+	const auto sMap = read("data1.txt", true);
 	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
 	const auto s1 = cjacobian<mp_list<mp_size_t<1> > >(1.3, false);
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(jacobian_1)
 BOOST_AUTO_TEST_CASE(taylor_2)
 {	using namespace taylor;
 	using namespace boost::mp11;
-	const auto sMap = read(L"data2.txt");
+	const auto sMap = read("data2.txt");
 	constexpr const std::size_t MAX = 3;
 	const auto s0 = ctaylor<makeIndependent<0>, MAX>(1.2, false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(taylor_2)
 BOOST_AUTO_TEST_CASE(jacobian_2)
 {	using namespace jacobian;
 	using namespace boost::mp11;
-	const auto sMap = read(L"data2.txt", true);
+	const auto sMap = read("data2.txt", true);
 	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
 	const auto s1 = cjacobian<mp_list<mp_size_t<1> > >(1.3, false);
