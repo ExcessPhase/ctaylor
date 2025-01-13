@@ -186,3 +186,58 @@ BOOST_AUTO_TEST_CASE(jacobian_1)
 		sCompare(*sMap.cbegin(), value(s5))
 	);
 }
+BOOST_AUTO_TEST_CASE(taylor_2)
+{	using namespace taylor;
+	using namespace boost::mp11;
+	const auto sMap = read(L"data2.txt");
+	constexpr const std::size_t MAX = 3;
+	const auto s0 = ctaylor<makeIndependent<0>, MAX>(1.2, false);
+		/// create an independent variable for x1 (this is what the unused boolean is for)
+	const auto s1 = ctaylor<makeIndependent<1>, MAX>(1.3, false);
+	const auto s2 = ctaylor<makeIndependent<2>, MAX>(1.4, false);
+	const auto s3 = ctaylor<makeIndependent<3>, MAX>(1.5, false);
+		/// some calculation
+	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	const auto s5 = hypot(s4*s4, 1.0 - s4*s4);
+	constexpr const double epsilon = 1e-12;
+	BOOST_CHECK(s5.m_s.size() == sMap.size());
+	BOOST_CHECK(
+		std::equal(
+			sMap.cbegin(),
+			sMap.cend(),
+			s5.m_s.cbegin(),
+			[epsilon](const taylorMap::value_type&_r, const double _d)
+			{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
+			}
+		)
+	);
+}
+BOOST_AUTO_TEST_CASE(jacobian_2)
+{	using namespace jacobian;
+	using namespace boost::mp11;
+	const auto sMap = read(L"data2.txt", true);
+	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
+		/// create an independent variable for x1 (this is what the unused boolean is for)
+	const auto s1 = cjacobian<mp_list<mp_size_t<1> > >(1.3, false);
+	const auto s2 = cjacobian<mp_list<mp_size_t<2> > >(1.4, false);
+	const auto s3 = cjacobian<mp_list<mp_size_t<3> > >(1.5, false);
+		/// some calculation
+	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	const auto s5 = hypot(s4*s4, 1.0 - s4*s4);
+	constexpr const double epsilon = 1e-12;
+	BOOST_CHECK(s5.m_s.size() == sMap.size());
+	const auto sCompare = [epsilon](const taylorMap::value_type&_r, const double _d)
+	{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
+	};
+	BOOST_CHECK(
+		std::equal(
+			std::next(sMap.cbegin()),
+			sMap.cend(),
+			s5.m_s.cbegin(),
+			sCompare
+		)
+	);
+	BOOST_CHECK(
+		sCompare(*sMap.cbegin(), value(s5))
+	);
+}
