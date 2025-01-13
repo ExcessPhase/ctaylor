@@ -143,6 +143,13 @@
     <Text Include="maxima2.txt" />
     <Text Include="maxima3.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\cjacobian.h" />
+    <ClInclude Include="..\ctaylor.h" />
+    <ClInclude Include="..\initializer_list.h" />
+    <ClInclude Include="..\merge_sorted_sets.h" />
+    <ClInclude Include="..\taylor_series_expansions.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
