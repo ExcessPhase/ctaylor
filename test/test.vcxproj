@@ -137,9 +137,11 @@
     <Text Include="data0.txt" />
     <Text Include="data1.txt" />
     <Text Include="data2.txt" />
+    <Text Include="data3.txt" />
     <Text Include="maxima0.txt" />
     <Text Include="maxima1.txt" />
     <Text Include="maxima2.txt" />
+    <Text Include="maxima3.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

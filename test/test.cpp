@@ -76,10 +76,13 @@ static taylorMap read(const char *const _p, const bool _bOnlyFirstOrder = false)
 	}
 	return sMap;
 }
-BOOST_AUTO_TEST_CASE(taylor_0)
+static auto sIsIdentical(const taylorMap::value_type&_r, const double _d)
+{	static constexpr auto epsilon = 1e-12;
+	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
+}
+static auto getS4Taylor(void)
 {	using namespace taylor;
-	using namespace boost::mp11;
-	const auto sMap = read("data0.txt");
+	//using namespace boost::mp11;
 	constexpr const std::size_t MAX = 3;
 	const auto s0 = ctaylor<makeIndependent<0>, MAX>(1.2, false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
@@ -88,211 +91,188 @@ BOOST_AUTO_TEST_CASE(taylor_0)
 	const auto s3 = ctaylor<makeIndependent<3>, MAX>(1.5, false);
 		/// some calculation
 	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	return s4;
+}
+static auto getS4Jacobian(void)
+{	using namespace jacobian;
+	using namespace boost::mp11;
+	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
+		/// create an independent variable for x1 (this is what the unused boolean is for)
+	const auto s1 = cjacobian<mp_list<mp_size_t<1> > >(1.3, false);
+	const auto s2 = cjacobian<mp_list<mp_size_t<2> > >(1.4, false);
+	const auto s3 = cjacobian<mp_list<mp_size_t<3> > >(1.5, false);
+		/// some calculation
+	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	return s4;
+}
+#define __EQUAL_TAYLOR__()\
+do\
+{	BOOST_CHECK(s5.m_s.size() == sMap.size());\
+	BOOST_CHECK(\
+		std::equal(\
+			sMap.cbegin(),\
+			sMap.cend(),\
+			s5.m_s.cbegin(),\
+			sIsIdentical\
+		)\
+	);\
+} while (false)
+#define __EQUAL_JACOBIAN__()\
+do\
+{	BOOST_CHECK(s5.m_s.size() == sMap.size());\
+	BOOST_CHECK(\
+		std::equal(\
+			std::next(sMap.cbegin()),\
+			sMap.cend(),\
+			s5.m_s.cbegin(),\
+			sIsIdentical\
+		)\
+	);\
+	BOOST_CHECK(\
+		sIsIdentical(*sMap.cbegin(), value(s5))\
+	);\
+} while (false)
+BOOST_AUTO_TEST_CASE(taylor_0)
+{	using namespace taylor;
+	using namespace boost::mp11;
+	const auto sMap = read("data0.txt");
+	const auto s4 = getS4Taylor();
 	const auto s5 = exp(-1.0/(s4*s4));
-	constexpr const double epsilon = 1e-12;
-	BOOST_CHECK(s5.m_s.size() == sMap.size());
-	BOOST_CHECK(
-		std::equal(
-			sMap.cbegin(),
-			sMap.cend(),
-			s5.m_s.cbegin(),
-			[epsilon](const taylorMap::value_type&_r, const double _d)
-			{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
-			}
-		)
-	);
+	__EQUAL_TAYLOR__();
+}
+BOOST_AUTO_TEST_CASE(taylor_chain_0)
+{	using namespace taylor;
+	using namespace boost::mp11;
+	const auto sMap = read("data0.txt");
+	const auto s4 = getS4Taylor();
+	const auto s41 = s4.convert2Independent(mp_size_t<4>());
+	const auto s51 = exp(-1.0/(s41*s41));
+	const auto s5 = s51.chainRule(s4, mp_size_t<4>());
+	__EQUAL_TAYLOR__();
 }
 BOOST_AUTO_TEST_CASE(jacobian_0)
 {	using namespace jacobian;
 	using namespace boost::mp11;
 	const auto sMap = read("data0.txt", true);
-	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
-		/// create an independent variable for x1 (this is what the unused boolean is for)
-	const auto s1 = cjacobian<mp_list<mp_size_t<1> > >(1.3, false);
-	const auto s2 = cjacobian<mp_list<mp_size_t<2> > >(1.4, false);
-	const auto s3 = cjacobian<mp_list<mp_size_t<3> > >(1.5, false);
-		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	const auto s4 = getS4Jacobian();
 	const auto s5 = exp(-1.0/(s4*s4));
-	constexpr const double epsilon = 1e-12;
-	BOOST_CHECK(s5.m_s.size() == sMap.size());
-	const auto sCompare = [epsilon](const taylorMap::value_type&_r, const double _d)
-	{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
-	};
-	BOOST_CHECK(
-		std::equal(
-			std::next(sMap.cbegin()),
-			sMap.cend(),
-			s5.m_s.cbegin(),
-			sCompare
-		)
-	);
-	BOOST_CHECK(
-		sCompare(*sMap.cbegin(), value(s5))
-	);
+	__EQUAL_JACOBIAN__();
+}
+BOOST_AUTO_TEST_CASE(jacobian_chain_0)
+{	using namespace jacobian;
+	using namespace boost::mp11;
+	const auto sMap = read("data0.txt", true);
+	const auto s4 = getS4Jacobian();
+	const auto s41 = s4.convert2Independent(mp_size_t<4>());
+	const auto s51 = exp(-1.0/(s41*s41));
+	const auto s5 = s51.chainRule(s4, mp_size_t<4>());
+	__EQUAL_JACOBIAN__();
 }
 BOOST_AUTO_TEST_CASE(taylor_1)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data1.txt");
-	constexpr const std::size_t MAX = 3;
-	const auto s0 = ctaylor<makeIndependent<0>, MAX>(1.2, false);
-		/// create an independent variable for x1 (this is what the unused boolean is for)
-	const auto s1 = ctaylor<makeIndependent<1>, MAX>(1.3, false);
-	const auto s2 = ctaylor<makeIndependent<2>, MAX>(1.4, false);
-	const auto s3 = ctaylor<makeIndependent<3>, MAX>(1.5, false);
-		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	const auto s4 = getS4Taylor();
 	const auto s5 = fmod(s4*s4, 1.0 - s4*s4);
-	constexpr const double epsilon = 1e-12;
-	BOOST_CHECK(s5.m_s.size() == sMap.size());
-	BOOST_CHECK(
-		std::equal(
-			sMap.cbegin(),
-			sMap.cend(),
-			s5.m_s.cbegin(),
-			[epsilon](const taylorMap::value_type&_r, const double _d)
-			{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
-			}
-		)
-	);
+	__EQUAL_TAYLOR__();
+}
+BOOST_AUTO_TEST_CASE(taylor_chain_1)
+{	using namespace taylor;
+	using namespace boost::mp11;
+	const auto sMap = read("data1.txt");
+	const auto s4 = getS4Taylor();
+	const auto s41 = s4.convert2Independent(mp_size_t<4>());
+	const auto s51 = fmod(s41*s41, 1.0 - s41*s41);
+	const auto s5 = s51.chainRule(s4, mp_size_t<4>());
+	__EQUAL_TAYLOR__();
 }
 BOOST_AUTO_TEST_CASE(jacobian_1)
 {	using namespace jacobian;
 	using namespace boost::mp11;
 	const auto sMap = read("data1.txt", true);
-	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
-		/// create an independent variable for x1 (this is what the unused boolean is for)
-	const auto s1 = cjacobian<mp_list<mp_size_t<1> > >(1.3, false);
-	const auto s2 = cjacobian<mp_list<mp_size_t<2> > >(1.4, false);
-	const auto s3 = cjacobian<mp_list<mp_size_t<3> > >(1.5, false);
-		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	const auto s4 = getS4Jacobian();
 	const auto s5 = fmod(s4*s4, 1.0 - s4*s4);
-	constexpr const double epsilon = 1e-12;
-	BOOST_CHECK(s5.m_s.size() == sMap.size());
-	const auto sCompare = [epsilon](const taylorMap::value_type&_r, const double _d)
-	{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
-	};
-	BOOST_CHECK(
-		std::equal(
-			std::next(sMap.cbegin()),
-			sMap.cend(),
-			s5.m_s.cbegin(),
-			sCompare
-		)
-	);
-	BOOST_CHECK(
-		sCompare(*sMap.cbegin(), value(s5))
-	);
+	__EQUAL_JACOBIAN__();
+}
+BOOST_AUTO_TEST_CASE(jacobian_chain_1)
+{	using namespace jacobian;
+	using namespace boost::mp11;
+	const auto sMap = read("data1.txt", true);
+	const auto s4 = getS4Jacobian();
+	const auto s41 = s4.convert2Independent(mp_size_t<4>());
+	const auto s51 = fmod(s41*s41, 1.0 - s41*s41);
+	const auto s5 = s51.chainRule(s4, mp_size_t<4>());
+	__EQUAL_JACOBIAN__();
 }
 BOOST_AUTO_TEST_CASE(taylor_2)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data2.txt");
-	constexpr const std::size_t MAX = 3;
-	const auto s0 = ctaylor<makeIndependent<0>, MAX>(1.2, false);
-		/// create an independent variable for x1 (this is what the unused boolean is for)
-	const auto s1 = ctaylor<makeIndependent<1>, MAX>(1.3, false);
-	const auto s2 = ctaylor<makeIndependent<2>, MAX>(1.4, false);
-	const auto s3 = ctaylor<makeIndependent<3>, MAX>(1.5, false);
-		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	const auto s4 = getS4Taylor();
 	const auto s5 = hypot(s4*s4, 1.0 - s4*s4);
-	constexpr const double epsilon = 1e-12;
-	BOOST_CHECK(s5.m_s.size() == sMap.size());
-	BOOST_CHECK(
-		std::equal(
-			sMap.cbegin(),
-			sMap.cend(),
-			s5.m_s.cbegin(),
-			[epsilon](const taylorMap::value_type&_r, const double _d)
-			{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
-			}
-		)
-	);
+	__EQUAL_TAYLOR__();
+}
+BOOST_AUTO_TEST_CASE(taylor_chain_2)
+{	using namespace taylor;
+	using namespace boost::mp11;
+	const auto sMap = read("data2.txt");
+	const auto s4 = getS4Taylor();
+	const auto s41 = s4.convert2Independent(mp_size_t<4>());
+	const auto s51 = hypot(s41*s41, 1.0 - s41*s41);
+	const auto s5 = s51.chainRule(s4, mp_size_t<4>());
+	__EQUAL_TAYLOR__();
 }
 BOOST_AUTO_TEST_CASE(jacobian_2)
 {	using namespace jacobian;
 	using namespace boost::mp11;
 	const auto sMap = read("data2.txt", true);
-	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
-		/// create an independent variable for x1 (this is what the unused boolean is for)
-	const auto s1 = cjacobian<mp_list<mp_size_t<1> > >(1.3, false);
-	const auto s2 = cjacobian<mp_list<mp_size_t<2> > >(1.4, false);
-	const auto s3 = cjacobian<mp_list<mp_size_t<3> > >(1.5, false);
-		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	const auto s4 = getS4Jacobian();
 	const auto s5 = hypot(s4*s4, 1.0 - s4*s4);
-	constexpr const double epsilon = 1e-12;
-	BOOST_CHECK(s5.m_s.size() == sMap.size());
-	const auto sCompare = [epsilon](const taylorMap::value_type&_r, const double _d)
-	{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
-	};
-	BOOST_CHECK(
-		std::equal(
-			std::next(sMap.cbegin()),
-			sMap.cend(),
-			s5.m_s.cbegin(),
-			sCompare
-		)
-	);
-	BOOST_CHECK(
-		sCompare(*sMap.cbegin(), value(s5))
-	);
+	__EQUAL_JACOBIAN__();
+}
+BOOST_AUTO_TEST_CASE(jacobian_chain_2)
+{	using namespace jacobian;
+	using namespace boost::mp11;
+	const auto sMap = read("data2.txt", true);
+	const auto s4 = getS4Jacobian();
+	const auto s41 = s4.convert2Independent(mp_size_t<4>());
+	const auto s51 = hypot(s41*s41, 1.0 - s41*s41);
+	const auto s5 = s51.chainRule(s4, mp_size_t<4>());
+	__EQUAL_JACOBIAN__();
 }
 BOOST_AUTO_TEST_CASE(taylor_3)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data3.txt");
-	constexpr const std::size_t MAX = 3;
-	const auto s0 = ctaylor<makeIndependent<0>, MAX>(1.2, false);
-		/// create an independent variable for x1 (this is what the unused boolean is for)
-	const auto s1 = ctaylor<makeIndependent<1>, MAX>(1.3, false);
-	const auto s2 = ctaylor<makeIndependent<2>, MAX>(1.4, false);
-	const auto s3 = ctaylor<makeIndependent<3>, MAX>(1.5, false);
-		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	const auto s4 = getS4Taylor();
 	const auto s5 = atan(1.0/s4 - s4*s4);
-	constexpr const double epsilon = 1e-12;
-	BOOST_CHECK(s5.m_s.size() == sMap.size());
-	BOOST_CHECK(
-		std::equal(
-			sMap.cbegin(),
-			sMap.cend(),
-			s5.m_s.cbegin(),
-			[epsilon](const taylorMap::value_type&_r, const double _d)
-			{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
-			}
-		)
-	);
+	__EQUAL_TAYLOR__();
+}
+BOOST_AUTO_TEST_CASE(taylor_chain_3)
+{	using namespace taylor;
+	using namespace boost::mp11;
+	const auto sMap = read("data3.txt");
+	const auto s4 = getS4Taylor();
+	const auto s41 = s4.convert2Independent(mp_size_t<4>());
+	const auto s51 = atan(1.0/s41 - s41*s41);
+	const auto s5 = s51.chainRule(s4, mp_size_t<4>());
+	__EQUAL_TAYLOR__();
 }
 BOOST_AUTO_TEST_CASE(jacobian_3)
 {	using namespace jacobian;
 	using namespace boost::mp11;
 	const auto sMap = read("data3.txt", true);
-	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
-		/// create an independent variable for x1 (this is what the unused boolean is for)
-	const auto s1 = cjacobian<mp_list<mp_size_t<1> > >(1.3, false);
-	const auto s2 = cjacobian<mp_list<mp_size_t<2> > >(1.4, false);
-	const auto s3 = cjacobian<mp_list<mp_size_t<3> > >(1.5, false);
-		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+	const auto s4 = getS4Jacobian();
 	const auto s5 = atan(1.0/s4 - s4*s4);
-	constexpr const double epsilon = 1e-12;
-	BOOST_CHECK(s5.m_s.size() == sMap.size());
-	const auto sCompare = [epsilon](const taylorMap::value_type&_r, const double _d)
-	{	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
-	};
-	BOOST_CHECK(
-		std::equal(
-			std::next(sMap.cbegin()),
-			sMap.cend(),
-			s5.m_s.cbegin(),
-			sCompare
-		)
-	);
-	BOOST_CHECK(
-		sCompare(*sMap.cbegin(), value(s5))
-	);
+	__EQUAL_JACOBIAN__();
+}
+BOOST_AUTO_TEST_CASE(jacobian_chain_3)
+{	using namespace jacobian;
+	using namespace boost::mp11;
+	const auto sMap = read("data3.txt", true);
+	const auto s4 = getS4Jacobian();
+	const auto s41 = s4.convert2Independent(mp_size_t<4>());
+	const auto s51 = atan(1.0/s41 - s41*s41);
+	const auto s5 = s51.chainRule(s4, mp_size_t<4>());
+	__EQUAL_JACOBIAN__();
 }
