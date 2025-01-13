@@ -22,8 +22,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BLACK_SCHOLES_ORIG", "BLACK
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "logistic_regression", "logistic_regression\logistic_regression.vcxproj", "{9A32B14C-96A0-4625-9294-64C960F4ECDE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ctaylor_test", "ctaylor_test\ctaylor_test.vcxproj", "{62F4EF11-E58F-49EA-BCDC-32CF0361330D}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{17C711C1-B07A-4528-9962-26B3EEC46DC4}"
 EndProject
 Global
@@ -90,14 +88,6 @@ Global
 		{9A32B14C-96A0-4625-9294-64C960F4ECDE}.Release|x64.Build.0 = Release|x64
 		{9A32B14C-96A0-4625-9294-64C960F4ECDE}.Release|x86.ActiveCfg = Release|Win32
 		{9A32B14C-96A0-4625-9294-64C960F4ECDE}.Release|x86.Build.0 = Release|Win32
-		{62F4EF11-E58F-49EA-BCDC-32CF0361330D}.Debug|x64.ActiveCfg = Debug|x64
-		{62F4EF11-E58F-49EA-BCDC-32CF0361330D}.Debug|x64.Build.0 = Debug|x64
-		{62F4EF11-E58F-49EA-BCDC-32CF0361330D}.Debug|x86.ActiveCfg = Debug|Win32
-		{62F4EF11-E58F-49EA-BCDC-32CF0361330D}.Debug|x86.Build.0 = Debug|Win32
-		{62F4EF11-E58F-49EA-BCDC-32CF0361330D}.Release|x64.ActiveCfg = Release|x64
-		{62F4EF11-E58F-49EA-BCDC-32CF0361330D}.Release|x64.Build.0 = Release|x64
-		{62F4EF11-E58F-49EA-BCDC-32CF0361330D}.Release|x86.ActiveCfg = Release|Win32
-		{62F4EF11-E58F-49EA-BCDC-32CF0361330D}.Release|x86.Build.0 = Release|Win32
 		{17C711C1-B07A-4528-9962-26B3EEC46DC4}.Debug|x64.ActiveCfg = Debug|x64
 		{17C711C1-B07A-4528-9962-26B3EEC46DC4}.Debug|x64.Build.0 = Debug|x64
 		{17C711C1-B07A-4528-9962-26B3EEC46DC4}.Debug|x86.ActiveCfg = Debug|Win32

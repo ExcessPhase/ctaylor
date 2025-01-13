@@ -11,7 +11,7 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
-I added some automatic regression test (ctaylor_test, Visual C++ only) which I'm going to extend further.
+I added some automatic regression test (test/test.exe) using boost::test.
 
 I changed the Makefile to enable the user to override `USER_CXXFLAGS=-march=native` with his own setting and I added a compiler flag `-fno-stack-protector` as this project is interested in performance but not in avoiding hacker attacks.
 
@@ -82,6 +82,13 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **Outputs**: `logistic_regression.exe`
    - **Headers**: `cjacobian.h`
    - **Description**: Supposed to prove that forward-mode AD is not necessarily slower than reverse-mode AD but quite the opposite when applying the chain rule properly. Compare to [reverse-mode AD](https://github.com/ExcessPhase/reverse_mode_automatic_differentiation).
+   - **Visual C++**: no problem
+   - **g++-13**: no problem
+
+6. **boost autodiff regression test cases**
+   - **Outputs**: `test/test.exe`
+   - **Headers**: `cjacobian.h` and `ctaylor.h`
+   - **Description**: .Compares results with `test/data*.txt` files which have been precalculated using maxima and `test/maxima*.txt`. Should be executed with the current directory equal to `test` in order to find `data*.txt`!
    - **Visual C++**: no problem
    - **g++-13**: no problem
 

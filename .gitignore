@@ -396,3 +396,4 @@ FodyWeavers.xsd
 /ctaylor.h.rej
 /initializer_list.h.orig
 /initializer_list.h.rej
+*.swp
