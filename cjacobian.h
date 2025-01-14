@@ -53,14 +53,22 @@ struct createStdArray
 };
 	/// used to call createStdArrayImpl2 and create the index_sequence
 template<typename VECTOR, typename SIZE>
-struct createStdArray2;
-template<typename ...ELEMENTS, typename SIZE>
-struct createStdArray2<mp_list<ELEMENTS...>, SIZE>
+struct createStdArray2
 {	typedef typename getTypeFromSize<SIZE>::type TYPE;
-	static constexpr const std::array<std::pair<TYPE, TYPE>, sizeof...(ELEMENTS)> value = {std::make_pair(TYPE(mp_first<ELEMENTS>::value), TYPE(mp_second<ELEMENTS>::value))...};
+	typedef std::initializer_list<TYPE> IL;
+	typedef foelsche::init_list::convertToStdInitializerList<
+		mp_transform<mp_first, VECTOR>,
+		TYPE
+	> first;
+	typedef foelsche::init_list::convertToStdInitializerList<
+		mp_transform<mp_second, VECTOR>,
+		TYPE
+	> second;
+	typedef std::pair<IL, IL> PAIR;
+	static constexpr const PAIR value = {first::value, second::value};
 };
-template<typename ...ELEMENTS, typename SIZE>
-constexpr const std::array<std::pair<typename createStdArray2<mp_list<ELEMENTS...>, SIZE>::TYPE, typename createStdArray2<mp_list<ELEMENTS...>, SIZE>::TYPE>, sizeof...(ELEMENTS)> createStdArray2<mp_list<ELEMENTS...>, SIZE>::value;
+template<typename VECTOR, typename SIZE>
+constexpr const typename createStdArray2<VECTOR, SIZE>::PAIR createStdArray2<VECTOR, SIZE>::value;
 	/// create a vector for every entry in TARGET by attempting to find the corresponding entry in SOURCE
 	/// or size-of-SOURCE for if not found
 template<typename TARGET, typename SOURCE>
@@ -295,17 +303,18 @@ struct cjacobian
 		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		std::transform(
-			r.begin(),
-			r.end(),
+			r.first.begin(),
+			r.first.end(),
+			r.second.begin(),
 			s.m_s.begin(),
-			[&](const std::pair<TYPE, TYPE>&_rI)
-			{	if (_rI.first == SIZE - 1)
-					return _r.m_s[_rI.second]*m_s.back();
+			[&](const TYPE _i0, const TYPE _i1)
+			{	if (_i0 == SIZE - 1)
+					return _r.m_s[_i1]*m_s.back();
 				else
-				if (_rI.second == cjacobian<T1>::SIZE - 1)
-					return m_s[_rI.first]*_r.m_s.back();
+				if (_i1 == cjacobian<T1>::SIZE - 1)
+					return m_s[_i0]*_r.m_s.back();
 				else
-					return m_s[_rI.first]*_r.m_s.back() + _r.m_s[_rI.second]*m_s.back();
+					return m_s[_i0]*_r.m_s.back() + _r.m_s[_i1]*m_s.back();
 			}
 		);
 		s.m_s.back() = m_s.back() * _r.m_s.back();
@@ -328,17 +337,18 @@ struct cjacobian
 		const auto dInv = 1.0/_r.m_s.back();
 		const auto dInv2 = dInv*dInv*m_s.back();
 		std::transform(
-			r.begin(),
-			r.end(),
+			r.first.begin(),
+			r.first.end(),
+			r.second.begin(),
 			s.m_s.begin(),
-			[&](const std::pair<TYPE, TYPE>&_rI)
-			{	if (_rI.first == SIZE - 1)
-					return -dInv2*_r.m_s[_rI.second];
+			[&](const TYPE _i0, const TYPE _i1)
+			{	if (_i0 == SIZE - 1)
+					return -dInv2*_r.m_s[_i1];
 				else
-				if (_rI.second == cjacobian<T1>::SIZE - 1)
-					return dInv*m_s[_rI.first];
+				if (_i1 == cjacobian<T1>::SIZE - 1)
+					return dInv*m_s[_i0];
 				else
-					return dInv*m_s[_rI.first] - dInv2*_r.m_s[_rI.second];
+					return dInv*m_s[_i0] - dInv2*_r.m_s[_i1];
 			}
 		);
 		s.m_s.back() = m_s.back() * dInv;
@@ -359,17 +369,18 @@ struct cjacobian
 		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		std::transform(
-			r.begin(),
-			r.end(),
+			r.first.begin(),
+			r.first.end(),
+			r.second.begin(),
 			s.m_s.begin(),
-			[&](const std::pair<TYPE, TYPE>&_rI)
-			{	if (_rI.first == SIZE - 1)
-					return _r.m_s[_rI.second];
+			[&](const TYPE _i0, const TYPE _i1)
+			{	if (_i0 == SIZE - 1)
+					return _r.m_s[_i1];
 				else
-				if (_rI.second == cjacobian<T1>::SIZE - 1)
-					return m_s[_rI.first];
+				if (_i1 == cjacobian<T1>::SIZE - 1)
+					return m_s[_i0];
 				else
-					return m_s[_rI.first] + _r.m_s[_rI.second];
+					return m_s[_i0] + _r.m_s[_i1];
 			}
 		);
 		s.m_s.back() = m_s.back() + _r.m_s.back();
@@ -390,17 +401,18 @@ struct cjacobian
 		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		cjacobian<MERGED> s;
 		std::transform(
-			r.begin(),
-			r.end(),
+			r.first.begin(),
+			r.first.end(),
+			r.second.begin(),
 			s.m_s.begin(),
-			[&](const std::pair<TYPE, TYPE>&_rI)
-			{	if (_rI.first == SIZE - 1)
-					return -_r.m_s[_rI.second];
+			[&](const TYPE _i0, const TYPE _i1)
+			{	if (_i0 == SIZE - 1)
+					return -_r.m_s[_i1];
 				else
-				if (_rI.second == cjacobian<T1>::SIZE - 1)
-					return m_s[_rI.first];
+				if (_i1 == cjacobian<T1>::SIZE - 1)
+					return m_s[_i0];
 				else
-					return m_s[_rI.first] - _r.m_s[_rI.second];
+					return m_s[_i0] - _r.m_s[_i1];
 			}
 		);
 		s.m_s.back() = m_s.back() - _r.m_s.back();
