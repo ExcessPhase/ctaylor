@@ -18,6 +18,7 @@
 #include <cmath>
 #include <iterator>
 #include "merge_sorted_sets.h"
+#include "initializer_list.h"
 namespace jacobian
 {
 namespace implementation
@@ -46,15 +47,10 @@ struct getTypeFromSize
 	/// create an initialized constexpr std::array
 	/// needed to create the index_sequence used by createStdArrayImpl
 template<typename VECTOR, typename SIZE>
-struct createStdArray;
-template<typename ...ELEMENTS, typename SIZE>
-struct createStdArray<mp_list<ELEMENTS...>, SIZE>
-{	//typedef createStdArrayImpl<VECTOR, std::make_index_sequence<mp_size<VECTOR>::value>, typename getTypeFromSize<SIZE>::type> type;
-	typedef typename getTypeFromSize<SIZE>::type TYPE;
-	static constexpr const std::array<TYPE, sizeof...(ELEMENTS)> value = {ELEMENTS::value...};
+struct createStdArray
+{	typedef typename getTypeFromSize<SIZE>::type TYPE;
+	typedef foelsche::init_list::convertToStdInitializerList<VECTOR, TYPE> type;
 };
-template<typename ...ELEMENTS, typename SIZE>
-constexpr const std::array<typename createStdArray<mp_list<ELEMENTS...>, SIZE>::TYPE, sizeof...(ELEMENTS)> createStdArray<mp_list<ELEMENTS...>, SIZE>::value;;
 	/// used to call createStdArrayImpl2 and create the index_sequence
 template<typename VECTOR, typename SIZE>
 struct createStdArray2;
@@ -166,7 +162,7 @@ struct cjacobian
 	{	ARRAY s;
 		typedef typename createIndicies<VECTOR, T1>::type INDICIES;
 		typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE_T;
-		auto &r = createStdArray<INDICIES, SIZE_T>::value;
+		auto &r = createStdArray<INDICIES, SIZE_T>::type::value;
 		typedef typename getTypeFromSize<SIZE_T>::type TYPE;
 		std::transform(
 			r.begin(),
@@ -232,9 +228,9 @@ struct cjacobian
 	template<typename T1>
 	cjacobian&operator+=(const cjacobian<T1>&_r)
 	{	typedef typename createIndicies<VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::value;
+		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
 		for (std::size_t i = 0; i < r.size(); ++i)
-		{	const auto iT = r[i];
+		{	const auto iT = r.begin()[i];
 			if (iT != cjacobian<T1>::SIZE - 1)
 				m_s[i] += _r.m_s[iT];
 		}
@@ -244,9 +240,9 @@ struct cjacobian
 	template<typename T1>
 	cjacobian&operator-=(const cjacobian<T1>&_r)
 	{	typedef typename createIndicies<VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::value;
+		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
 		for (std::size_t i = 0; i < r.size(); ++i)
-		{	const auto iT = r[i];
+		{	const auto iT = r.begin()[i];
 			if (iT != cjacobian<T1>::SIZE - 1)
 				m_s[i] -= _r.m_s[iT];
 		}
