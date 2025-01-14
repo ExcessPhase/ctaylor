@@ -80,7 +80,7 @@ static auto sIsIdentical(const taylorMap::value_type&_r, const double _d)
 {	static constexpr auto epsilon = 1e-12;
 	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
 }
-static auto getS4Taylor(void)
+static auto getS4Taylor(const bool _b = false)
 {	using namespace taylor;
 	//using namespace boost::mp11;
 	constexpr const std::size_t MAX = 3;
@@ -90,10 +90,20 @@ static auto getS4Taylor(void)
 	const auto s2 = ctaylor<makeIndependent<2>, MAX>(1.4, false);
 	const auto s3 = ctaylor<makeIndependent<3>, MAX>(1.5, false);
 		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
-	return s4;
+	if (_b)
+	{	decltype(-s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3) s4 = 0.0;
+		s4 -= s0;
+		s4 += s1;
+		s4 -= s2;
+		s4 += s1*s2;
+		s4 -= s0*s1;
+		s4 += s2*s3;
+		return s4;
+	}
+	else
+		return -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
 }
-static auto getS4Jacobian(void)
+static auto getS4Jacobian(const bool _b = false)
 {	using namespace jacobian;
 	using namespace boost::mp11;
 	const auto s0 = cjacobian<mp_list<mp_size_t<0> > >(1.2, false);
@@ -102,8 +112,18 @@ static auto getS4Jacobian(void)
 	const auto s2 = cjacobian<mp_list<mp_size_t<2> > >(1.4, false);
 	const auto s3 = cjacobian<mp_list<mp_size_t<3> > >(1.5, false);
 		/// some calculation
-	const auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
-	return s4;
+	if (_b)
+	{	decltype(-s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3) s4 = 0.0;
+		s4 -= s0;
+		s4 += s1;
+		s4 -= s2;
+		s4 += s1*s2;
+		s4 -= s0*s1;
+		s4 += s2*s3;
+		return s4;
+	}
+	else
+		return -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
 }
 #define __EQUAL_TAYLOR__()\
 do\
@@ -140,6 +160,14 @@ BOOST_AUTO_TEST_CASE(taylor_0)
 	const auto s5 = exp(-1.0/(s4*s4));
 	__EQUAL_TAYLOR__();
 }
+BOOST_AUTO_TEST_CASE(taylor_1_0)
+{	using namespace taylor;
+	using namespace boost::mp11;
+	const auto sMap = read("data0.txt");
+	const auto s4 = getS4Taylor(true);
+	const auto s5 = exp(-1.0/(s4*s4));
+	__EQUAL_TAYLOR__();
+}
 BOOST_AUTO_TEST_CASE(taylor_chain_0)
 {	using namespace taylor;
 	using namespace boost::mp11;
@@ -155,6 +183,14 @@ BOOST_AUTO_TEST_CASE(jacobian_0)
 	using namespace boost::mp11;
 	const auto sMap = read("data0.txt", true);
 	const auto s4 = getS4Jacobian();
+	const auto s5 = exp(-1.0/(s4*s4));
+	__EQUAL_JACOBIAN__();
+}
+BOOST_AUTO_TEST_CASE(jacobian_1_0)
+{	using namespace jacobian;
+	using namespace boost::mp11;
+	const auto sMap = read("data0.txt", true);
+	const auto s4 = getS4Jacobian(true);
 	const auto s5 = exp(-1.0/(s4*s4));
 	__EQUAL_JACOBIAN__();
 }
