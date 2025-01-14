@@ -796,7 +796,23 @@ struct ctaylor
 	}
 	template<typename T1>
 	ctaylor &operator+=(const ctaylor<T1, MAX>&_r)
-	{	typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
+	{
+#if 1
+		typedef mp_size<T> SIZE;
+		typedef typename findPositions<T1, T, SIZE, true>::type SOURCE_POSITIONS;
+		typedef typename getTypeFromSize<SIZE>::type TYPE;
+		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
+		std::transform(
+			_r.m_s.cbegin(),
+			_r.m_s.cend(),
+			boost::make_permutation_iterator(m_s.cbegin(), rT.begin()),
+			boost::make_permutation_iterator(m_s.begin(), rT.begin()),
+			[](const double _d0, const double _d1)
+			{	return _d1 + _d0;
+			}
+		);
+#else
+		typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
 		typedef typename findPositions<T, T1, SIZE, true>::type SOURCE_POSITIONS;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
@@ -805,11 +821,28 @@ struct ctaylor
 			if (iT != std::numeric_limits<TYPE>::max())
 				m_s[i] += _r.m_s[iT];
 		}
+#endif
 		return *this;
 	}
 	template<typename T1>
 	ctaylor &operator-=(const ctaylor<T1, MAX>&_r)
-	{	typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
+	{
+#if 1
+		typedef mp_size<T> SIZE;
+		typedef typename findPositions<T1, T, SIZE, true>::type SOURCE_POSITIONS;
+		typedef typename getTypeFromSize<SIZE>::type TYPE;
+		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
+		std::transform(
+			_r.m_s.cbegin(),
+			_r.m_s.cend(),
+			boost::make_permutation_iterator(m_s.cbegin(), rT.begin()),
+			boost::make_permutation_iterator(m_s.begin(), rT.begin()),
+			[](const double _d0, const double _d1)
+			{	return _d1 - _d0;
+			}
+		);
+#else
+		typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
 		typedef typename findPositions<T, T1, SIZE, true>::type SOURCE_POSITIONS;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
@@ -818,6 +851,7 @@ struct ctaylor
 			if (iT != std::numeric_limits<TYPE>::max())
 				m_s[i] -= _r.m_s[iT];
 		}
+#endif
 		return *this;
 	}
 	template<

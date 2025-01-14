@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iterator>
+#include <boost/iterator/permutation_iterator.hpp>
 #include "merge_sorted_sets.h"
 #include "initializer_list.h"
 namespace jacobian
@@ -235,25 +236,58 @@ struct cjacobian
 	}
 	template<typename T1>
 	cjacobian&operator+=(const cjacobian<T1>&_r)
-	{	typedef typename createIndicies<VECTOR, T1>::type INDICIES;
+	{
+#if 1
+		typedef typename createIndicies<T1, VECTOR>::type INDICIES;
+		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
+		typedef typename getTypeFromSize<mp_size<INDICIES> >::type TYPE;
+		std::transform(
+			_r.m_s.begin(),
+			std::prev(_r.m_s.end()),
+			boost::make_permutation_iterator(m_s.cbegin(), r.begin()),
+			boost::make_permutation_iterator(m_s.begin(), r.begin()),
+			[](const double _d0, const double _d1)
+			{	return _d1 + _d0;
+			}
+		);
+#else
+		typedef typename createIndicies<VECTOR, T1>::type INDICIES;
 		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
 		for (std::size_t i = 0; i < r.size(); ++i)
 		{	const auto iT = r.begin()[i];
 			if (iT != cjacobian<T1>::SIZE - 1)
 				m_s[i] += _r.m_s[iT];
 		}
+#endif
 		m_s.back() += _r.m_s.back();
 		return *this;
 	}
 	template<typename T1>
 	cjacobian&operator-=(const cjacobian<T1>&_r)
-	{	typedef typename createIndicies<VECTOR, T1>::type INDICIES;
+	{
+
+#if 1
+		typedef typename createIndicies<T1, VECTOR>::type INDICIES;
+		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
+		typedef typename getTypeFromSize<mp_size<INDICIES> >::type TYPE;
+		std::transform(
+			_r.m_s.begin(),
+			std::prev(_r.m_s.end()),
+			boost::make_permutation_iterator(m_s.cbegin(), r.begin()),
+			boost::make_permutation_iterator(m_s.begin(), r.begin()),
+			[](const double _d0, const double _d1)
+			{	return _d1 - _d0;
+			}
+		);
+#else
+		typedef typename createIndicies<VECTOR, T1>::type INDICIES;
 		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
 		for (std::size_t i = 0; i < r.size(); ++i)
 		{	const auto iT = r.begin()[i];
 			if (iT != cjacobian<T1>::SIZE - 1)
 				m_s[i] -= _r.m_s[iT];
 		}
+#endif
 		m_s.back() -= _r.m_s.back();
 		return *this;
 	}
