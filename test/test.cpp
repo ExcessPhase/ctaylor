@@ -42,6 +42,8 @@ typedef std::map<ind2Expr, double, compare> taylorMap;
 static taylorMap read(const char *const _p, const bool _bOnlyFirstOrder = false)
 {	taylorMap sMap;
 	std::ifstream sFile(_p);
+	if (!sFile)
+		throw std::runtime_error(std::string("Cannot open file \"") + _p + "\"!");
 	std::string sLine;
 	std::regex sRegEx(R"(^([+-]?(?:\d+(?:\.\d*)?)(?:[eE][+-]?\d+)?)((?:\*X\d+(?:\^\d+)?)*)\s*$)");
 	std::regex sVarRegEx(R"((?:\*X(\d+)(?:\^(\d+))?)\s*)");
