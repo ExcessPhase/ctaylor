@@ -236,9 +236,7 @@ struct cjacobian
 	}
 	template<typename T1>
 	cjacobian&operator+=(const cjacobian<T1>&_r)
-	{
-#if 1
-		typedef typename createIndicies<T1, VECTOR>::type INDICIES;
+	{	typedef typename createIndicies<T1, VECTOR>::type INDICIES;
 		auto &r = createStdArray<INDICIES, mp_size<VECTOR> >::type::value;
 		typedef typename getTypeFromSize<mp_size<INDICIES> >::type TYPE;
 		std::transform(
@@ -250,24 +248,12 @@ struct cjacobian
 			{	return _d1 + _d0;
 			}
 		);
-#else
-		typedef typename createIndicies<VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
-		for (std::size_t i = 0; i < r.size(); ++i)
-		{	const auto iT = r.begin()[i];
-			if (iT != cjacobian<T1>::SIZE - 1)
-				m_s[i] += _r.m_s[iT];
-		}
-#endif
 		m_s.back() += _r.m_s.back();
 		return *this;
 	}
 	template<typename T1>
 	cjacobian&operator-=(const cjacobian<T1>&_r)
-	{
-
-#if 1
-		typedef typename createIndicies<T1, VECTOR>::type INDICIES;
+	{	typedef typename createIndicies<T1, VECTOR>::type INDICIES;
 		auto &r = createStdArray<INDICIES, mp_size<VECTOR> >::type::value;
 		typedef typename getTypeFromSize<mp_size<INDICIES> >::type TYPE;
 		std::transform(
@@ -279,15 +265,6 @@ struct cjacobian
 			{	return _d1 - _d0;
 			}
 		);
-#else
-		typedef typename createIndicies<VECTOR, T1>::type INDICIES;
-		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
-		for (std::size_t i = 0; i < r.size(); ++i)
-		{	const auto iT = r.begin()[i];
-			if (iT != cjacobian<T1>::SIZE - 1)
-				m_s[i] -= _r.m_s[iT];
-		}
-#endif
 		m_s.back() -= _r.m_s.back();
 		return *this;
 	}
