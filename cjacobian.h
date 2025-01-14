@@ -239,7 +239,7 @@ struct cjacobian
 	{
 #if 1
 		typedef typename createIndicies<T1, VECTOR>::type INDICIES;
-		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
+		auto &r = createStdArray<INDICIES, mp_size<VECTOR> >::type::value;
 		typedef typename getTypeFromSize<mp_size<INDICIES> >::type TYPE;
 		std::transform(
 			_r.m_s.begin(),
@@ -268,7 +268,7 @@ struct cjacobian
 
 #if 1
 		typedef typename createIndicies<T1, VECTOR>::type INDICIES;
-		auto &r = createStdArray<INDICIES, mp_plus<mp_size<T1>, mp_size_t<1> > >::type::value;
+		auto &r = createStdArray<INDICIES, mp_size<VECTOR> >::type::value;
 		typedef typename getTypeFromSize<mp_size<INDICIES> >::type TYPE;
 		std::transform(
 			_r.m_s.begin(),
