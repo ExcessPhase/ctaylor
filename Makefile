@@ -6,7 +6,7 @@ USER_CXXFLAGS=-march=native
 CXXFLAGS = -std=c++14 -DNDEBUG -O3 $(USER_CXXFLAGS) -flto=auto -fno-stack-protector -isystem $(BOOST_ROOT)/include -MMD -MP
 OBJECTS = cjacobian.o ctaylor.o VBIC95Jac/VBIC95Jac.o LUFAC/lufac.o VBIC95/VBIC95.o \
 	BLACK_SCHOLES/autodiff_black_scholes.o BLACK_SCHOLES/autodiff_black_scholes_orig.o \
-	logistic_regression/logistic_regression.o
+	logistic_regression/logistic_regression.o test/test.o
 
 DEPS = $(OBJECTS:.o=.d)
 
