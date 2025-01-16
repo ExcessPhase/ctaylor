@@ -52,7 +52,7 @@ using namespace taylor;
 #endif
 /// part of the original VBIC standard
 template<typename P_T, typename EA_T, typename VTV_T, typename RT_T>
-auto psibi (const P_T& P, const EA_T&EA, const VTV_T&Vtv, const RT_T&rT) 
+auto psibi (const P_T& P, const EA_T&EA, const VTV_T&Vtv, const RT_T&rT)
 {
 	const auto psiio = 2.0 * Vtv * log( exp ( 0.5 * P / Vtv ) - exp ( - 0.5 * P / Vtv ) );
 	const auto psiin = psiio * rT - 3.0 * Vtv * log ( rT ) - EA * ( rT - 1.0 );
@@ -685,7 +685,7 @@ struct vbic
 			(*this)(sNodePair0.second, sNodePair1.second, mp_size_t<POS>(), false);
 			(*this)(sNodePair0.first, sNodePair1.second, mp_size_t<POS>(), true);
 			(*this)(sNodePair0.second, sNodePair1.first, mp_size_t<POS>(), true);
-			
+
 			(*this)(sNodePair1.first, sNodePair0.first, mp_size_t<POS>(), false);
 			(*this)(sNodePair1.second, sNodePair0.second, mp_size_t<POS>(), false);
 			(*this)(sNodePair1.first, sNodePair0.second, mp_size_t<POS>(), true);
