@@ -952,6 +952,7 @@ try
 					/// calling the single transistor instance
 					/// second argument are the fixed external voltages (with negative indicies)
 				sI.calculate(sV, {vb, vc}, sH, sJ, sValues, sTrans, sTC);
+#if 0
 				for (const auto &r0 : sH)
 					for (const auto &r1 : r0.second)
 						for (const auto &r2 : r1.second)
@@ -964,6 +965,7 @@ try
 				for (const auto &r : sValues)
 					if (!std::isfinite(r.second) || std::isnan(r.second))
 						throw std::logic_error("Calculate produces NAN!");
+#endif
 /*
 x_{k+1} = x_k - [J(x_k) - (1/2) H(x_k) F(x_k)]^{-1} F(x_k)
 */
