@@ -11,8 +11,10 @@
 #include <numeric>
 #include <algorithm>
 #include <cassert>
+#ifdef __GNUC__
 #include <csignal>
 #include <fenv.h>
+#endif
 #define SELF_HEATING
 namespace vbic95
 {
@@ -902,10 +904,12 @@ lufac::index2Index2Double operator*(const lufac::index2Index2Index2Double&_rL, c
 	return s;
 }
 }
+#ifdef __GNUC__
 static void signalHandler(const int signal)
 {	if (signal == SIGFPE)
 		throw std::runtime_error("Caught SIGFPE: Floating-Point Exception");
 }
+#endif
 int main(int argc, char**argv)
 try
 {	using namespace vbic95;
@@ -914,8 +918,10 @@ try
 	{	std::cerr << argv[0] << ": usage: " << argv[0] << " PARS" << std::endl;
 		return 1;
 	}
+#ifdef __GNUC__
 	std::signal(SIGFPE, signalHandler);
 	feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
+#endif
 		/// single transistor instance
 	const vbic sI(readParams(argv[1]));
 		/// translation of internal nodes to external ones
