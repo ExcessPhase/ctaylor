@@ -11,6 +11,8 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
+For the vbic*.exe I added leveraging of asynchronous exception handling which is finally available also on LINUX.
+
 I added some automatic regression test (test/test.exe) using boost::test.
 
 I changed the Makefile to enable the user to override `USER_CXXFLAGS=-march=native` with his own setting and I added a compiler flag `-fno-stack-protector` as this project is interested in performance but not in avoiding hacker attacks.
