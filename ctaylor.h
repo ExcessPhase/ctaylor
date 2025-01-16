@@ -796,9 +796,7 @@ struct ctaylor
 	}
 	template<typename T1>
 	ctaylor &operator+=(const ctaylor<T1, MAX>&_r)
-	{
-#if 1
-		typedef mp_size<T> SIZE;
+	{	typedef mp_size<T> SIZE;
 		typedef typename findPositions<T1, T, SIZE, true>::type SOURCE_POSITIONS;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
@@ -811,24 +809,11 @@ struct ctaylor
 			{	return _d1 + _d0;
 			}
 		);
-#else
-		typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
-		typedef typename findPositions<T, T1, SIZE, true>::type SOURCE_POSITIONS;
-		typedef typename getTypeFromSize<SIZE>::type TYPE;
-		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
-		for (std::size_t i = 0; i < ctaylor::SIZE; ++i)
-		{	const auto iT = rT.begin()[i];
-			if (iT != std::numeric_limits<TYPE>::max())
-				m_s[i] += _r.m_s[iT];
-		}
-#endif
 		return *this;
 	}
 	template<typename T1>
 	ctaylor &operator-=(const ctaylor<T1, MAX>&_r)
-	{
-#if 1
-		typedef mp_size<T> SIZE;
+	{	typedef mp_size<T> SIZE;
 		typedef typename findPositions<T1, T, SIZE, true>::type SOURCE_POSITIONS;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
@@ -841,17 +826,6 @@ struct ctaylor
 			{	return _d1 - _d0;
 			}
 		);
-#else
-		typedef mp_plus<mp_size<T1>, mp_size_t<1> > SIZE;
-		typedef typename findPositions<T, T1, SIZE, true>::type SOURCE_POSITIONS;
-		typedef typename getTypeFromSize<SIZE>::type TYPE;
-		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
-		for (std::size_t i = 0; i < ctaylor::SIZE; ++i)
-		{	const auto iT = rT.begin()[i];
-			if (iT != std::numeric_limits<TYPE>::max())
-				m_s[i] -= _r.m_s[iT];
-		}
-#endif
 		return *this;
 	}
 	template<
