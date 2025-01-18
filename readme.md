@@ -11,7 +11,9 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
-For the vbic*.exe I added leveraging of asynchronous exception handling which is finally available also on LINUX.
+I simplified ctaylor::chainRule(), reducing the number of steps.
+
+For the `vbic*.exe`, I added support for asynchronous exception handling for floating-point exceptions, which is now finally available on Linux.
 
 I added some automatic regression test (test/test.exe) using boost::test.
 

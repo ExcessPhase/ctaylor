@@ -15,8 +15,37 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Test1.cpp">
+    <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\cjacobian.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ctaylor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\initializer_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\merge_sorted_sets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\taylor_series_expansions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="data0.txt" />
+    <Text Include="data1.txt" />
+    <Text Include="data2.txt" />
+    <Text Include="data3.txt" />
+    <Text Include="maxima0.txt" />
+    <Text Include="maxima1.txt" />
+    <Text Include="maxima2.txt" />
+    <Text Include="maxima3.txt" />
+    <Text Include="data4.txt" />
+    <Text Include="maxima4.txt" />
   </ItemGroup>
 </Project>
