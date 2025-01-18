@@ -82,10 +82,11 @@ static auto sIsIdentical(const taylorMap::value_type&_r, const double _d)
 {	static constexpr auto epsilon = 1e-12;
 	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
 }
-static auto getS4Taylor(const bool _b = false)
+template<typename THREE = boost::mp11::mp_size_t<3> >
+static auto getS4Taylor(const bool _b = false, const THREE& = THREE())
 {	using namespace taylor;
 	//using namespace boost::mp11;
-	constexpr const std::size_t MAX = 3;
+	constexpr const std::size_t MAX = THREE::value;
 	const auto s0 = ctaylor<makeIndependent<0>, MAX>(1.2, false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
 	const auto s1 = ctaylor<makeIndependent<1>, MAX>(1.3, false);
@@ -313,4 +314,16 @@ BOOST_AUTO_TEST_CASE(jacobian_chain_3)
 	const auto s51 = atan(1.0/s41 - s41*s41);
 	const auto s5 = s51.chainRule(s4, mp_size_t<4>());
 	__EQUAL_JACOBIAN__();
+}
+template<typename T>
+static auto sqr(const T&_d)
+{	return _d*_d;
+}
+BOOST_AUTO_TEST_CASE(taylor_4)
+{	using namespace taylor;
+	using namespace boost::mp11;
+	const auto sMap = read("data4.txt");
+	const auto s4 = getS4Taylor(false, mp_size_t<2>());
+	const auto s5 = exp(-sqr(atan(1.0/s4 - s4*s4)));
+	__EQUAL_TAYLOR__();
 }
