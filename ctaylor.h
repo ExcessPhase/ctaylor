@@ -74,11 +74,11 @@ struct output
 	{	m_r << I << ",";
 	}
 	void operator()(const mp_list<>&) const
-	{	m_r << "(), ";
+	{	m_r << "mp_list(), ";
 	}
 	template<typename FIRST, typename SECOND>
 	void operator()(const pair<FIRST, SECOND>&) const
-	{	m_r << "(";
+	{	m_r << "pair(";
 		(*this)(FIRST());
 		(*this)(SECOND());
 		m_r << ")";
@@ -94,7 +94,7 @@ struct output
 	}
 	template<typename FIRST, typename ...REST>
 	void operator()(const mp_list<FIRST, REST...>&) const
-	{	m_r << "(";
+	{	m_r << "mp_list(";
 		(*this)(mp_list<FIRST, REST...>(), mp_size<mp_list<FIRST, REST...> >());
 		m_r << ")";
 	}
@@ -685,10 +685,8 @@ using getMaxOrder = mp_max_element<
 	>,
 	mp_less
 >;
-template<typename LIST, std::size_t MAX>
-struct getTuple;
-template<typename ENUM, typename TUPLE, typename T, std::size_t MAX>
-struct ChainRule;
+template<typename ENUM, typename T, typename T1, std::size_t MAX>
+struct ChainRule2;
 	/// the class
 	/// first template argument is a vector of a vector of pairs of independent variable enum and order
 	/// all vectors must be sorted
@@ -876,25 +874,12 @@ struct ctaylor
 		/// T does contain ENUM
 	template<typename T1, std::size_t ENUM>
 	auto chainRule(const ctaylor<T1, MAX>&_r, const mp_size_t<ENUM>&_rE, const mp_true&) const
-	{	//typedef getMaxOrder<mp_size_t<ENUM>, T> MAX_ORDER;
-		typedef mp_transform<
-			mp_bind_front<
-				getMaxOrder,
-				mp_size_t<ENUM>
-			>::template fn,
-			T
-		> MAX_ELEMENTS;
-		typedef mp_max_element<
-			MAX_ELEMENTS,
-			mp_less
-		> MAX_ORDER;
-		const auto s = getTuple<T1, MAX>(dropValue(_r)).get(1.0, MAX_ORDER());
-		return ChainRule<
+	{	return ChainRule2<
 			mp_size_t<ENUM>,
-			typename std::decay<decltype(s)>::type,
 			T,
+			mp_pop_front<T1>,
 			MAX
-		>(*this, s)(mp_size<T>());
+		>(*this, dropValue(_r))();
 	}
 		/// substitutes one derivative by the ones passed in the first argument
 		/// might have to be called multiple times
@@ -1779,75 +1764,99 @@ struct ctaylor
 template<typename T, std::size_t MAX>
 const double ctaylor<T, MAX>::dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
 #endif
-template<typename ENUM, typename TUPLE, typename T, std::size_t MAX>
-struct ChainRule
+template<typename POWER, typename PAIR>
+using is_first_different = mp_not<
+	mp_same<
+		mp_first<PAIR>,
+		POWER
+	>
+>;
+template<typename ENUM, typename PAIR>
+using isFirstEqual = mp_same<
+	typename PAIR::first_type,
+	ENUM
+>;
+template<typename ENUM, typename LIST_OF_PAIRS>
+using filterEnum = mp_remove_if<
+	LIST_OF_PAIRS,
+	mp_bind_front<
+		isFirstEqual,
+		ENUM
+	>::template fn
+>;
+template<typename ENUM, typename T, typename T1, std::size_t MAX>
+struct ChainRule2
 {	const ctaylor<T, MAX>&m_r;
-	const TUPLE &m_rT;
-	ChainRule(
+	const ctaylor<T1, MAX> &m_rT;
+	typedef mp_transform<
+		mp_bind_front<
+			getMaxOrder,
+			ENUM
+		>::template fn,
+		T
+	> ORDERS;
+	typedef mp_max_element<
+		ORDERS,
+		mp_less
+	> MAX_ORDER;
+	typedef mp_transform<
+		mp_list,
+		ORDERS,
+		T
+	> ORDER_AND_ELEMENT;
+	ChainRule2(
 		const ctaylor<T, MAX>&_r,
-		const TUPLE &_rT
+		const ctaylor<T1, MAX> &_rT
 	)
 		:m_r(_r),
 		m_rT(_rT)
 	{
 	}
-	template<typename POSM>
-	auto operator()(const POSM&) const
-	{	typedef mp_size_t<mp_size<T>::value - POSM::value> POS;
-		typedef mp_at<T, POS> ELEMENT;
-		typedef contains_pair_first<ENUM, ELEMENT> BOOL;
-		return (*this)(POS(), BOOL()) + (*this)(mp_size_t<POSM::value - 1>());
+	auto operator()(void) const
+	{	return (*this)(MAX_ORDER());
 	}
-	auto operator()(const mp_size_t<1>&) const
-	{	typedef mp_size_t<mp_size<T>::value - 1> POS;
-		typedef mp_at<T, POS> ELEMENT;
-		typedef contains_pair_first<ENUM, ELEMENT> BOOL;
-		return (*this)(POS(), BOOL());
-	}
-	template<typename POS>
-	auto operator()(const POS&, const mp_true&) const
-	{	typedef mp_at<T, POS> ELEMENT;
-		typedef getMaxOrder<ENUM, ELEMENT> ORDER;
+	template<typename ORDERM>
+	auto calculate(const ORDERM&) const
+	{	typedef mp_size_t<MAX_ORDER::value - ORDERM::value> POWER;
+			/// only identical power of ENUM
 		typedef mp_remove_if<
-			ELEMENT,
+			ORDER_AND_ELEMENT,
 			mp_bind_front<
-				is_first_equal_to_enum,
-				ENUM
+				is_first_different,
+				POWER
 			>::template fn
-		> REMOVED;
-		ctaylor<mp_list<REMOVED>, MAX> s;
-		s.m_s[0] = m_r.m_s[POS::value];
-		return std::get<ORDER::value - 1>(m_rT)*s;
-	}
-	template<typename POS>
-	auto operator()(const POS&, const mp_false&) const
-	{	typedef mp_at<T, POS> ELEMENT;
-		ctaylor<mp_list<ELEMENT>, MAX> s;
-		s.m_s[0] = m_r.m_s[POS::value];
+		> FILTERED;
+			/// only the second part -- the ELEMENTS
+		typedef mp_transform<
+			mp_second,
+			FILTERED
+		> ELEMENTS;
+			/// from every element remove the pair with ENUM being the first
+		typedef mp_transform<
+			mp_bind_front<
+				filterEnum,
+				ENUM
+			>::template fn,
+			ELEMENTS
+		> ELEMENTS_ENUM_REMOVED;
+		typedef typename findPositions<ELEMENTS, T, mp_size<T>, true>::type SOURCE_POSITIONS;
+		auto &rT = convertToStdArray2<SOURCE_POSITIONS, mp_size<T> >::type::value;
+		ctaylor<ELEMENTS_ENUM_REMOVED, MAX> s;
+		std::copy(
+			boost::make_permutation_iterator(m_r.m_s.cbegin(), rT.begin()),
+			boost::make_permutation_iterator(m_r.m_s.cbegin(), rT.end()),
+			s.m_s.begin()
+		);
 		return s;
 	}
-};
-template<typename T, std::size_t MAX>
-struct getTuple
-{	const ctaylor<T, MAX> &m_r;
-	getTuple(const ctaylor<T, MAX>&_r)
-		:m_r(_r)
-	{
+	auto operator()(const mp_size_t<0>&) const
+	{	return calculate(mp_size_t<0>());
 	}
-	template<typename CURRENT, typename EXPM1>
-	auto get(const CURRENT&_r, const EXPM1&) const
-	{	const auto dCurrent = _r*m_r;
-		return std::tuple_cat(
-			std::make_tuple(dCurrent),
-			get(dCurrent, mp_size_t<EXPM1::value - 1>())
-		);
-	}
-	template<typename CURRENT>
-	auto get(const CURRENT&_r, const mp_size_t<0>&) const
-	{	return std::make_tuple();
+	template<typename ORDERM>
+	auto operator()(const ORDERM&) const
+	{	return calculate(ORDERM()) + m_rT*(*this)(mp_size_t<ORDERM::value -1 >());
 	}
 };
-
 template<typename T>
 struct containsValue2
 {	typedef mp_empty<
