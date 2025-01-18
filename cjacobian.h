@@ -225,13 +225,16 @@ struct cjacobian
 		typedef mp_erase<VECTOR, START, END> REMOVED;
 		typedef cjacobian<REMOVED> REMOVEDJ;
 		REMOVEDJ s;
-		for (std::size_t i = 0; i < SIZE; ++i)
-			if (i == START::value)
-				break;
-			else
-				s.m_s[i] = m_s[i];
-		for (std::size_t i = START::value + 1; i < SIZE; ++i)
-			s.m_s[i - 1] = m_s[i];
+		std::copy(
+			m_s.cbegin(),
+			m_s.cbegin() + START::value,
+			s.m_s.begin()
+		);
+		std::copy(
+			m_s.cbegin() + START::value + 1,
+			m_s.cend(),
+			s.m_s.begin() + START::value
+		);
 		return s + getDer(mp_size_t<ENUM>())*(_r - value(_r));
 	}
 	template<typename T1>
