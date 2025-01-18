@@ -323,7 +323,7 @@ BOOST_AUTO_TEST_CASE(taylor_4)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data4.txt");
-	const auto s4 = getS4Taylor(false, mp_size_t<2>());
+	const auto s4 = getS4Taylor(false, mp_size_t<4>());
 	const auto s5 = exp(-sqr(atan(1.0/s4 - s4*s4)));
 	__EQUAL_TAYLOR__();
 }
