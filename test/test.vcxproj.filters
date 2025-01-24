@@ -48,6 +48,12 @@
     <ClCompile Include="test9.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test10.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cjacobian.h">
