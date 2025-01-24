@@ -6,7 +6,9 @@ USER_CXXFLAGS=-march=native
 CXXFLAGS = -std=c++14 -DNDEBUG -O3 $(USER_CXXFLAGS) -flto=auto -fno-stack-protector -isystem $(BOOST_ROOT)/include -MMD -MP -fnon-call-exceptions -fasynchronous-unwind-tables
 OBJECTS = cjacobian.o ctaylor.o VBIC95Jac/VBIC95Jac.o LUFAC/lufac.o VBIC95/VBIC95.o \
 	BLACK_SCHOLES/autodiff_black_scholes.o BLACK_SCHOLES/autodiff_black_scholes_orig.o \
-	logistic_regression/logistic_regression.o test/test.o
+	logistic_regression/logistic_regression.o test/test.o \
+	test/test0.o test/test1.o test/test2.o test/test3.o \
+	test/test4.o test/test5.o test/test6.o test/test7.o test/test8.o test/test9.o
 
 DEPS = $(OBJECTS:.o=.d)
 
@@ -16,7 +18,7 @@ all: ctaylor.exe vbic95Jac.exe vbic95Taylor.exe black_scholes.exe cjacobian.exe 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-test/test.exe: test/test.o
+test/test.exe: test/test.o test/test0.o test/test1.o test/test2.o test/test3.o test/test4.o test/test5.o test/test6.o test/test7.o test/test8.o test/test9.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 cjacobian.exe: cjacobian.o
