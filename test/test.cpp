@@ -323,7 +323,7 @@ BOOST_AUTO_TEST_CASE(taylor_4)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data4.txt");
-	const auto s4 = getS4Taylor(false, mp_size_t<4>());
+	const auto s4 = getS4Taylor(false);
 	const auto s5 = exp(-sqr(atan(1.0/s4 - s4*s4)));
 	__EQUAL_TAYLOR__();
 }
@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE(taylor_5)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data5.txt");
-	const auto s4 = getS4Taylor(false, mp_size_t<4>());
+	const auto s4 = getS4Taylor(false);
 	const auto s5 = erf(s4);
 	__EQUAL_TAYLOR__();
 }
@@ -355,7 +355,7 @@ BOOST_AUTO_TEST_CASE(taylor_6)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data6.txt");
-	const auto s4 = getS4Taylor(false, mp_size_t<4>());
+	const auto s4 = getS4Taylor(false);
 	const auto s5 = erfc(s4);
 	__EQUAL_TAYLOR__();
 }
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(taylor_7)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data7.txt");
-	const auto s4 = getS4Taylor(false, mp_size_t<4>());
+	const auto s4 = getS4Taylor(false);
 	const auto s5 = sin(s4);
 	__EQUAL_TAYLOR__();
 }
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(taylor_8)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data8.txt");
-	const auto s4 = getS4Taylor(false, mp_size_t<4>());
+	const auto s4 = getS4Taylor(false);
 	const auto s5 = asin(1.0/s4);
 	__EQUAL_TAYLOR__();
 }
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE(taylor_9)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data9.txt");
-	const auto s4 = getS4Taylor(false, mp_size_t<4>());
+	const auto s4 = getS4Taylor(false);
 	const auto s5 = asinh(1.0/s4);
 	__EQUAL_TAYLOR__();
 }
