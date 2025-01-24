@@ -81,6 +81,9 @@
     <ClCompile Include="test20.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test21.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cjacobian.h">
@@ -227,6 +230,12 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="maxima20.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data21.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima21.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
