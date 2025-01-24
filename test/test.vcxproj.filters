@@ -18,6 +18,36 @@
     <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test0.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test5.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test6.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test7.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test8.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test9.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cjacobian.h">
@@ -35,17 +65,78 @@
     <ClInclude Include="..\taylor_series_expansions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="test.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="data0.txt" />
-    <Text Include="data1.txt" />
-    <Text Include="data2.txt" />
-    <Text Include="data3.txt" />
-    <Text Include="maxima0.txt" />
-    <Text Include="maxima1.txt" />
-    <Text Include="maxima2.txt" />
-    <Text Include="maxima3.txt" />
-    <Text Include="data4.txt" />
-    <Text Include="maxima4.txt" />
+    <Text Include="data5.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data6.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data7.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data8.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data9.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima5.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima6.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima7.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima8.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima9.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data0.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data1.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data2.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data3.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data4.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima0.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima1.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima2.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima3.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima4.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="test.xaml">
+      <Filter>Source Files</Filter>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
