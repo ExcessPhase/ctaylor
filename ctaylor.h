@@ -256,12 +256,10 @@ struct listOfListsIsSorted<mp_list<T0, T1, REST...> >
 template<typename TARGET, typename SOURCE, typename SIZE, bool CHECK=true>
 struct findPositions
 {
-#ifndef NDEBUG
 	static_assert(!CHECK || mp_size<TARGET>::value >= mp_size<SOURCE>::value, "size of target must be larger than size of source!");
 	static_assert(mp_is_set<TARGET>::value, "TARGET must be a set!");
 	static_assert(mp_is_set<SOURCE>::value, "SOURCE must be a set!");
 	static_assert(!CHECK || std::is_same<TARGET, mp_set_union<TARGET, SOURCE> >::value, "TARGET must contain all elements in SOURCE");
-#endif
 	typedef typename getTypeFromSize<SIZE>::type TYPE;
 #if 0
 	template<typename STATE, typename SOURCE_ELEMENT>
@@ -795,7 +793,7 @@ struct ctaylor
 	template<typename T1>
 	ctaylor &operator+=(const ctaylor<T1, MAX>&_r)
 	{	typedef mp_size<T> SIZE;
-		typedef typename findPositions<T1, T, SIZE, true>::type SOURCE_POSITIONS;
+		typedef typename findPositions<T1, T, SIZE, false>::type SOURCE_POSITIONS;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
 		std::transform(
@@ -812,7 +810,7 @@ struct ctaylor
 	template<typename T1>
 	ctaylor &operator-=(const ctaylor<T1, MAX>&_r)
 	{	typedef mp_size<T> SIZE;
-		typedef typename findPositions<T1, T, SIZE, true>::type SOURCE_POSITIONS;
+		typedef typename findPositions<T1, T, SIZE, false>::type SOURCE_POSITIONS;
 		typedef typename getTypeFromSize<SIZE>::type TYPE;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, SIZE>::type::value;
 		std::transform(
@@ -1839,7 +1837,7 @@ struct ChainRule2
 			>::template fn,
 			ELEMENTS
 		> ELEMENTS_ENUM_REMOVED;
-		typedef typename findPositions<ELEMENTS, T, mp_size<T>, true>::type SOURCE_POSITIONS;
+		typedef typename findPositions<ELEMENTS, T, mp_size<T>, false>::type SOURCE_POSITIONS;
 		auto &rT = convertToStdArray2<SOURCE_POSITIONS, mp_size<T> >::type::value;
 		ctaylor<ELEMENTS_ENUM_REMOVED, MAX> s;
 		std::copy(
