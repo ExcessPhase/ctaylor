@@ -1,0 +1,22 @@
+hypot(a, b) := sqrt(a*a + b*b)$
+pow(a, b) := a^b$
+display2d: false$
+ratprint: false$
+x4 : -x0 + x1 - x2 + x1*x2 - x0*x1 + x2*x3$
+gradef(truncate(x), 0)$
+float(
+    taylor(
+	log(x4)/log(10),
+        [x0, x1, x2, x3],
+        [1.2, 1.3, 1.4, 1.5],
+        3
+    )
+)$
+subst(x0-1.2 = X0, subst(x1-1.3 = X1, subst(x2-1.4 = X2, subst(x3-1.5 = X3, %))))$
+expand(%)$
+
+/* Extract coefficients */
+listify(%)$
+
+/* Write coefficients to a file */
+with_stdout("data19.txt", for c in % do print(c))$
