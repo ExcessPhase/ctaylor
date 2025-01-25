@@ -152,6 +152,7 @@
     <ClCompile Include="test2.cpp" />
     <ClCompile Include="test20.cpp" />
     <ClCompile Include="test21.cpp" />
+    <ClCompile Include="test22.cpp" />
     <ClCompile Include="test3.cpp" />
     <ClCompile Include="test4.cpp" />
     <ClCompile Include="test5.cpp" />
@@ -176,6 +177,7 @@
     <Text Include="data2.txt" />
     <Text Include="data20.txt" />
     <Text Include="data21.txt" />
+    <Text Include="data22.txt" />
     <Text Include="data3.txt" />
     <Text Include="data4.txt" />
     <Text Include="data5.txt" />
@@ -198,6 +200,7 @@
     <Text Include="maxima2.txt" />
     <Text Include="maxima20.txt" />
     <Text Include="maxima21.txt" />
+    <Text Include="maxima22.txt" />
     <Text Include="maxima3.txt" />
     <Text Include="maxima4.txt" />
     <Text Include="maxima5.txt" />

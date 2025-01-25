@@ -2,6 +2,7 @@
 #include <cmath>
 #include <array>
 #include <utility>
+#include <boost/math/special_functions/polygamma.hpp>
 namespace taylor
 {
 namespace implementation
@@ -271,6 +272,25 @@ std::array<double, SIZE> inverse(const double _d)
 	}
 #endif
 	return s;
+}
+template<std::size_t SIZE>
+std::array<double, SIZE> tgamma(const double _d)
+{
+	std::array<double,SIZE> coefficients;
+	// Calculate the gamma function at x
+	const auto gamma_x = std::tgamma(_d);
+
+	// First coefficient is the gamma function value
+	coefficients[0] = gamma_x;
+
+	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
+	double d = gamma_x;
+	// Calculate derivatives (polygamma functions) at x and add to coefficients
+	for (int n = 1; n < SIZE; ++n)
+	{	d *= r[n - 1];
+		coefficients[n] = boost::math::polygamma(n - 1, _d) *d;
+	}
+	return coefficients;
 }
 }
 }

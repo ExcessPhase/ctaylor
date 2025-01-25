@@ -1484,6 +1484,7 @@ struct ctaylor
 	__CREATE_NONLINEAR__(cos)
 	__CREATE_NONLINEAR__(sinh)
 	__CREATE_NONLINEAR__(cosh)
+	__CREATE_NONLINEAR__(tgamma)
 	struct output
 	{	std::ostream&m_rS;
 		const ctaylor&m_rT;

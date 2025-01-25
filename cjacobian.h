@@ -20,6 +20,7 @@
 #include <boost/iterator/permutation_iterator.hpp>
 #include "merge_sorted_sets.h"
 #include "initializer_list.h"
+#include <boost/math/special_functions/polygamma.hpp>
 namespace jacobian
 {
 namespace implementation
@@ -655,6 +656,10 @@ struct cjacobian
 	static doublePair log_(const double _d)
 	{	return std::make_pair(std::log(_d), 1.0/_d);
 	}
+	static doublePair tgamma_(const double _d)
+	{	const auto d = std::tgamma(_d);
+		return std::make_pair(d, d*boost::math::polygamma(0, _d));
+	}
 #if defined(__GNUC__) && !defined(__clang__)
 	static constexpr double s_dLog10 = std::log(10.0);
 #else
@@ -819,6 +824,7 @@ struct cjacobian
 	friend cjacobian sin(const cjacobian&_r)\
 	{	return nonlinear<sin##_>(_r);\
 	}
+	__create__(tgamma)
 	__create__(cbrt)
 	__create__(erfc)
 	__create__(erf)
