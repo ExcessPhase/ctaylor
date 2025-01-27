@@ -277,9 +277,10 @@ template<std::size_t SIZE>
 std::array<double, SIZE> polygamma(const int _i, const double _d)
 {	std::array<double, SIZE> s;
 	auto d = 1.0;
+	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
 	for (std::size_t i = 0; i < SIZE; ++i)
 	{	if (i > 1)
-			d /= i;
+			d *= r[i-1];
 		s[i] = boost::math::polygamma(_i + i, _d)*d;
 	}
 	return s;
