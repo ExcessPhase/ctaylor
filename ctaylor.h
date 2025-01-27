@@ -1398,17 +1398,19 @@ struct ctaylor
 		return dropValue(_r).apply(s, mp_size_t<MAX + 1>());
 	}
 	friend auto tgamma(const ctaylor&_r)
-	{	return tgamma(_r, std::tgamma(value(_r)));
+	{	return tgamma(_r, std::tgamma(value(_r)), polygamma<MAX>(0, value(_r)));
 	}
 	template<
 		std::size_t _MAX = MAX,
 		typename std::enable_if<
 			(_MAX > 1),
 			int
-		>::type = 0
+		>::type = 0,
+		std::size_t PSIZE
 	>
-	friend auto tgamma(const ctaylor&_r, const double _d)
-	{	const auto s1 = tgamma(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true), _d)*polygamma(0, ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true));
+	friend auto tgamma(const ctaylor&_r, const double _d, const std::array<double, PSIZE>&_rPG)
+	{	static_assert(PSIZE >= _MAX, "PSIZE >= MAX");
+		const auto s1 = tgamma(ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true), _d, _rPG)*polygamma(0, ctaylor<makeIndependent<0>, MAX - 1>(value(_r), true), _rPG);
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = _d;
@@ -1421,10 +1423,12 @@ struct ctaylor
 		typename std::enable_if<
 			(_MAX == 1),
 			int
-		>::type = 0
+		>::type = 0,
+		std::size_t PSIZE
 	>
-	friend auto tgamma(const ctaylor&_r, const double _d)
-	{	const auto s1 = _d*boost::math::polygamma(0, value(_r));
+	friend auto tgamma(const ctaylor&_r, const double _d, const std::array<double, PSIZE>&_rPG)
+	{	static_assert(PSIZE >= _MAX, "PSIZE >= MAX");
+		const auto s1 = _d*_rPG[0];
 		auto &r = divide_by_n_p_1<MAX>::type::value;
 		std::array<double, MAX + 1> s;
 		s[0] = _d;
@@ -1523,8 +1527,22 @@ struct ctaylor
 	__CREATE_NONLINEAR__(sinh)
 	__CREATE_NONLINEAR__(cosh)
 	friend auto polygamma(const int _i, const ctaylor&_r)
+	{	return polygamma(_i, _r, polygamma<MAX + 1>(_i, value(_r)));
+	}
+	template<std::size_t PSIZE>
+	friend auto polygamma(const int _i, const ctaylor&_r, const std::array<double, PSIZE>&_rPG)
+	{	static_assert(PSIZE >= MAX + 1, "PSIZE >= MAX + 1");
+		std::array<double, MAX + 1> s;
+		for (std::size_t i = 0; i < MAX + 1; ++i)
+			s[i] = _rPG[i];
+		return dropValue(_r).apply(
+			s,
+			mp_size_t<MAX + 1>()
+		);
+	}
+	friend auto polygamma(const int _i, const ctaylor&_r, const std::array<double, MAX + 1>&_rPG)
 	{	return dropValue(_r).apply(
-			polygamma<MAX + 1>(_i, value(_r)),
+			_rPG,
 			mp_size_t<MAX + 1>()
 		);
 	}
