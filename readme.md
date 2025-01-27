@@ -11,6 +11,8 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
+Fixed undefined symbols which occured only for debug builds due to missing out-of-class definition of various static value objects.
+
 I simplified ctaylor::chainRule(), reducing the number of steps.
 
 For the `vbic*.exe`, I added support for asynchronous exception handling for floating-point exceptions, which is now finally available on Linux.

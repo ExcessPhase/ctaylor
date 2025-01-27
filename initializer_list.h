@@ -39,6 +39,8 @@ struct convertToStdInitializerList<mp_list<ITEMS...>, TYPE>
 	{	ITEMS::value...
 	};
 };
+template<typename ...ITEMS, typename TYPE>
+constexpr const std::initializer_list<TYPE> convertToStdInitializerList<mp_list<ITEMS...>, TYPE>::value;
 
 
 template<typename LIST_A, typename LIST_B, typename TYPE>

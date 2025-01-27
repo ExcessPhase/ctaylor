@@ -473,6 +473,8 @@ struct convertToStdArray3<mp_list<ELEMENTS...>, SIZE>
 	{	createPair<ELEMENTS, TYPE>::type::value...
 	};
 };
+template<typename ...ELEMENTS, typename SIZE>
+constexpr const std::initializer_list<typename convertToStdArray3<mp_list<ELEMENTS...>, SIZE>::PAIR> convertToStdArray3<mp_list<ELEMENTS...>, SIZE>::value;
 template<typename LIST, typename SIZE>
 struct convertToStdArray
 {	typedef typename getTypeFromSize<SIZE>::type TYPE;
@@ -490,7 +492,8 @@ struct convertToStdArray
 		TYPE
 	>::value;
 };
-
+template<typename LIST, typename SIZE>
+constexpr const typename convertToStdArray<LIST, SIZE>::PAIR convertToStdArray<LIST, SIZE>::value;
 template<typename LIST, typename SIZE>
 struct convertToStdArray2
 {	typedef typename foelsche::init_list::convertToStdInitializerList<
