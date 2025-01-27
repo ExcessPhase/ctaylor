@@ -820,6 +820,20 @@ struct cjacobian
 			-s_dTwoOverSqrtPi*std::exp(-_d*_d)
 		);
 	}
+	static doublePair polygamma_(const int _i, const double _d)
+	{	return std::make_pair(
+			boost::math::polygamma(_i, _d),
+			boost::math::polygamma(_i + 1, _d)
+		);
+	}
+	friend cjacobian polygamma(const int _i, const cjacobian&_r)\
+	{	cjacobian s;
+		const auto sPair = polygamma_(_i, value(_r));
+		for (std::size_t i = 0; i < SIZE - 1; ++i)
+			s.m_s[i] = sPair.second*_r.m_s[i];
+		s.m_s.back() = sPair.first;
+		return s;
+	}
 #define __create__(sin)\
 	friend cjacobian sin(const cjacobian&_r)\
 	{	return nonlinear<sin##_>(_r);\
