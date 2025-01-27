@@ -276,8 +276,12 @@ std::array<double, SIZE> inverse(const double _d)
 template<std::size_t SIZE>
 std::array<double, SIZE> polygamma(const int _i, const double _d)
 {	std::array<double, SIZE> s;
+	auto d = 1.0;
 	for (std::size_t i = 0; i < SIZE; ++i)
-		s[i] = boost::math::polygamma(_i + i, _d);
+	{	if (i > 1)
+			d /= i;
+		s[i] = boost::math::polygamma(_i + i, _d)*d;
+	}
 	return s;
 }
 }
