@@ -10,7 +10,7 @@ OBJECTS = cjacobian.o ctaylor.o VBIC95Jac/VBIC95Jac.o LUFAC/lufac.o VBIC95/VBIC9
 	test/test0.o test/test1.o test/test2.o test/test3.o \
 	test/test4.o test/test5.o test/test6.o test/test7.o test/test8.o test/test9.o \
 	test/test10.o test/test11.o test/test12.o test/test13.o test/test14.o test/test15.o test/test16.o \
-	test/test17.o test/test18.o test/test19.o test/test20.o test/test21.o
+	test/test17.o test/test18.o test/test19.o test/test20.o test/test21.o test/test22.o test/test23.o
 
 DEPS = $(OBJECTS:.o=.d)
 
@@ -22,7 +22,7 @@ all: ctaylor.exe vbic95Jac.exe vbic95Taylor.exe black_scholes.exe cjacobian.exe 
 
 test/test.exe: test/test.o test/test0.o test/test1.o test/test2.o test/test3.o test/test4.o test/test5.o \
 	test/test6.o test/test7.o test/test8.o test/test9.o test/test10.o test/test11.o test/test12.o test/test13.o \
-	test/test14.o test/test15.o test/test16.o test/test17.o test/test18.o test/test19.o test/test20.o test/test21.o
+	test/test14.o test/test15.o test/test16.o test/test17.o test/test18.o test/test19.o test/test20.o \			test/test21.o test/test22.o test/test23.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 cjacobian.exe: cjacobian.o
