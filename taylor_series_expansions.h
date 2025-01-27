@@ -274,26 +274,11 @@ std::array<double, SIZE> inverse(const double _d)
 	return s;
 }
 template<std::size_t SIZE>
-std::array<double, SIZE> tgamma(const double _d)
-{
-	std::array<double,SIZE> coefficients;
-	// Calculate the gamma function at x
-	const auto gamma_x = std::tgamma(_d);
-
-	// First coefficient is the gamma function value
-	coefficients[0] = gamma_x;
-
-	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-	double d = gamma_x;
-	// Calculate derivatives (polygamma functions) at x and add to coefficients
-	for (int n = 1; n < SIZE; ++n)
-	{	d *= r[n - 1];
-		coefficients[n] = boost::math::polygamma(n - 1, _d) *d;
-	}
-	return coefficients;
+std::array<double, SIZE> polygamma(const int _i, const double _d)
+{	std::array<double, SIZE> s;
+	for (std::size_t i = 0; i < SIZE; ++i)
+		s[i] = boost::math::polygamma(_i + i, _d);
+	return s;
 }
 }
 }
-#if 0
-((n & 1) ? ((n & 2) ? -cosh_x0 : cosh_x0) : ((n & 2) ? -sinh_x0 : sinh_x0)) * term
-#endif
