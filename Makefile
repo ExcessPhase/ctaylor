@@ -4,14 +4,16 @@ endif
 
 USER_CXXFLAGS=-march=native
 CXXFLAGS = -std=c++14 -DNDEBUG -O3 $(USER_CXXFLAGS) -flto=auto -fno-stack-protector -isystem $(BOOST_ROOT)/include -MMD -MP -fnon-call-exceptions -fasynchronous-unwind-tables
+TEST_OBJECTS_LOCAL=test.o \
+	test0.o test1.o test2.o test3.o \
+	test4.o test5.o test6.o test7.o test8.o test9.o \
+	test10.o test11.o test12.o test13.o test14.o test15.o test16.o \
+	test17.o test18.o test19.o test20.o test21.o test22.o test23.o \
+	test24.o test25.o
+TEST_OBJECTS=$(addprefix test/, $(TEST_OBJECTS_LOCAL))
 OBJECTS = cjacobian.o ctaylor.o VBIC95Jac/VBIC95Jac.o LUFAC/lufac.o VBIC95/VBIC95.o \
 	BLACK_SCHOLES/autodiff_black_scholes.o BLACK_SCHOLES/autodiff_black_scholes_orig.o \
-	logistic_regression/logistic_regression.o test/test.o \
-	test/test0.o test/test1.o test/test2.o test/test3.o \
-	test/test4.o test/test5.o test/test6.o test/test7.o test/test8.o test/test9.o \
-	test/test10.o test/test11.o test/test12.o test/test13.o test/test14.o test/test15.o test/test16.o \
-	test/test17.o test/test18.o test/test19.o test/test20.o test/test21.o test/test22.o test/test23.o \
-	test/test24.o
+	logistic_regression/logistic_regression.o $(TEST_OBJECTS)
 
 DEPS = $(OBJECTS:.o=.d)
 
@@ -21,10 +23,7 @@ all: ctaylor.exe vbic95Jac.exe vbic95Taylor.exe black_scholes.exe cjacobian.exe 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-test/test.exe: test/test.o test/test0.o test/test1.o test/test2.o test/test3.o test/test4.o test/test5.o \
-	test/test6.o test/test7.o test/test8.o test/test9.o test/test10.o test/test11.o test/test12.o test/test13.o \
-	test/test14.o test/test15.o test/test16.o test/test17.o test/test18.o test/test19.o test/test20.o \
-	test/test21.o test/test22.o test/test23.o test/test24.o
+test/test.exe: $(TEST_OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 cjacobian.exe: cjacobian.o

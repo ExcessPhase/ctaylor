@@ -826,13 +826,19 @@ struct cjacobian
 			boost::math::polygamma(_i + 1, _d)
 		);
 	}
-	friend cjacobian polygamma(const int _i, const cjacobian&_r)\
+	friend cjacobian polygamma(const int _i, const cjacobian&_r)
 	{	cjacobian s;
 		const auto sPair = polygamma_(_i, value(_r));
 		for (std::size_t i = 0; i < SIZE - 1; ++i)
 			s.m_s[i] = sPair.second*_r.m_s[i];
 		s.m_s.back() = sPair.first;
 		return s;
+	}
+	friend auto abs(const cjacobian&_r)
+	{	if (_r < 0)
+			return -_r;
+		else
+			return _r;
 	}
 #define __create__(sin)\
 	friend cjacobian sin(const cjacobian&_r)\
