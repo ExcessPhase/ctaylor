@@ -7,6 +7,8 @@ int main(int argc, char**argv)
 
 	if (argc != 6)
 	{	std::cerr << argv[0] << ": Need 4 floating point arguments and one integer!" << std::endl;
+		std::cerr << argv[0] << ": with chainrule: " << argv[0] << " 1.2 1.3 1.4 1.5 1" << std::endl;
+		std::cerr << argv[0] << ": without chainrule: " << argv[0] << " 1.2 1.3 1.4 1.5 0" << std::endl;
 		return 1;
 	}
 	const cjacobian<mp_list<mp_size_t<0> > > s0(std::atof(argv[1]), true);
@@ -33,7 +35,9 @@ int main(int argc, char**argv)
 		/// and it must be different than any other used ENUM -- see s0..s3 above which are using 0..3
 	const auto s51 = fmod(s41*s41, 1.0 - s41*s41).chainRule(s4, mp_size_t<4>());;
 	std::cerr << "s4=" << s4 << "\n";
-	std::cerr << "s5=" << s5 << "\n";
+		/// this is the value being printed by maxima.txt
+	std::cerr << "compare to output of maxima.txt: s5=" << s5 << "\n";
 	std::cerr << "s41=" << s41 << "\n";
-	std::cerr << "s51=" << s51 << "\n";
+		/// this is the value being printed by maxima.txt
+	std::cerr << "compare to output of maxima.txt: s51=" << s51 << "\n";
 }

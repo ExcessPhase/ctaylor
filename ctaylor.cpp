@@ -11,7 +11,9 @@ int main(int argc, char**argv)
 		/// for MAX=1 it is cheaper to use a dual number class dedicated to first oder derivatives
 	static constexpr std::size_t MAX = 2;
 	if (argc != 6)
-	{	std::cerr << "missing arguments -- must be 4 floating point numbers and one integer!" << std::endl;
+	{	std::cerr << argv[0] << ": missing arguments -- must be 4 floating point numbers and one integer!" << std::endl;
+		std::cerr << argv[0] << ": with chainrule: " << argv[0] << " 1.2 1.3 1.4 1.5 1" << std::endl;
+		std::cerr << argv[0] << ": without chainrule: " << argv[0] << " 1.2 1.3 1.4 1.5 0" << std::endl;
 		return 1;
 	}
 		/// create an independent variable for x0 (this is what the unused boolean is for)
@@ -39,9 +41,11 @@ int main(int argc, char**argv)
 		/// print the entire polynomial
 	std::cout << "s4=" << s4 << "\n";
 	std::cout << "s41=" << s41 << "\n";
-	std::cout << "s5=" << s5 << "\n";
+		/// this is the value being printed by maxima.txt
+	std::cout << "compare to output of maxima.txt: s5=" << s5 << "\n";
 	std::cout << "s52=" << s52 << "\n";
-	std::cout << "s51=" << s51 << "\n";
+		/// this is the value being printed by maxima.txt
+	std::cout << "compare to output of maxima.txt: s51=" << s51 << "\n";
 	typedef mp_list<
 		pair<
 			mp_size_t<0>,	// wrt x0
