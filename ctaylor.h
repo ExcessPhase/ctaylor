@@ -1517,6 +1517,7 @@ struct ctaylor
 			mp_size_t<MAX + 1>()\
 		);\
 	}
+	__CREATE_NONLINEAR__(lgamma)
 	__CREATE_NONLINEAR__(exp)
 	__CREATE_NONLINEAR__(log)
 	__CREATE_NONLINEAR__(log10)

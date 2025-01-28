@@ -285,5 +285,15 @@ std::array<double, SIZE> polygamma(const int _i, const double _d)
 	}
 	return s;
 }
+template<std::size_t SIZE>
+std::array<double, SIZE> lgamma(const double _d)
+{	std::array<double, SIZE> s;
+	s[0] = std::lgamma(_d);
+	const auto sPG = polygamma<SIZE-1>(0, _d);
+	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
+	for (std::size_t i = 1; i < SIZE; ++i)
+		s[i] = r[i - 1]*sPG[i - 1];
+	return s;
+}
 }
 }
