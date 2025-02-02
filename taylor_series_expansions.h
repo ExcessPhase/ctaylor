@@ -29,19 +29,24 @@ template<std::size_t SIZE>
 std::array<double, SIZE> exp(double _d)
 {	std::array<double, SIZE> s;
 	double d = std::exp(_d);
-#if 1
 	s[0] = d;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
 	for (std::size_t i = 1; i < SIZE; ++i)
 	{	d *= r[i - 1];
 		s[i] = d;
 	}
-#else
-	for (std::size_t i = 0; i < SIZE; ++i)
-	{	s[i] = d;
-		d /= i + 1;
+	return s;
+}
+template<std::size_t SIZE>
+std::array<double, SIZE> expm1(double _d)
+{	std::array<double, SIZE> s;
+	double d = std::exp(_d);
+	s[0] = d - 1.0;
+	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
+	for (std::size_t i = 1; i < SIZE; ++i)
+	{	d *= r[i - 1];
+		s[i] = d;
 	}
-#endif
 	return s;
 }
 static const auto s_dLog2 = std::log(2.0);

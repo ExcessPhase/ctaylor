@@ -653,6 +653,10 @@ struct cjacobian
 	{	const auto d = std::exp(_d);
 		return std::make_pair(d, d);
 	}
+	static doublePair expm1_(const double _d)
+	{	const auto d = std::exp(_d);
+		return std::make_pair(d - 1.0, d);
+	}
 #if defined(__GNUC__) && !defined(__clang__)
 	static constexpr double s_dLog2 = std::log(2.0);
 #else
@@ -875,6 +879,7 @@ struct cjacobian
 	__create__(erfc)
 	__create__(erf)
 	__create__(sqrt)
+	__create__(expm1)
 	__create__(exp2)
 	__create__(log2)
 	__create__(exp)
