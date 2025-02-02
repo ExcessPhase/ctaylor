@@ -11,6 +11,12 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
+Implemented the following functions:
+	- exp2()
+	- log2()
+	- isinf() -- returning if any value or derivative is infinite
+	- expm1()
+	- log1p()
 Implemented tgamma() and polygamma().
 
 Fixed undefined symbols which occured only for debug builds due to missing out-of-class definition of various static value objects.
