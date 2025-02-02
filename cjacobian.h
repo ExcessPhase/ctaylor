@@ -666,6 +666,9 @@ struct cjacobian
 	{	const auto d = std::exp2(_d);
 		return std::make_pair(d, s_dLog2*d);
 	}
+	static doublePair log1p_(const double _d)
+	{	return std::make_pair(std::log1p(_d), 1.0/(1.0 + _d));
+	}
 	static doublePair log_(const double _d)
 	{	return std::make_pair(std::log(_d), 1.0/_d);
 	}
@@ -880,6 +883,7 @@ struct cjacobian
 	__create__(erf)
 	__create__(sqrt)
 	__create__(expm1)
+	__create__(log1p)
 	__create__(exp2)
 	__create__(log2)
 	__create__(exp)

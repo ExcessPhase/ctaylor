@@ -89,6 +89,20 @@ std::array<double, SIZE> log(const double _d)
 	}
 	return s;
 }
+template<std::size_t SIZE>
+std::array<double, SIZE> log1p(const double _d)
+{	std::array<double, SIZE> s;
+	const double d1 = 1.0/(1.0 + _d);
+	double d = d1;
+	s[0] = std::log1p(_d);
+	s[1] = d;
+	auto &r = n_p_1_divided_by_n_p_2<SIZE - 2>::type::value;
+	for (std::size_t i = 2; i < SIZE; ++i)
+	{	d *= -d1*r[i - 2];
+		s[i] = d;
+	}
+	return s;
+}
 static const auto s_dInvLog10 = 1.0/std::log(10.0);
 template<std::size_t SIZE>
 std::array<double, SIZE> log10(const double _d)
