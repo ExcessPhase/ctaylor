@@ -44,6 +44,20 @@ std::array<double, SIZE> exp(double _d)
 #endif
 	return s;
 }
+static const auto s_dLog2 = std::log(2.0);
+template<std::size_t SIZE>
+std::array<double, SIZE> exp2(double _d)
+{	std::array<double, SIZE> s;
+	double d = std::exp2(_d);
+	s[0] = d;
+	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
+	for (std::size_t i = 1; i < SIZE; ++i)
+	{	d *= r[i - 1];
+		d *= s_dLog2;
+		s[i] = d;
+	}
+	return s;
+}
 template<typename>
 struct n_p_1_divided_by_n_p_2_impl;
 template<std::size_t ...POS>
@@ -61,7 +75,6 @@ std::array<double, SIZE> log(const double _d)
 {	std::array<double, SIZE> s;
 	const double d1 = 1.0/_d;
 	double d = d1;
-#if 1
 	s[0] = std::log(_d);
 	s[1] = d;
 	auto &r = n_p_1_divided_by_n_p_2<SIZE - 2>::type::value;
@@ -69,22 +82,14 @@ std::array<double, SIZE> log(const double _d)
 	{	d *= -d1*r[i - 2];
 		s[i] = d;
 	}
-#else
-	s[0] = std::log(_d);
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	s[i] = d;
-		d *= -d1*i/(i + 1);
-	}
-#endif
 	return s;
 }
-static const auto s_dLog10 = 1.0/std::log(10.0);
+static const auto s_dInvLog10 = 1.0/std::log(10.0);
 template<std::size_t SIZE>
 std::array<double, SIZE> log10(const double _d)
 {	std::array<double, SIZE> s;
 	const double d1 = 1.0/_d;
-	double d = d1*s_dLog10;
-#if 1
+	double d = d1*s_dInvLog10;
 	s[0] = std::log10(_d);
 	s[1] = d;
 	auto &r = n_p_1_divided_by_n_p_2<SIZE - 2>::type::value;
@@ -92,13 +97,21 @@ std::array<double, SIZE> log10(const double _d)
 	{	d *= -d1*r[i - 2];
 		s[i] = d;
 	}
-#else
-	s[0] = std::log10(_d);
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	s[i] = d;
-		d *= -d1*i/(i + 1);
+	return s;
+}
+static const auto s_dInvLog2 = 1.0/std::log(2.0);
+template<std::size_t SIZE>
+std::array<double, SIZE> log2(const double _d)
+{	std::array<double, SIZE> s;
+	const double d1 = 1.0/_d;
+	double d = d1*s_dInvLog2;
+	s[0] = std::log2(_d);
+	s[1] = d;
+	auto &r = n_p_1_divided_by_n_p_2<SIZE - 2>::type::value;
+	for (std::size_t i = 2; i < SIZE; ++i)
+	{	d *= -d1*r[i - 2];
+		s[i] = d;
 	}
-#endif
 	return s;
 }
 template<std::size_t SIZE>

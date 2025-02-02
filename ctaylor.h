@@ -1519,6 +1519,8 @@ struct ctaylor
 	}
 	__CREATE_NONLINEAR__(lgamma)
 	__CREATE_NONLINEAR__(exp)
+	__CREATE_NONLINEAR__(exp2)
+	__CREATE_NONLINEAR__(log2)
 	__CREATE_NONLINEAR__(log)
 	__CREATE_NONLINEAR__(log10)
 	__CREATE_NONLINEAR__(sqrt)

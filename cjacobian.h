@@ -653,6 +653,15 @@ struct cjacobian
 	{	const auto d = std::exp(_d);
 		return std::make_pair(d, d);
 	}
+#if defined(__GNUC__) && !defined(__clang__)
+	static constexpr double s_dLog2 = std::log(2.0);
+#else
+	static const double s_dLog2;
+#endif
+	static doublePair exp2_(const double _d)
+	{	const auto d = std::exp2(_d);
+		return std::make_pair(d, s_dLog2*d);
+	}
 	static doublePair log_(const double _d)
 	{	return std::make_pair(std::log(_d), 1.0/_d);
 	}
@@ -673,6 +682,9 @@ struct cjacobian
 #endif
 	static doublePair log10_(const double _d)
 	{	return std::make_pair(std::log10(_d), 1.0/(s_dLog10*_d));
+	}
+	static doublePair log2_(const double _d)
+	{	return std::make_pair(std::log2(_d), 1.0/(s_dLog2*_d));
 	}
 	static doublePair sqrt_(const double _d)
 	{	const auto d = std::sqrt(_d);
@@ -856,6 +868,8 @@ struct cjacobian
 	__create__(erfc)
 	__create__(erf)
 	__create__(sqrt)
+	__create__(exp2)
+	__create__(log2)
 	__create__(exp)
 	__create__(log)
 	__create__(log10)
@@ -896,6 +910,8 @@ template<typename T>
 const double cjacobian<T>::s_dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
 template<typename VECTOR>
 const double cjacobian<VECTOR>::s_dLog10 = std::log(10.0);
+template<typename VECTOR>
+const double cjacobian<VECTOR>::s_dLog2 = std::log(2.0);
 #endif
 template<typename A, typename B>
 struct common_type
