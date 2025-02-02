@@ -1808,6 +1808,13 @@ struct ctaylor
 	friend bool operator>=(const double _d, const ctaylor&_r)
 	{	return _d >= value(_r);
 	}
+	friend bool isinf(const ctaylor&_r)
+	{	return std::any_of(
+			_r.m_s.begin(),
+			_r.m_s.end(),
+			static_cast<bool(*)(double)>(&std::isinf)
+		);
+	}
 	friend bool isnan(const ctaylor&_r)
 	{	return std::any_of(
 			_r.m_s.begin(),

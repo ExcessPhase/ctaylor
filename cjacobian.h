@@ -707,6 +707,13 @@ struct cjacobian
 			static_cast<bool(*)(double)>(&std::isnan)
 		);
 	}
+	friend bool isinf(const cjacobian&_r)
+	{	return std::any_of(
+			_r.m_s.begin(),
+			_r.m_s.end(),
+			static_cast<bool(*)(double)>(&std::isinf)
+		);
+	}
 	friend bool isfinite(const cjacobian&_r)
 	{	return std::all_of(
 			_r.m_s.begin(),
