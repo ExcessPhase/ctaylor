@@ -37,7 +37,7 @@ std::array<double, SIZE> exp(double _d)
 		s.cbegin(),
 		std::next(s.begin()),
 		[](const double _dR, const double _dD)
-		{       return _dR*_dD;
+		{	return _dR*_dD;
 		}
 	);
 	return s;
@@ -54,7 +54,7 @@ std::array<double, SIZE> expm1(double _d)
 		s.cbegin(),
 		std::next(s.begin()),
 		[](const double _dR, const double _dD)
-		{       return _dR*_dD;
+		{	return _dR*_dD;
 		}
 	);
 	s[0] -= 1.0;
@@ -73,7 +73,7 @@ std::array<double, SIZE> exp2(double _d)
 		s.cbegin(),
 		std::next(s.begin()),
 		[](const double _dR, const double _dD)
-		{       return _dR*_dD*s_dLog2;
+		{	return _dR*_dD*s_dLog2;
 		}
 	);
 	return s;
@@ -104,7 +104,7 @@ std::array<double, SIZE> log(const double _d)
 		s.cbegin() + 1,
 		s.begin() + 2,
 		[d1](const double _dR, const double _dD)
-		{       return -d1*_dR*_dD;
+		{	return -d1*_dR*_dD;
 		}
 	);
 	return s;
