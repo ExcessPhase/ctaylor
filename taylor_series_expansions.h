@@ -22,7 +22,7 @@ struct divide_by_n_p_1
 template<std::size_t SIZE>
 std::array<double, SIZE> exp(double _d)
 {	std::array<double, SIZE> s;
-	double d = std::exp(_d);
+	const double d = std::exp(_d);
 	s[0] = d;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
 	std::transform(
