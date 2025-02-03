@@ -11,6 +11,8 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
+Added CMakeLists.txt
+
 Implemented the following functions:
 - exp2()
 - log2()
