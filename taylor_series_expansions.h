@@ -95,8 +95,8 @@ std::array<double, SIZE> log(const double _d)
 	std::transform(
 		r.cbegin(),
 		r.cend(),
-		s.cbegin() + 1,
-		s.begin() + 2,
+		std::next(s.cbegin()),
+		std::next(s.begin(), 2),
 		[d1](const double _dR, const double _dD)
 		{	return -d1*_dR*_dD;
 		}
@@ -113,8 +113,8 @@ std::array<double, SIZE> log1p(const double _d)
 	std::transform(
 		r.cbegin(),
 		r.cend(),
-		s.cbegin() + 1,
-		s.begin() + 2,
+		std::next(s.cbegin()),
+		std::next(s.begin(), 2),
 		[d1](const double _dR, const double _dD)
 		{	return -d1*_dR*_dD;
 		}
