@@ -56,23 +56,15 @@ std::array<double, SIZE> exp2(double _d)
 	double d = std::exp2(_d);
 	s[0] = d;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-#if 1
 	std::transform(
 		r.cbegin(),
 		r.cend(),
 		s.begin(),
 		std::next(s.begin()),
-		[d](const double _dR, const double _dD)
+		[](const double _dR, const double _dD)
 		{       return _dR*_dD*s_dLog2;
 		}
 	);
-#else
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	d *= r[i - 1];
-		d *= s_dLog2;
-		s[i] = d;
-	}
-#endif
 	return s;
 }
 template<typename>
