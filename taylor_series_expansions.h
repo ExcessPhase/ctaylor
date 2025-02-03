@@ -31,7 +31,6 @@ std::array<double, SIZE> exp(double _d)
 	double d = std::exp(_d);
 	s[0] = d;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-#if 1
 	std::transform(
 		r.cbegin(),
 		r.cend(),
@@ -41,24 +40,24 @@ std::array<double, SIZE> exp(double _d)
 		{       return _dR*_dD;
 		}
 	);
-#else
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	d *= r[i - 1];
-		s[i] = d;
-	}
-#endif
 	return s;
 }
 template<std::size_t SIZE>
 std::array<double, SIZE> expm1(double _d)
 {	std::array<double, SIZE> s;
 	double d = std::exp(_d);
-	s[0] = d - 1.0;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	d *= r[i - 1];
-		s[i] = d;
-	}
+	s[0] = d;
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		s.cbegin(),
+		std::next(s.begin()),
+		[](const double _dR, const double _dD)
+		{       return _dR*_dD;
+		}
+	);
+	s[0] -= 1.0;
 	return s;
 }
 static const auto s_dLog2 = std::log(2.0);
