@@ -1,0 +1,35 @@
+name: vcpkg Dependency Update
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Weekly update, every Monday at midnight
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          ./vcpkg/bootstrap-vcpkg.sh
+      
+      - name: Update dependencies
+        run: |
+          ./vcpkg/vcpkg install
+          ./vcpkg/vcpkg upgrade
+      
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m 'Update vcpkg dependencies'
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
