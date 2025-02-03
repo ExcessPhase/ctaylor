@@ -31,10 +31,22 @@ std::array<double, SIZE> exp(double _d)
 	double d = std::exp(_d);
 	s[0] = d;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
+#if 1
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		s.cbegin(),
+		std::next(s.begin()),
+		[](const double _dR, const double _dD)
+		{       return _dR*_dD;
+		}
+	);
+#else
 	for (std::size_t i = 1; i < SIZE; ++i)
 	{	d *= r[i - 1];
 		s[i] = d;
 	}
+#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -59,7 +71,7 @@ std::array<double, SIZE> exp2(double _d)
 	std::transform(
 		r.cbegin(),
 		r.cend(),
-		s.begin(),
+		s.cbegin(),
 		std::next(s.begin()),
 		[](const double _dR, const double _dD)
 		{       return _dR*_dD*s_dLog2;
