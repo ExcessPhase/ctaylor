@@ -29,7 +29,7 @@ namespace implementation
 template<std::size_t POS, typename ...ARGS>
 std::ostream& printTuple(std::ostream&_rS, const std::tuple<ARGS...>&_r, const std::integral_constant<std::size_t, POS>&);
 template<typename ...ARGS>
-std::ostream &operator<<(std::ostream&_rS,  const std::tuple<ARGS...>&_r)
+std::ostream &operator<<(std::ostream&_rS, const std::tuple<ARGS...>&_r)
 {	_rS << "(";
 	printTuple(_rS, _r, std::tuple_size<std::tuple<ARGS...> >());
 	return _rS << ")";
@@ -41,7 +41,7 @@ std::ostream& printTuple(std::ostream&_rS, const std::tuple<ARGS...>&, const std
 template<std::size_t POSM1, typename ...ARGS>
 std::ostream& printTuple(std::ostream&_rS, const std::tuple<ARGS...>&_r, const std::integral_constant<std::size_t, POSM1>&)
 {	_rS << std::get<std::tuple_size<std::tuple<ARGS...> >::value - POSM1>(_r) << ",";
-	return printTuple(_rS, _r,  std::integral_constant<std::size_t, POSM1 - 1>());
+	return printTuple(_rS, _r, std::integral_constant<std::size_t, POSM1 - 1>());
 }
 template<typename SIZE>
 struct getTypeFromSize;
