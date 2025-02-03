@@ -126,14 +126,25 @@ template<std::size_t SIZE>
 std::array<double, SIZE> log10(const double _d)
 {	std::array<double, SIZE> s;
 	const double d1 = 1.0/_d;
-	double d = d1*s_dInvLog10;
 	s[0] = std::log10(_d);
-	s[1] = d;
+	s[1] = d1*s_dInvLog10;
 	auto &r = n_p_1_divided_by_n_p_2<SIZE - 2>::type::value;
+#if 1
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		std::next(s.cbegin()),
+		std::next(s.begin(), 2),
+		[d1](const double _dR, const double _dD)
+		{	return -d1*_dR*_dD;
+		}
+	);
+#else
 	for (std::size_t i = 2; i < SIZE; ++i)
 	{	d *= -d1*r[i - 2];
 		s[i] = d;
 	}
+#endif
 	return s;
 }
 static const auto s_dInvLog2 = 1.0/std::log(2.0);
