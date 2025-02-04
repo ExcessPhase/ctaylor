@@ -19,6 +19,28 @@ template<std::size_t SIZE>
 struct divide_by_n_p_1
 {	typedef divide_by_n_p_1_impl<std::make_index_sequence<SIZE> > type;
 };
+template<std::size_t N>
+struct inverseFactorial;
+template<typename>
+struct inverseFactorialArrayImpl;
+template<std::size_t ...ARGS>
+struct inverseFactorialArrayImpl<std::index_sequence<ARGS...> >
+{	static constexpr const std::array<double, sizeof...(ARGS)> value = {inverseFactorial<ARGS>::value...};
+};
+template<std::size_t ...ARGS>
+constexpr const std::array<double, sizeof...(ARGS)> inverseFactorialArrayImpl<std::index_sequence<ARGS...> >::value;
+template<std::size_t N>
+struct inverseFactorialArray
+{	typedef inverseFactorialArrayImpl<std::make_index_sequence<N> > type;
+};
+template<std::size_t N>
+struct inverseFactorial
+{	static constexpr const double value = inverseFactorial<N-1>::value/N;
+};
+template<>
+struct inverseFactorial<0>
+{	static constexpr const double value = 1.0;
+};
 template<std::size_t SIZE>
 std::array<double, SIZE> exp(double _d)
 {	std::array<double, SIZE> s;
@@ -178,18 +200,27 @@ std::array<double, SIZE> sin(const double _d)
 {	std::array<double, SIZE> s;
 	const double ds = std::sin(_d);
 	const double dc = std::cos(_d);
-	double d = 1.0;
 	//0=sin
 	//1=cos
 	//2=-sin
 	//3=-cos
 	//4=0
-	s[0] = ds;
-	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	d *= r[i - 1];
-		s[i] = (i & 1 ? i & 2 ? -dc : dc : i & 2 ? -ds : ds)*d;
-	}
+	//auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
+	auto &r = inverseFactorialArray<SIZE>::type::value;
+#if 1
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		s.begin(),
+		[&](const double &_dR)
+		{	const auto i = &_dR - r.data();
+			return (i & 1 ? i & 2 ? -dc : dc : i & 2 ? -ds : ds)*_dR;
+		}
+	);
+#else
+	for (std::size_t i = 0; i < SIZE; ++i)
+		s[i] = (i & 1 ? i & 2 ? -dc : dc : i & 2 ? -ds : ds)*r[i];
+#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -197,6 +228,18 @@ std::array<double, SIZE> cos(const double _d)
 {	std::array<double, SIZE> s;
 	const double ds = std::sin(_d);
 	const double dc = std::cos(_d);
+#if 1
+	auto &r = inverseFactorialArray<SIZE>::type::value;
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		s.begin(),
+		[&](const double &_dR)
+		{	const auto i = &_dR - r.data();
+			return (i & 1 ? i & 2 ? ds : -ds : i & 2 ? -dc : dc)*_dR;
+		}
+	);
+#else
 	double d = 1.0;
 	//0=cos
 	//1=-sin
@@ -209,6 +252,7 @@ std::array<double, SIZE> cos(const double _d)
 	{	d *= r[i - 1];
 		s[i] = (i & 1 ? i & 2 ? ds : -ds : i & 2 ? -dc: dc)*d;
 	}
+#endif
 	return s;
 }
 template<std::size_t SIZE>
