@@ -14,29 +14,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake
+    - name: Set up vcpkg
+      uses: lukka/get-cmake@v3
+      with:
+        vcpkgArgs: 'boost'
 
     - name: Build
       run: |
         mkdir build
         cd build
-        cmake .. 2>&1 | tee cmake_output.log
-        make 2>&1 | tee make_output.log
+        cmake -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+        make
 
     - name: Run tests
       run: |
         cd build
-        ctest 2>&1 | tee ctest_output.log
-
-    - name: Show build logs
-      if: always()
-      run: |
-        echo "CMake Output:"
-        cat build/cmake_output.log
-        echo "Make Output:"
-        cat build/make_output.log
-        echo "CTest Output:"
-        cat build/ctest_output.log
+        ctest
