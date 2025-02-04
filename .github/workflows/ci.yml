@@ -18,7 +18,7 @@ jobs:
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         ./vcpkg/bootstrap-vcpkg.sh
-        ./vcpkg/vcpkg install boost
+        ./vcpkg/vcpkg install --feature-flags=manifests
 
     - name: Build
       run: |
