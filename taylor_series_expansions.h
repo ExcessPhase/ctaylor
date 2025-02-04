@@ -381,8 +381,20 @@ std::array<double, SIZE> lgamma(const double _d)
 	s[0] = std::lgamma(_d);
 	const auto sPG = polygamma<SIZE-1>(0, _d);
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
+#if 1
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		sPG.cbegin(),
+		std::next(s.begin()),
+		[](const auto _dR, const double _dPG)
+		{	return _dR*_dPG;
+		}
+	);
+#else
 	for (std::size_t i = 1; i < SIZE; ++i)
 		s[i] = r[i - 1]*sPG[i - 1];
+#endif
 	return s;
 }
 }
