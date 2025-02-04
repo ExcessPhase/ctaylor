@@ -260,6 +260,18 @@ std::array<double, SIZE> sinh(const double _d)
 {	std::array<double, SIZE> s;
 	const double ds = std::sinh(_d);
 	const double dc = std::cosh(_d);
+#if 1
+	auto &r = inverseFactorialArray<SIZE>::type::value;
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		s.begin(),
+		[&](const double &_dR)
+		{	const auto i = &_dR - r.data();
+			return (i & 1 ? dc : ds)*_dR;
+		}
+	);
+#else
 	double d = 1.0;
 	s[0] = ds;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
@@ -267,6 +279,7 @@ std::array<double, SIZE> sinh(const double _d)
 	{	d *= r[i - 1];
 		s[i] = (i & 1 ? dc : ds)*d;
 	}
+#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -274,6 +287,18 @@ std::array<double, SIZE> cosh(const double _d)
 {	std::array<double, SIZE> s;
 	const double ds = std::sinh(_d);
 	const double dc = std::cosh(_d);
+#if 1
+	auto &r = inverseFactorialArray<SIZE>::type::value;
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		s.begin(),
+		[&](const double &_dR)
+		{	const auto i = &_dR - r.data();
+			return (i & 1 ? ds : dc)*_dR;
+		}
+	);
+#else
 	double d = 1.0;
 	s[0] = dc;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
@@ -281,6 +306,7 @@ std::array<double, SIZE> cosh(const double _d)
 	{	d *= r[i - 1];
 		s[i] = (i & 1 ? ds : dc)*d;
 	}
+#endif
 	return s;
 }
 template<std::size_t SIZE>
