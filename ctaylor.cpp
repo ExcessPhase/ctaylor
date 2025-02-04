@@ -12,8 +12,8 @@ int main(int argc, char**argv)
 	static constexpr std::size_t MAX = 2;
 	if (argc != 6)
 	{	std::cerr << argv[0] << ": missing arguments -- must be 4 floating point numbers and one integer!" << std::endl;
-		std::cerr << argv[0] << ": with chainrule: " << argv[0] << " 1.2 1.3 1.4 1.5 1" << std::endl;
-		std::cerr << argv[0] << ": without chainrule: " << argv[0] << " 1.2 1.3 1.4 1.5 0" << std::endl;
+		std::cerr << argv[0] << ": with testing -= and +=: " << argv[0] << " 1.2 1.3 1.4 1.5 1" << std::endl;
+		std::cerr << argv[0] << ": without testing -= and +=: " << argv[0] << " 1.2 1.3 1.4 1.5 0" << std::endl;
 		return 1;
 	}
 		/// create an independent variable for x0 (this is what the unused boolean is for)

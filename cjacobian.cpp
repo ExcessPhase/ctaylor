@@ -7,8 +7,8 @@ int main(int argc, char**argv)
 
 	if (argc != 6)
 	{	std::cerr << argv[0] << ": Need 4 floating point arguments and one integer!" << std::endl;
-		std::cerr << argv[0] << ": with chainrule: " << argv[0] << " 1.2 1.3 1.4 1.5 1" << std::endl;
-		std::cerr << argv[0] << ": without chainrule: " << argv[0] << " 1.2 1.3 1.4 1.5 0" << std::endl;
+		std::cerr << argv[0] << ": with testing -= and +=: " << argv[0] << " 1.2 1.3 1.4 1.5 1" << std::endl;
+		std::cerr << argv[0] << ": without testing -= and +=: " << argv[0] << " 1.2 1.3 1.4 1.5 0" << std::endl;
 		return 1;
 	}
 	const cjacobian<mp_list<mp_size_t<0> > > s0(std::atof(argv[1]), true);
