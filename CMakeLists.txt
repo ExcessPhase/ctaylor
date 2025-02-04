@@ -1,19 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
-project(ctaylor VERSION 1.0 LANGUAGES CXX)
+project(MyProject)
 
-# Ensure C++11 standard or higher is used
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Find the Boost libraries
-find_package(Boost REQUIRED COMPONENTS filesystem system)
-
-if(NOT Boost_FOUND)
-    message(FATAL_ERROR "Boost libraries not found!")
+# Check for Boost
+if(NOT DEFINED ENV{BOOST_ROOT})
+    message(FATAL_ERROR "BOOST_ROOT is not set")
+else()
+    set(BOOST_ROOT $ENV{BOOST_ROOT})
 endif()
 
-# Include Boost headers
-include_directories(${Boost_INCLUDE_DIRS})
+find_package(Boost REQUIRED)
+include_directories(${BOOST_ROOT}/include)
 
 # Source files
 set(TEST_SOURCES
@@ -58,32 +54,27 @@ add_executable(vbic95Taylor VBIC95/VBIC95.cpp LUFAC/lufac.cpp)
 add_executable(black_scholes BLACK_SCHOLES/autodiff_black_scholes.cpp)
 add_executable(black_scholes_orig BLACK_SCHOLES/autodiff_black_scholes_orig.cpp)
 add_executable(logistic_regression logistic_regression/logistic_regression.cpp)
-add_executable(test_exe ${TEST_SOURCES})
+add_executable(test_exe ${TEST_SOURCES})  # Renaming the target to avoid issues
 
-# Include directories
-target_include_directories(ctaylor PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(vbic95Jac PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(vbic95Taylor PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(black_scholes PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(black_scholes_orig PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(logistic_regression PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(test_exe PRIVATE ${Boost_INCLUDE_DIRS})
+# Custom clean target
+add_custom_target(clean_all
+    COMMAND ${CMAKE_COMMAND} -E rm -f $(OBJECTS)
+    COMMAND ${CMAKE_COMMAND} -E rm -f ctaylor.exe vbic95Jac.exe vbic95Taylor.exe black_scholes.exe cjacobian.exe black_scholes_orig.exe logistic_regression.exe test_exe
+)
 
-# Link Boost libraries
+# Include directories and libraries
+target_include_directories(ctaylor PRIVATE ${BOOST_ROOT}/include)
+target_include_directories(vbic95Jac PRIVATE ${BOOST_ROOT}/include)
+target_include_directories(vbic95Taylor PRIVATE ${BOOST_ROOT}/include)
+target_include_directories(black_scholes PRIVATE ${BOOST_ROOT}/include)
+target_include_directories(black_scholes_orig PRIVATE ${BOOST_ROOT}/include)
+target_include_directories(logistic_regression PRIVATE ${BOOST_ROOT}/include)
+target_include_directories(test_exe PRIVATE ${BOOST_ROOT}/include)  # Updated target name
+
 target_link_libraries(ctaylor ${Boost_LIBRARIES})
 target_link_libraries(vbic95Jac ${Boost_LIBRARIES})
 target_link_libraries(vbic95Taylor ${Boost_LIBRARIES})
 target_link_libraries(black_scholes ${Boost_LIBRARIES})
 target_link_libraries(black_scholes_orig ${Boost_LIBRARIES})
 target_link_libraries(logistic_regression ${Boost_LIBRARIES})
-target_link_libraries(test_exe ${Boost_LIBRARIES})
-
-# Optionally, add include directories for your own headers
-target_include_directories(ctaylor PRIVATE include)
-# Repeat for other targets as needed
-
-# Enable testing
-enable_testing()
-
-# Add tests if any (adjust accordingly)
-add_test(NAME ctaylor_test COMMAND ctaylor)
+target_link_libraries(test_exe ${Boost_LIBRARIES})  # Updated target name

@@ -1,0 +1,19 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name": "ctaylor",
+    "version-string": "1.0.0",
+    "dependencies": [
+        {
+            "name": "boost",
+            "version>=": "1.86.0"
+        }
+    ],
+    "builtin-baseline": "abcdef1234567890abcdef1234567890abcdef12",
+    "description": "ctaylor project with a dependency on Boost library",
+    "documentation": "https://github.com/ExcessPhase/ctaylor",
+    "homepage": "https://github.com/ExcessPhase/ctaylor",
+    "license": "MIT",
+    "maintainers": [
+        "Peter Foelsche <peter_foelsche@outlook.com>"
+    ]
+}
