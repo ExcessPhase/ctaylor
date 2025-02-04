@@ -11,6 +11,9 @@ This document describes the implementation and usage of two classes designed for
 
 ## News
 
+I attempted to get CI working, but abandoned the idea as it seems to be undocumented and unmanageable.
+Anyway, this is a header-only library and what needs to be built here, are the various examples and the test executable.
+
 Added CMakeLists.txt
 
 Implemented the following functions:
