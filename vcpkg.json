@@ -8,6 +8,7 @@
             "version>=": "1.86.0"
         }
     ],
+    "builtin-baseline": "a75ad067f470c19f030361064e32a2585392bee2",
     "description": "ctaylor project with a dependency on Boost library",
     "documentation": "https://github.com/ExcessPhase/ctaylor",
     "homepage": "https://github.com/ExcessPhase/ctaylor",
