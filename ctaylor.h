@@ -1402,11 +1402,11 @@ struct ctaylor
 	}
 	template<
 		std::size_t _MAX = MAX,
+		std::size_t PSIZE = SIZE,
 		typename std::enable_if<
 			(_MAX > 1),
 			int
-		>::type = 0,
-		std::size_t PSIZE
+		>::type = 0
 	>
 	friend auto tgamma(const ctaylor&_r, const double _d, const std::array<double, PSIZE>&_rPG)
 	{	static_assert(PSIZE >= _MAX, "PSIZE >= MAX");
@@ -1420,11 +1420,11 @@ struct ctaylor
 	}
 	template<
 		std::size_t _MAX = MAX,
+		std::size_t PSIZE = SIZE,
 		typename std::enable_if<
 			(_MAX == 1),
 			int
-		>::type = 0,
-		std::size_t PSIZE
+		>::type = 0
 	>
 	friend auto tgamma(const ctaylor&_r, const double _d, const std::array<double, PSIZE>&_rPG)
 	{	static_assert(PSIZE >= _MAX, "PSIZE >= MAX");
