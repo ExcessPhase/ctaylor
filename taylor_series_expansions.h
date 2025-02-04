@@ -314,19 +314,31 @@ std::array<double, SIZE> sqrt(const double _d)
 {	std::array<double, SIZE> s;
 	const double d0 = std::sqrt(_d);
 	const double d1 = 1.0/_d;
+	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
+	s[0] = d0;
+#if 1
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		s.cbegin(),
+		std::next(s.begin()),
+		[d1, &r](const double &_dR, const double _dP)
+		{	return _dP*d1*(0.5 - (&_dR - r.data()))*_dR;
+		}
+	);
+#else
 	double dPow = 0.5;
 	double d = d0;
 	//0=x^0.5
 	//1=0.5*x^-0.5
 	//2=-0.25*x^-1.5
 	//3=
-	s[0] = d;
-	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
 	for (std::size_t i = 1; i < SIZE; ++i)
 	{	d *= d1*dPow*r[i - 1];	// sqrt(_d)/_d*0.5, sqrt(_d)/_d*0.5/_d*-0.5
 		dPow -= 1.0;	// -0.5
 		s[i] = d;	// sqrt(_d),
 	}
+#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -334,18 +346,31 @@ std::array<double, SIZE> cbrt(const double _d)
 {	std::array<double, SIZE> s;
 	const double d0 = std::cbrt(_d);
 	const double d1 = 1.0/_d;
+	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
+	s[0] = d0;
+#if 1
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		s.cbegin(),
+		std::next(s.begin()),
+		[d1, &r](const double &_dR, const double _dP)
+		{	constexpr const auto dOneThird = 1.0/3.0;
+			return _dP*d1*(dOneThird - (&_dR - r.data()))*_dR;
+		}
+	);
+#else
 	double dPow = 1.0/3.0;
 	double d = d0;
 	//x^1.3
 	//pow*previous/x
 	//pow -= 1.0
-	s[0] = d;
-	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
 	for (std::size_t i = 1; i < SIZE; ++i)
 	{	d *= d1*dPow*r[i - 1];
 		dPow -= 1.0;
 		s[i] = d;
 	}
+#endif
 	return s;
 }
 template<std::size_t SIZE>
