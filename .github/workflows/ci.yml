@@ -15,9 +15,10 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up vcpkg
-      uses: lukka/get-cmake@latest
-      with:
-        vcpkgArgs: 'boost'
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        ./vcpkg/bootstrap-vcpkg.sh
+        ./vcpkg/vcpkg install boost
 
     - name: Build
       run: |
