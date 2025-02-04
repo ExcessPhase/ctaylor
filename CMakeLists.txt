@@ -85,5 +85,6 @@ target_include_directories(ctaylor PRIVATE include)
 # Enable testing
 enable_testing()
 
-# Add tests if any (adjust accordingly)
-add_test(NAME ctaylor_test COMMAND ctaylor)
+# Add test_exe as the only test and run it from the test directory
+add_test(NAME test_exe COMMAND ${CMAKE_COMMAND} -E chdir ../test ./test_exe)
+
