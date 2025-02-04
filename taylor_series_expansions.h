@@ -366,6 +366,17 @@ std::array<double, SIZE> inverse(const double _d)
 template<std::size_t SIZE>
 std::array<double, SIZE> polygamma(const int _i, const double _d)
 {	std::array<double, SIZE> s;
+#if 1
+	auto &r = inverseFactorialArray<SIZE>::type::value;
+	std::transform(
+		r.cbegin(),
+		r.cend(),
+		s.begin(),
+		[&r, _i, _d](const double &_dR)
+		{	return _dR*boost::math::polygamma(_i + (&_dR - r.data()), _d);
+		}
+	);
+#else
 	auto d = 1.0;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
 	s[0] = boost::math::polygamma(_i, _d)*d;
@@ -373,6 +384,7 @@ std::array<double, SIZE> polygamma(const int _i, const double _d)
 	{	d *= r[i-1];
 		s[i] = boost::math::polygamma(_i + i, _d)*d;
 	}
+#endif
 	return s;
 }
 template<std::size_t SIZE>
