@@ -14,20 +14,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up vcpkg
+    - name: Install Boost and Dependencies
       run: |
-        git clone https://github.com/microsoft/vcpkg.git
-        ./vcpkg/bootstrap-vcpkg.sh
-        ./vcpkg/vcpkg install --feature-flags=manifests
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake libboost-all-dev
 
     - name: Build
       run: |
         mkdir build
         cd build
-        cmake -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+        cmake ..
         make
 
-    - name: Run tests
+    - name: Run Tests
       run: |
         cd build
         ctest
