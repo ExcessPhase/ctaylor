@@ -351,16 +351,15 @@ std::array<double, SIZE> cbrt(const double _d)
 template<std::size_t SIZE>
 std::array<double, SIZE> inverse(const double _d)
 {	std::array<double, SIZE> s;
-	const double ds = 1.0/_d;
-	double d = ds;
+	const double ds = -1.0/_d;
+	double d = -1.0;
 	//f0=x^-1/0!
 	//f1=-x^-2/1!
 	//f2=2x^-3/2!
 	//f3=-6x^-4/3!
-	s[0] = d;
-	for (std::size_t i = 1; i < SIZE; ++i)
+	for (std::size_t i = 0; i < SIZE; ++i)
 	{	d *= ds;
-		s[i] = i & 1 ? -d : d;
+		s[i] = d;
 	}
 	return s;
 }
