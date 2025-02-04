@@ -23,17 +23,20 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake ..
-        make
-      continue-on-error: true
+        cmake .. 2>&1 | tee cmake_output.log
+        make 2>&1 | tee make_output.log
 
     - name: Run tests
       run: |
         cd build
-        ctest
-      continue-on-error: true
+        ctest 2>&1 | tee ctest_output.log
 
     - name: Show build logs
-      if: failure()
+      if: always()
       run: |
-        cat $(find build -type f -name '*.log')
+        echo "CMake Output:"
+        cat build/cmake_output.log
+        echo "Make Output:"
+        cat build/make_output.log
+        echo "CTest Output:"
+        cat build/ctest_output.log
