@@ -1,6 +1,7 @@
 #include "ctaylor.h"
-/// the max number of terms of a polynomial in n variables and a maximum degree of m is (n+m)!/n!/m!
-/// for n = 2 and m=4 this would be 6!/2!/4!=720/2/24=720/48=15
+/// the max number of terms of a polynomial in n variables and a maximum order of m is (n+m)!/n!/m!
+/// for m = MAX=2 and n=4 this would be 6!/2!/4!=720/2/24=720/48=15
+/// increasing maximum order MAX=m to 4 would already mean 8!/4!/4!=70
 int main(int argc, char**argv)
 {	using namespace taylor;
 	using namespace boost::mp11;
@@ -23,7 +24,10 @@ int main(int argc, char**argv)
 	const auto s2 = ctaylor<makeIndependent<2>, MAX>(std::atof(argv[3]), false);
 	const auto s3 = ctaylor<makeIndependent<3>, MAX>(std::atof(argv[4]), false);
 		/// some calculation
+		/// to create a value containing more than a single derivative
+		/// including second order cross derivatives
 	auto s4 = -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3;
+		/// testing of -= and += operators
 	if (std::atoi(argv[5]))
 	{
 		std::cerr << "s4_0=" << s4 << "\n";
@@ -34,9 +38,14 @@ int main(int argc, char**argv)
 		s4 += s2*s3;
 		std::cerr << "s4_3=" << s4 << "=" << -s0 + s1 - s2 + s1*s2 - s0*s1 + s2*s3 << "\n";
 	}
+		/// demonstration of chain-rule optimization
 	const auto s41 = s4.convert2Independent(mp_size_t<4>());
+		/// without chain=rule optimization
 	const auto s5 = fmod(s4*s4, 1.0 - s4*s4);
+		/// with chain=rule optimization
 	const auto s52 = fmod(s41*s41, 1.0 - s41*s41);
+		/// final result after back-substitution
+		/// should be identical to s5
 	const auto s51 = s52.chainRule(s4, mp_size_t<4>());
 		/// print the entire polynomial
 	std::cout << "s4=" << s4 << "\n";
@@ -46,6 +55,7 @@ int main(int argc, char**argv)
 	std::cout << "s52=" << s52 << "\n";
 		/// this is the value being printed by maxima.txt
 	std::cout << "compare to output of maxima.txt: s51=" << s51 << "\n";
+		/// demonstration on how to extract a specific derivative
 	typedef mp_list<
 		pair<
 			mp_size_t<0>,	// wrt x0
@@ -53,6 +63,7 @@ int main(int argc, char**argv)
 		>
 	> LIST_OF_PAIRS;
 	std::cout << "s5.getDer(LIST_OF_PAIRS())=" << s5.getDer(LIST_OF_PAIRS()) << "\n";
+		/// demonstration on how to extract a specific cross-derivative
 	typedef mp_list<
 			/// elements must be sorted by variable-enum
 		pair<
@@ -65,6 +76,7 @@ int main(int argc, char**argv)
 		>
 	> LIST_OF_PAIRS_2;
 	std::cout << "s5.getDer(LIST_OF_PAIRS_2())=" << s5.getDer(LIST_OF_PAIRS_2()) << "\n";
+		/// just another test of += operator
 	auto s6 = s5;
 	s6 += s0;
 	std::cout << s6 << "=" << s5 + s0 << "\n";
