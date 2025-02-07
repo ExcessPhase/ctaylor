@@ -1846,6 +1846,18 @@ struct ctaylor
 			static_cast<bool(*)(double)>(&std::isfinite)
 		);
 	}
+	friend double floor(const ctaylor&_r)
+	{	return std::floor(value(_r));
+	}
+	friend double ceil(const ctaylor&_r)
+	{	return std::ceil(value(_r));
+	}
+	friend double trunc(const ctaylor&_r)
+	{	return std::trunc(value(_r));
+	}
+	friend double round(const ctaylor&_r)
+	{	return std::round(value(_r));
+	}
 };
 #if !defined(__GNUC__) || defined(__clang__)
 template<typename T, std::size_t MAX>
