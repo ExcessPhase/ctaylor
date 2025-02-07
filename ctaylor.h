@@ -1143,8 +1143,20 @@ struct ctaylor
 		const auto d = 1.0/_r0.m_s[0];
 		s[0] = std::pow(_r0.m_s[0], _d1);	//x^n
 		auto &r = divide_by_n_p_1<MAX>::type::value;
+#if 1
+		std::transform(
+			r.cbegin(),
+			r.cend(),
+			s.cbegin(),
+			std::next(s.begin()),
+			[d, _d1, &r](const double &_dR, const double _dP)
+			{	return _dP*d*(_d1 - (&_dR - r.data()))*_dR;
+			}
+		);
+#else
 		for (std::size_t i = 1; i < MAX + 1; ++i)
 			s[i] = s[i - 1]*d*(_d1 - (i - 1))*r[i - 1];//n*x^(n - 1)
+#endif
 		return dropValue(_r0).apply(s, mp_size_t<MAX + 1>());
 	}
 #endif
