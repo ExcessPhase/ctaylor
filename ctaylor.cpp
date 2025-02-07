@@ -18,6 +18,7 @@ int main(int argc, char**argv)
 		return 1;
 	}
 		/// create an independent variable for x0 (this is what the unused boolean is for)
+		/// without the boolean argument, the derivative would be zero instead of one
 	const auto s0 = ctaylor<makeIndependent<0>, MAX>(std::atof(argv[1]), false);
 		/// create an independent variable for x1 (this is what the unused boolean is for)
 	const auto s1 = ctaylor<makeIndependent<1>, MAX>(std::atof(argv[2]), false);
