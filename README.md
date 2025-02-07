@@ -57,6 +57,39 @@ I fixed some compile time issue which prevented some projects using ctaylor.h to
 - **Header File**: `cjacobian.h`
 - **Description**: Implements a dual number class for automatic derivation of max order 1. Much simpler than `ctaylor`.
 
+## bulding the regression test and the examples
+
+This is not strictly necessary, as using these classes can be done simply by including them.
+There are 3 ways to build the examples and the regression test:
+
+- **Visual C++ 2022**: load ctaylor.sln after having set %BOOST_ROOT% and potentially having created a symbolic link called %BOOST_ROOOT%\include pointing to %BOOST_ROOT% -- see LINUX-make
+- **LINUX-make**: after having set the environment variable BOOST_ROOT to the location of the boost directory. I added a subdirectory $(BOOST_ROOT)/include, which in case of you have not let the build tool of boost (b2.exe) install itself, can simply be a symbolic link to $(BOOST_ROOT) itself -- even on Windows.
+```
+rem on windows as administrator
+cd %BOOST_ROOT%
+mklink /D include .
+```
+```
+#on LINUX
+cd $(BOOST_ROOT)
+ln -s . include
+```
+build:
+```
+cd ctaylor
+make -j$(nproc)
+cd test
+./test.exe
+```
+- **cmake**:
+```
+cd ctaylor
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --verbose -j$(nproc)
+ctest
+```
 ## Implementation Details
 
 Both implementations are sparse, carrying and calculating only potentially nonzero derivatives. Variables cannot be reused arbitrarily due to the type changing when different independent variables or derivative orders are involved. If-statements must be implemented using the `if_()` function, which supports returning tuples. The `auto` keyword should be used to allow the compiler to determine the correct type. Don't specify the the full `ctaylor`/`cjacobian` type by hand, but use `decltype()` or `jacobian::common_type` or `taylor::common_type` or best use `auto`.
