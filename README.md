@@ -62,8 +62,8 @@ I fixed some compile time issue which prevented some projects using ctaylor.h to
 This is not strictly necessary, as using these classes can be done simply by including them.
 There are 3 ways to build the examples and the regression test:
 
-- **Visual C++ 2022**: load ctaylor.sln after having set %BOOST_ROOT% and potentially having created a symbolic link called %BOOST_ROOOT%\include pointing to %BOOST_ROOT% -- see LINUX-make
-- **LINUX-make**: after having set the environment variable BOOST_ROOT to the location of the boost directory. I added a subdirectory $(BOOST_ROOT)/include, which in case of you have not let the build tool of boost (b2.exe) install itself, can simply be a symbolic link to $(BOOST_ROOT) itself -- even on Windows.
+- **Visual C++ 2022**: load `ctaylor.sln` after having set `%BOOST_ROOT%` and potentially having created a symbolic link called `%BOOST_ROOOT%\include` pointing to `%BOOST_ROOT%` -- see LINUX-make
+- **LINUX-make**: after having set the environment variable `BOOST_ROOT` to the location of the boost directory. I added a subdirectory `$(BOOST_ROOT)/include`, which in case of you have not let the build tool of boost (`b2.exe`) install the boost build, can simply be a symbolic link to `$(BOOST_ROOT)` itself -- even on Windows.
 ```
 rem on windows as administrator
 cd %BOOST_ROOT%
