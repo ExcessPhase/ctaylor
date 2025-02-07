@@ -11,6 +11,8 @@ endif()
 find_package(Boost REQUIRED)
 include_directories(${BOOST_ROOT}/include)
 
+enable_testing()
+
 # Source files
 set(TEST_SOURCES
     test/test.cpp
@@ -46,6 +48,8 @@ set(TEST_SOURCES
     test/test29.cpp
     test/test30.cpp
     test/test31.cpp
+    test/test32.cpp
+    test/test33.cpp
 )
 
 # Executable targets
@@ -56,6 +60,9 @@ add_executable(black_scholes BLACK_SCHOLES/autodiff_black_scholes.cpp)
 add_executable(black_scholes_orig BLACK_SCHOLES/autodiff_black_scholes_orig.cpp)
 add_executable(logistic_regression logistic_regression/logistic_regression.cpp)
 add_executable(test_exe ${TEST_SOURCES})  # Renaming the target to avoid issues
+add_test(NAME test_exe COMMAND test_exe)
+set_tests_properties(test_exe PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test)
+
 
 # Custom clean target
 add_custom_target(clean_all
