@@ -1173,6 +1173,9 @@ struct ctaylor
 		else
 			return _r;
 	}
+	friend auto fabs(const ctaylor&_r)
+	{	return abs(_r);
+	}
 #if defined(__GNUC__) && !defined(__clang__)
 	static constexpr double dTwoOverSqrtPi = 2.0/std::sqrt(M_PI);
 #else

@@ -872,6 +872,9 @@ struct cjacobian
 		else
 			return _r;
 	}
+	friend auto fabs(const cjacobian&_r)
+	{	return abs(_r);
+	}
 #define __create__(sin)\
 	friend cjacobian sin(const cjacobian&_r)\
 	{	return nonlinear<sin##_>(_r);\
