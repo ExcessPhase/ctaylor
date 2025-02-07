@@ -151,7 +151,6 @@ std::array<double, SIZE> log10(const double _d)
 	s[0] = std::log10(_d);
 	s[1] = d1*s_dInvLog10;
 	auto &r = n_p_1_divided_by_n_p_2<SIZE - 2>::type::value;
-#if 1
 	std::transform(
 		r.cbegin(),
 		r.cend(),
@@ -161,12 +160,6 @@ std::array<double, SIZE> log10(const double _d)
 		{	return -d1*_dR*_dD;
 		}
 	);
-#else
-	for (std::size_t i = 2; i < SIZE; ++i)
-	{	d *= -d1*r[i - 2];
-		s[i] = d;
-	}
-#endif
 	return s;
 }
 static const auto s_dInvLog2 = 1.0/std::log(2.0);
@@ -177,7 +170,6 @@ std::array<double, SIZE> log2(const double _d)
 	s[0] = std::log2(_d);
 	s[1] = d1*s_dInvLog2;
 	auto &r = n_p_1_divided_by_n_p_2<SIZE - 2>::type::value;
-#if 1
 	std::transform(
 		r.cbegin(),
 		r.cend(),
@@ -187,12 +179,6 @@ std::array<double, SIZE> log2(const double _d)
 		{	return -d1*_dR*_dD;
 		}
 	);
-#else
-	for (std::size_t i = 2; i < SIZE; ++i)
-	{	d *= -d1*r[i - 2];
-		s[i] = d;
-	}
-#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -207,7 +193,6 @@ std::array<double, SIZE> sin(const double _d)
 	//4=0
 	//auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
 	auto &r = inverseFactorialArray<SIZE>::type::value;
-#if 1
 	std::transform(
 		r.cbegin(),
 		r.cend(),
@@ -217,10 +202,6 @@ std::array<double, SIZE> sin(const double _d)
 			return (i & 1 ? i & 2 ? -dc : dc : i & 2 ? -ds : ds)*_dR;
 		}
 	);
-#else
-	for (std::size_t i = 0; i < SIZE; ++i)
-		s[i] = (i & 1 ? i & 2 ? -dc : dc : i & 2 ? -ds : ds)*r[i];
-#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -228,7 +209,6 @@ std::array<double, SIZE> cos(const double _d)
 {	std::array<double, SIZE> s;
 	const double ds = std::sin(_d);
 	const double dc = std::cos(_d);
-#if 1
 	auto &r = inverseFactorialArray<SIZE>::type::value;
 	std::transform(
 		r.cbegin(),
@@ -239,20 +219,6 @@ std::array<double, SIZE> cos(const double _d)
 			return (i & 1 ? i & 2 ? ds : -ds : i & 2 ? -dc : dc)*_dR;
 		}
 	);
-#else
-	double d = 1.0;
-	//0=cos
-	//1=-sin
-	//2=-cos
-	//3=sin
-	//4=0
-	s[0] = dc;
-	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	d *= r[i - 1];
-		s[i] = (i & 1 ? i & 2 ? ds : -ds : i & 2 ? -dc: dc)*d;
-	}
-#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -260,7 +226,6 @@ std::array<double, SIZE> sinh(const double _d)
 {	std::array<double, SIZE> s;
 	const double ds = std::sinh(_d);
 	const double dc = std::cosh(_d);
-#if 1
 	auto &r = inverseFactorialArray<SIZE>::type::value;
 	std::transform(
 		r.cbegin(),
@@ -271,15 +236,6 @@ std::array<double, SIZE> sinh(const double _d)
 			return (i & 1 ? dc : ds)*_dR;
 		}
 	);
-#else
-	double d = 1.0;
-	s[0] = ds;
-	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	d *= r[i - 1];
-		s[i] = (i & 1 ? dc : ds)*d;
-	}
-#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -287,7 +243,6 @@ std::array<double, SIZE> cosh(const double _d)
 {	std::array<double, SIZE> s;
 	const double ds = std::sinh(_d);
 	const double dc = std::cosh(_d);
-#if 1
 	auto &r = inverseFactorialArray<SIZE>::type::value;
 	std::transform(
 		r.cbegin(),
@@ -298,15 +253,6 @@ std::array<double, SIZE> cosh(const double _d)
 			return (i & 1 ? ds : dc)*_dR;
 		}
 	);
-#else
-	double d = 1.0;
-	s[0] = dc;
-	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	d *= r[i - 1];
-		s[i] = (i & 1 ? ds : dc)*d;
-	}
-#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -316,7 +262,6 @@ std::array<double, SIZE> sqrt(const double _d)
 	const double d1 = 1.0/_d;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
 	s[0] = d0;
-#if 1
 	std::transform(
 		r.cbegin(),
 		r.cend(),
@@ -326,19 +271,6 @@ std::array<double, SIZE> sqrt(const double _d)
 		{	return _dP*d1*(0.5 - (&_dR - r.data()))*_dR;
 		}
 	);
-#else
-	double dPow = 0.5;
-	double d = d0;
-	//0=x^0.5
-	//1=0.5*x^-0.5
-	//2=-0.25*x^-1.5
-	//3=
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	d *= d1*dPow*r[i - 1];	// sqrt(_d)/_d*0.5, sqrt(_d)/_d*0.5/_d*-0.5
-		dPow -= 1.0;	// -0.5
-		s[i] = d;	// sqrt(_d),
-	}
-#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -348,7 +280,6 @@ std::array<double, SIZE> cbrt(const double _d)
 	const double d1 = 1.0/_d;
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
 	s[0] = d0;
-#if 1
 	std::transform(
 		r.cbegin(),
 		r.cend(),
@@ -359,39 +290,38 @@ std::array<double, SIZE> cbrt(const double _d)
 			return _dP*d1*(dOneThird - (&_dR - r.data()))*_dR;
 		}
 	);
-#else
-	double dPow = 1.0/3.0;
-	double d = d0;
-	//x^1.3
-	//pow*previous/x
-	//pow -= 1.0
-	for (std::size_t i = 1; i < SIZE; ++i)
-	{	d *= d1*dPow*r[i - 1];
-		dPow -= 1.0;
-		s[i] = d;
-	}
-#endif
 	return s;
 }
 template<std::size_t SIZE>
 std::array<double, SIZE> inverse(const double _d)
 {	std::array<double, SIZE> s;
 	const double ds = -1.0/_d;
-	double d = -1.0;
 	//f0=x^-1/0!
 	//f1=-x^-2/1!
 	//f2=2x^-3/2!
 	//f3=-6x^-4/3!
+#if 1
+	s[0] = -ds;
+	std::transform(
+		s.cbegin(),
+		std::prev(s.cend()),
+		std::next(s.begin()),
+		[ds](const double _d)
+		{	return ds*_d;
+		}
+	);
+#else
+	double d = -1.0;
 	for (std::size_t i = 0; i < SIZE; ++i)
 	{	d *= ds;
 		s[i] = d;
 	}
+#endif
 	return s;
 }
 template<std::size_t SIZE>
 std::array<double, SIZE> polygamma(const int _i, const double _d)
 {	std::array<double, SIZE> s;
-#if 1
 	auto &r = inverseFactorialArray<SIZE>::type::value;
 	std::transform(
 		r.cbegin(),
@@ -401,15 +331,6 @@ std::array<double, SIZE> polygamma(const int _i, const double _d)
 		{	return _dR*boost::math::polygamma(_i + (&_dR - r.data()), _d);
 		}
 	);
-#else
-	auto d = 1.0;
-	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-	s[0] = boost::math::polygamma(_i, _d)*d;
-	for (int i = 1; i < SIZE; ++i)
-	{	d *= r[i-1];
-		s[i] = boost::math::polygamma(_i + i, _d)*d;
-	}
-#endif
 	return s;
 }
 template<std::size_t SIZE>
@@ -418,7 +339,6 @@ std::array<double, SIZE> lgamma(const double _d)
 	s[0] = std::lgamma(_d);
 	const auto sPG = polygamma<SIZE-1>(0, _d);
 	auto &r = divide_by_n_p_1<SIZE - 1>::type::value;
-#if 1
 	std::transform(
 		r.cbegin(),
 		r.cend(),
@@ -428,10 +348,6 @@ std::array<double, SIZE> lgamma(const double _d)
 		{	return _dR*_dPG;
 		}
 	);
-#else
-	for (std::size_t i = 1; i < SIZE; ++i)
-		s[i] = r[i - 1]*sPG[i - 1];
-#endif
 	return s;
 }
 }

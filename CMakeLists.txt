@@ -45,6 +45,7 @@ set(TEST_SOURCES
     test/test28.cpp
     test/test29.cpp
     test/test30.cpp
+    test/test31.cpp
 )
 
 # Executable targets
