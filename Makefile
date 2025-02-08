@@ -19,12 +19,12 @@ OBJECTS = cjacobian.o ctaylor.o VBIC95Jac/VBIC95Jac.o LUFAC/lufac.o VBIC95/VBIC9
 DEPS = $(OBJECTS:.o=.d)
 
 all: ctaylor.exe vbic95Jac.exe vbic95Taylor.exe black_scholes.exe cjacobian.exe black_scholes_orig.exe \
-	logistic_regression.exe test/test.exe
+	logistic_regression.exe test/regtest.exe
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-test/test.exe: $(TEST_OBJECTS)
+test/regtest.exe: $(TEST_OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 cjacobian.exe: cjacobian.o

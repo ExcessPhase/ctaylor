@@ -31,7 +31,7 @@ I simplified ctaylor::chainRule(), reducing the number of steps.
 
 For the `vbic*.exe`, I added support for asynchronous exception handling for floating-point exceptions, which is now finally available on Linux.
 
-I added some automatic regression test (test/test.exe) using boost::test.
+I added some automatic regression test (test/regtest.exe) using boost::test.
 
 I changed the Makefile to enable the user to override `USER_CXXFLAGS=-march=native` with his own setting and I added a compiler flag `-fno-stack-protector` as this project is interested in performance but not in avoiding hacker attacks.
 
@@ -79,7 +79,7 @@ build:
 cd ctaylor
 make -j$(nproc)
 cd test
-./test.exe
+./regtest.exe
 ```
 - **cmake**:
 ```
@@ -139,7 +139,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **g++-13**: no problem
 
 6. **boost test regression test cases**
-   - **Outputs**: `test/test.exe`
+   - **Outputs**: `test/regtest.exe`
    - **Headers**: `cjacobian.h` and `ctaylor.h`
    - **Description**: .Compares results with `test/data*.txt` files which have been precalculated using maxima and `test/maxima*.txt`. Should be executed with the current directory equal to `test` in order to find `data*.txt`!
    - **Visual C++**: no problem
