@@ -27,44 +27,7 @@ struct compare
 {	bool operator()(const ind2Expr&_r0, const ind2Expr&_r1) const;
 };
 typedef std::map<ind2Expr, double, compare> taylorMap;
-static taylorMap read(const char *const _p, const bool _bOnlyFirstOrder = false)
-{	taylorMap sMap;
-	std::ifstream sFile(_p);
-	if (!sFile)
-		throw std::runtime_error(std::string("Cannot open file \"") + _p + "\"!");
-	std::string sLine;
-	const std::regex sRegEx(R"(^([+-]?(?:\d+(?:\.\d*)?)(?:[eE][+-]?\d+)?)((?:\*X\d+(?:\^\d+)?)*)\s*$)");
-	const std::regex sVarRegEx(R"((?:\*X(\d+)(?:\^(\d+))?)\s*)");
-
-	//const auto sPath = std::filesystem::current_path();
-	//std::cerr << sPath << "\n";
-	while (std::getline(sFile, sLine))
-	{	std::smatch sMatch;
-		if (std::regex_match(sLine, sMatch, sRegEx))
-		{ // Extract the numerical coefficient
-			const double d = std::stod(sMatch[1]);
-			ind2Expr sI2E;
-			const std::string sVars = sMatch[2]; // match.position(5) gives position after the coefficient
-			std::smatch sVarsMatch;
-			auto pStart = sVars.cbegin();
-			while (pStart != sVars.cend())
-				if (std::regex_search(pStart, sVars.cend(), sVarsMatch, sVarRegEx))
-				{	//const std::string &sVar = sVarsMatch[1];
-					const auto iID = std::atoi(std::string(sVarsMatch[1]).c_str());
-					const std::string sExp = sVarsMatch[2];
-					const auto iExp = sExp.empty() ? 1 : std::atoi(sExp.c_str());
-					sI2E.emplace(iID, iExp);
-					pStart = sVarsMatch.suffix().first;
-					//sVars = sVars.substr(sVarsMatch.str(0).size());
-				}
-				else
-					break;
-			if (!_bOnlyFirstOrder || order(sI2E) < 2)
-				sMap.emplace(sI2E, d);
-		}
-	}
-	return sMap;
-}
+taylorMap read(const char *const _p, const bool _bOnlyFirstOrder = false);
 static auto sIsIdentical(const taylorMap::value_type&_r, const double _d)
 {	static constexpr auto epsilon = 1e-12;
 	return std::abs(_r.second - _d) < std::abs(epsilon*_r.second);
