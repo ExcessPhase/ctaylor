@@ -33,8 +33,8 @@ static taylorMap read(const char *const _p, const bool _bOnlyFirstOrder = false)
 	if (!sFile)
 		throw std::runtime_error(std::string("Cannot open file \"") + _p + "\"!");
 	std::string sLine;
-	std::regex sRegEx(R"(^([+-]?(?:\d+(?:\.\d*)?)(?:[eE][+-]?\d+)?)((?:\*X\d+(?:\^\d+)?)*)\s*$)");
-	std::regex sVarRegEx(R"((?:\*X(\d+)(?:\^(\d+))?)\s*)");
+	const std::regex sRegEx(R"(^([+-]?(?:\d+(?:\.\d*)?)(?:[eE][+-]?\d+)?)((?:\*X\d+(?:\^\d+)?)*)\s*$)");
+	const std::regex sVarRegEx(R"((?:\*X(\d+)(?:\^(\d+))?)\s*)");
 
 	//const auto sPath = std::filesystem::current_path();
 	//std::cerr << sPath << "\n";
