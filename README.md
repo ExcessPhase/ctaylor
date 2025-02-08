@@ -138,7 +138,7 @@ Both implementations are sparse, carrying and calculating only potentially nonze
    - **Visual C++**: no problem
    - **g++-13**: no problem
 
-6. **boost autodiff regression test cases**
+6. **boost test regression test cases**
    - **Outputs**: `test/test.exe`
    - **Headers**: `cjacobian.h` and `ctaylor.h`
    - **Description**: .Compares results with `test/data*.txt` files which have been precalculated using maxima and `test/maxima*.txt`. Should be executed with the current directory equal to `test` in order to find `data*.txt`!
