@@ -39,8 +39,7 @@ static taylorMap read(const char *const _p, const bool _bOnlyFirstOrder = false)
 	//const auto sPath = std::filesystem::current_path();
 	//std::cerr << sPath << "\n";
 	while (std::getline(sFile, sLine))
-	{	std::istringstream sSS(sLine);
-		std::smatch sMatch;
+	{	std::smatch sMatch;
 		if (std::regex_match(sLine, sMatch, sRegEx))
 		{ // Extract the numerical coefficient
 			const double d = std::stod(sMatch[1]);
