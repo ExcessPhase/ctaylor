@@ -166,6 +166,8 @@
     <ClCompile Include="test31.cpp" />
     <ClCompile Include="test32.cpp" />
     <ClCompile Include="test33.cpp" />
+    <ClCompile Include="test34.cpp" />
+    <ClCompile Include="test35.cpp" />
     <ClCompile Include="test4.cpp" />
     <ClCompile Include="test5.cpp" />
     <ClCompile Include="test6.cpp" />
@@ -202,6 +204,8 @@
     <Text Include="data31.txt" />
     <Text Include="data32.txt" />
     <Text Include="data33.txt" />
+    <Text Include="data34.txt" />
+    <Text Include="data35.txt" />
     <Text Include="data4.txt" />
     <Text Include="data5.txt" />
     <Text Include="data6.txt" />
@@ -236,6 +240,8 @@
     <Text Include="maxima31.txt" />
     <Text Include="maxima32.txt" />
     <Text Include="maxima33.txt" />
+    <Text Include="maxima34.txt" />
+    <Text Include="maxima35.txt" />
     <Text Include="maxima4.txt" />
     <Text Include="maxima5.txt" />
     <Text Include="maxima6.txt" />
