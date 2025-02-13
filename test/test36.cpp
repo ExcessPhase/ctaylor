@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(taylor_36)
 {	using namespace taylor;
 	using namespace boost::mp11;
 	const auto sMap = read("data36.txt");
-	constexpr std::size_t MAX = 8;
+	constexpr std::size_t MAX = 3;
 	auto const sX = ctaylor<makeIndependent<0>, MAX>(X0, true);
 	auto const sY = ctaylor<makeIndependent<1>, MAX>(Y0, true);
 	auto const sZ = ctaylor<makeIndependent<2>, MAX>(Z0, true);

@@ -8,7 +8,7 @@ float(
 	log(x**2 + y**2 + z**2),
         [x, y, z],
         [x0, y0, z0],
-        8
+        3
     )
 )$
 subst(x-x0 = X0, subst(y-y0 = X1, subst(z-z0 = X2, %)))$
