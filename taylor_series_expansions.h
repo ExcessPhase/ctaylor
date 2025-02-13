@@ -328,7 +328,7 @@ std::array<double, SIZE> polygamma(const int _i, const double _d)
 		r.cend(),
 		s.begin(),
 		[&r, _i, _d](const double &_dR)
-		{	return _dR*boost::math::polygamma(_i + (&_dR - r.data()), _d);
+		{	return _dR*boost::math::polygamma(_i + int(&_dR - r.data()), _d);
 		}
 	);
 	return s;

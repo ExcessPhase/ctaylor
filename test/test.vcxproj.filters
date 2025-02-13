@@ -126,6 +126,12 @@
     <ClCompile Include="test35.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test36.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test37.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cjacobian.h">
@@ -362,6 +368,18 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="maxima35.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data36.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima36.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="data37.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="maxima37.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

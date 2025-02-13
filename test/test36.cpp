@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_CASE(jacobian_36)
 {	using namespace jacobian;
 	using namespace boost::mp11;
 	const auto sMap = read("data36.txt", true);
-	double const K = 100.0;  // Strike price.
-	constexpr std::size_t MAX = 2;
+	//double const K = 100.0;  // Strike price.
+	//constexpr std::size_t MAX = 2;
 	auto const sX = cjacobian<mp_list<mp_size_t<0> > >(X0, true);
 	auto const sY = cjacobian<mp_list<mp_size_t<1> > >(Y0, true);
 	auto const sZ = cjacobian<mp_list<mp_size_t<2> > >(Z0, true);
