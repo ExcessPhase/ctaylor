@@ -10,7 +10,7 @@ TEST_OBJECTS_LOCAL=test.o \
 	test10.o test11.o test12.o test13.o test14.o test15.o test16.o \
 	test17.o test18.o test19.o test20.o test21.o test22.o test23.o \
 	test24.o test25.o test26.o test27.o test28.o test29.o test30.o test31.o \
-	test32.o test33.o test34.o test35.o test36.o test37.o
+	test32.o test33.o test34.o test35.o test36.o test37.o test38.o
 TEST_OBJECTS=$(addprefix test/, $(TEST_OBJECTS_LOCAL))
 OBJECTS = cjacobian.o ctaylor.o VBIC95Jac/VBIC95Jac.o LUFAC/lufac.o VBIC95/VBIC95.o \
 	BLACK_SCHOLES/autodiff_black_scholes.o BLACK_SCHOLES/autodiff_black_scholes_orig.o \

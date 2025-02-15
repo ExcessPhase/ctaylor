@@ -1,0 +1,19 @@
+display2d: false$
+ratprint: false$
+x0:1.23$
+float(
+    taylor(
+	(x*x - 1)**4,
+        [x],
+        [x0],
+        10
+    )
+)$
+subst(x-x0 = X0, %)$
+expand(%)$
+
+/* Extract coefficients */
+listify(%)$
+
+/* Write coefficients to a file */
+with_stdout("data38.txt", for c in % do print(c))$
