@@ -198,3 +198,7 @@ I'm aware of the compile-time problems when using `ctaylor`—especially when us
 ## Conclusion
 
 These classes provide efficient and flexible implementations for automatic differentiation and truncated Taylor series calculations. By leveraging sparse representations and template metaprogramming, they ensure high performance and accuracy. Proper usage and understanding of the types and dependencies are crucial for integrating these classes into your projects effectively.
+
+## Looking for a job as a C++ Software Engineer
+
+BTW -- if you know some company which is trying to hire a C++ Software Engineer: I'm on the market since some months already!
