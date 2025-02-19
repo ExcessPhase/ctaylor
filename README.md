@@ -71,7 +71,7 @@ mklink /D include .
 ```
 ```
 #on LINUX
-cd $(BOOST_ROOT)
+cd $BOOST_ROOT
 ln -s . include
 ```
 build:

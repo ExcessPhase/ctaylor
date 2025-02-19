@@ -577,11 +577,26 @@ struct cjacobian
 	friend bool operator!=(const double _d, const cjacobian&_r)
 	{	return _d != value(_r);
 	}
-
+	struct print
+	{	std::ostream &m_rS;
+		const cjacobian &m_r;
+		print(std::ostream &_rS, const cjacobian&_r)
+			:m_rS(_rS),
+			m_r(_r)
+		{
+		}
+		template<std::size_t I>
+		void operator()(const mp_size_t<I>&) const
+		{	if (const auto d = m_r.m_s[mp_find<VECTOR, mp_size_t<I> >::value])
+				m_rS << ", d/dX" << I << "=" << d;
+		}
+	};
 	friend std::ostream &operator<<(std::ostream&_rS, const cjacobian&_r)
 	{	_rS << "(";
-		for (std::size_t i = 0; i < SIZE; ++i)
-			_rS << _r.m_s[i] << ",";
+		//for (std::size_t i = 0; i < SIZE; ++i)
+		//	_rS << _r.m_s[i] << ",";
+		_rS << _r.m_s.back();
+		mp_for_each<VECTOR>(print(_rS, _r));
 		_rS << ")";
 		return _rS;
 	}
